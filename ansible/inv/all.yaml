@@ -1,0 +1,11 @@
+all:
+  children:
+    masters:
+      hosts:
+        master1:
+        master2:
+        master3:
+    workers:
+      hosts:
+        worker1:
+        worker2:

@@ -29,8 +29,4 @@ jobs:
       - name: Run a one-line script
         run: mkdir -p /home/dariusmurk/success && echo Hello, world! > /home/dariusmurk/success/index.html
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+     

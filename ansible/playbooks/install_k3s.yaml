@@ -1,0 +1,60 @@
+---
+- name: Install k3s Cluster
+  hosts: master1
+  become: true
+  tasks:
+    - name: Install k3s on master1 and disable servicelb
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
+        --disable servicelb --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+
+    - name: Fetch k3s token
+      shell: sudo cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token
+      changed_when: false
+
+    - name: Fetch kubeconfig file from master1
+      fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /tmp/k3s.yaml
+        flat: yes
+
+    - name: Adjust kubeconfig to use external IP
+      delegate_to: localhost
+      become: false
+      lineinfile:
+        path: /tmp/k3s.yaml
+        regexp: '^\s*server:.*$'
+        line: '    server: https://192.168.1.201:6443'
+
+    - name: Move kubeconfig to WSL ~/.kube/k3s.yaml
+      delegate_to: localhost
+      become: false
+      copy:
+        src: /tmp/k3s.yaml
+        dest: ~/.kube/k3s.yaml
+        mode: '0666'
+
+- name: Join additional master nodes
+  hosts: master2,master3
+  become: true
+  tasks:
+    - name: Install k3s on master nodes
+      shell: |
+        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
+        --token {{ hostvars['master1']['k3s_token']['stdout'] }} \
+        --disable servicelb --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+
+- name: Join worker nodes
+  hosts: worker1,worker2
+  become: true
+  tasks:
+    - name: Install k3s agent on worker nodes with role annotation
+      shell: |
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.201:6443 \
+        K3S_TOKEN={{ hostvars['master1']['k3s_token']['stdout'] }} sh -
+
+    # - name: Label worker nodes with 'worker' role
+    #   shell: |
+    #     sudo kubectl label node $(hostname) node-role.kubernetes.io/worker=worker
+    #   when: inventory_hostname in ['worker1', 'worker2']

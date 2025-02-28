@@ -1,12 +1,25 @@
 ---
-- name: Install k3s Cluster
+- name: Install Docker and K3s Cluster with Docker as Container Runtime
   hosts: master1
   become: true
   tasks:
-    - name: Install k3s on master1 and disable servicelb
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install k3s on master1 and disable servicelb, use Docker runtime
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
-        --disable servicelb --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+        --disable servicelb --docker \
+        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
     - name: Fetch k3s token
       shell: sudo cat /var/lib/rancher/k3s/server/node-token
@@ -35,26 +48,46 @@
         dest: ~/.kube/k3s.yaml
         mode: '0666'
 
-- name: Join additional master nodes
+- name: Join additional master nodes with Docker as Container Runtime
   hosts: master2,master3
   become: true
   tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
     - name: Install k3s on master nodes
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
         --token {{ hostvars['master1']['k3s_token']['stdout'] }} \
-        --disable servicelb --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+        --disable servicelb --docker \
+        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
-- name: Join worker nodes
+- name: Join worker nodes with Docker as Container Runtime
   hosts: worker1,worker2
   become: true
   tasks:
-    - name: Install k3s agent on worker nodes with role annotation
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install k3s agent on worker nodes with Docker as container runtime
       shell: |
         curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.201:6443 \
-        K3S_TOKEN={{ hostvars['master1']['k3s_token']['stdout'] }} sh -
-
-    # - name: Label worker nodes with 'worker' role
-    #   shell: |
-    #     sudo kubectl label node $(hostname) node-role.kubernetes.io/worker=worker
-    #   when: inventory_hostname in ['worker1', 'worker2']
+        K3S_TOKEN={{ hostvars['master1']['k3s_token']['stdout'] }} sh -s - --docker

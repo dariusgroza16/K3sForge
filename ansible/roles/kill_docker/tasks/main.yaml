@@ -1,0 +1,19 @@
+---
+# This task file contains the tasks to manage Docker containers.
+
+- name: Load Running Containers
+  shell: docker ps -aq
+  register: docker_ps_output
+  changed_when: false  # This prevents Ansible from marking this task as "changed"
+
+- name: Stop containers using docker stop
+  shell: docker stop {{ item }}
+  with_items: "{{ docker_ps_output.stdout.splitlines() }}"
+  when: docker_ps_output.stdout != ""  # Only run if containers exist
+  ignore_errors: yes  # Ignore errors if containers are not running or already stopped
+
+- name: Remove containers using docker rm
+  shell: docker rm {{ item }}
+  with_items: "{{ docker_ps_output.stdout.splitlines() }}"
+  when: docker_ps_output.stdout != ""  # Only run if containers exist
+  ignore_errors: yes  # Ignore errors if containers are already removed

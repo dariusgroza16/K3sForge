@@ -1,0 +1,6 @@
+ - name: Install Docker
+   apt:
+    name: docker.io
+    state: present
+    update_cache: yes
+   notify: "Ensure Docker service is running"

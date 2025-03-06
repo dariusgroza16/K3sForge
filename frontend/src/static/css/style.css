@@ -1,0 +1,89 @@
+/* Basic reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body styling */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #1e3a8a; /* Blue background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    text-align: center;
+}
+
+/* Title styling */
+h1, h2 {
+    color: #fff; /* White color for text on the blue background */
+    margin-bottom: 15px;
+}
+
+/* Input box styling */
+input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    width: 250px;
+    margin-bottom: 20px;
+    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out; /* Smooth transition for focus */
+}
+
+input[type="text"]:focus {
+    border-color: #4CAF50;
+    box-shadow: 0px 0px 8px rgba(0, 128, 0, 0.3); /* Highlight when focused */
+}
+
+/* Button styling */
+button {
+    background-color: #6a0dad; /* Purple background */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 10px 0;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out; /* Add transform animation */
+}
+
+button:hover {
+    background-color: #8e44ad; /* Lighter purple on hover */
+    transform: translateY(-5px); /* Button "lift" effect on hover */
+}
+
+button:active {
+    transform: translateY(0); /* Button "press" effect */
+}
+
+/* Output box styling */
+pre {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    padding: 15px;
+    width: 90%;
+    max-width: 500px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-top: 20px;
+    opacity: 0; /* Start as invisible */
+    animation: fadeIn 0.5s ease-out forwards; /* Fade-in animation */
+}
+
+/* Fade-in animation for output box */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px); /* Start from a small downward position */
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0); /* End at normal position */
+    }
+}

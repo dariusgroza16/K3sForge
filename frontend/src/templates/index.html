@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Command</title>
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Run a Command</h1>
+    <input type="text" id="command" placeholder="Enter command" />
+    <button onclick="runCommand()">Run Custom Command</button>
+    
+    <h2>Predefined Command</h2>
+    <button onclick="runPredefinedCommand()">Run Predefined Command (ls)</button>
+
+    <pre id="output"></pre>
+
+    <!-- Link to external JS -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

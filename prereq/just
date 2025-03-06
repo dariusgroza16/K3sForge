@@ -1,0 +1,18 @@
+curl -Lo just.tar.gz https://github.com/casey/just/releases/download/1.35.0/just-1.35.0-x86_64-unknown-linux-musl.tar.gz
+tar -xzf just.tar.gz
+sudo mv just /usr/local/bin/
+rm just.tar.gz
+
+#Example
+set export := true
+set quiet := true
+set shell := ["bash","-cu"]
+
+this_dir := justfile_directory()
+
+_default:
+   just --list
+
+[doc("Simple doc")]
+echo something:
+  echo "$something"

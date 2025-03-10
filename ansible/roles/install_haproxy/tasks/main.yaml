@@ -1,0 +1,25 @@
+---
+# roles/haproxy/tasks/main.yml
+- name: Update the package cache
+  apt:
+    update_cache: yes
+
+- name: Install HAProxy
+  apt:
+    name: haproxy
+    state: present
+
+- name: Ensure HAProxy service is started and enabled
+  service:
+    name: haproxy
+    state: started
+    enabled: yes
+
+- name: Create file from template
+  template:
+    src: "{{ templates_dir }}/haproxy.cfg"
+    dest: /etc/haproxy/haproxy.cfg
+    owner: root
+    group: root
+    mode: '0644'
+  notify: "Restart HAProxy"

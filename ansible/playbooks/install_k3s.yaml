@@ -15,7 +15,7 @@
     - name: Install k3s on master1 and disable servicelb, use Docker runtime
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
-        --disable servicelb --docker \
+        --docker \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
     - name: Fetch k3s token
@@ -33,7 +33,7 @@
         dest: /tmp/k3s.yaml
         flat: yes
 
-    - name: Adjust kubeconfig to use external IP
+    - name: Adjust kubeconfig to use external IP of HA Proxy LB
       delegate_to: localhost
       become: false
       lineinfile:
@@ -65,7 +65,7 @@
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
         --token {{ hostvars['master1']['k3s_token'] }} \
-        --disable servicelb --docker \
+        --docker \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
 - name: Join Worker Nodes

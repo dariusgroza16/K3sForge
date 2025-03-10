@@ -1,0 +1,11 @@
+---
+- name: Install and configure HAProxy
+  hosts: masters
+  gather_facts: true
+  become: true
+  vars:
+    templates_dir: "{{ playbook_dir }}/../templates"
+
+  roles:
+    - role: install_haproxy
+      tags: [install_haproxy]

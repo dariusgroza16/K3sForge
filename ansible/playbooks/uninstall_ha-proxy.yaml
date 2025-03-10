@@ -1,0 +1,21 @@
+---
+- name: Uninstall HAProxy
+  hosts: masters
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Stop and disable HAProxy service
+      service:
+        name: haproxy
+        state: stopped
+        enabled: no
+
+    - name: Remove HAProxy package
+      apt:
+        name: haproxy
+        state: absent
+
+    - name: Remove HAProxy configuration file
+      file:
+        path: /etc/haproxy
+        state: absent

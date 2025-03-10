@@ -7,5 +7,5 @@
     templates_dir: "{{ playbook_dir }}/../templates"
 
   roles:
-    - role: install_haproxy
-      tags: [install_haproxy]
+    - role: haproxy-install
+      tags: [haproxy-install]

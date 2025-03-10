@@ -1,0 +1,54 @@
+- name: Stop and disable HAProxy service
+  service:
+    name: haproxy
+    state: stopped
+    enabled: no
+
+- name: Remove HAProxy package
+  apt:
+    name: haproxy
+    state: absent
+    purge: yes  # This ensures configuration files are also removed
+
+- name: Remove HAProxy configuration directory
+  file:
+    path: /etc/haproxy
+    state: absent
+
+- name: Remove HAProxy log files
+  file:
+    path: /var/log/haproxy
+    state: absent
+
+- name: Remove HAProxy error files
+  file:
+    path: /etc/haproxy/errors
+    state: absent
+
+- name: Remove HAProxy log file
+  file:
+    path: /var/log/haproxy.log
+    state: absent
+
+- name: Remove HAProxy service file (if still exists)
+  file:
+    path: /lib/systemd/system/haproxy.service
+    state: absent
+
+- name: Remove any HAProxy-related directories or files in /var/run/
+  file:
+    path: /var/run/haproxy
+    state: absent
+
+- name: Remove any HAProxy-related dependencies
+  apt:
+    name: "{{ item }}"
+    state: absent
+  loop:
+    - haproxy
+    - libhaproxy-dev
+    - haproxy-common
+
+- name: Clean up the apt cache
+  apt:
+    autoclean: yes

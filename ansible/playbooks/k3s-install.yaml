@@ -5,8 +5,20 @@
   become: true
 
   roles:
-    - role: install_docker
-      tags: [install_docker]
+    - role: docker-install
+      tags: [docker-install]
+
+  pre_tasks:
+    - name: Ensure ~/.kube directory exists
+      command: "mkdir -p ~/.kube"
+      delegate_to: localhost
+
+    - name: Ensure ~/.kube directory is empty
+      shell: "rm -rf ~/.kube/*"
+      delegate_to: localhost
+
+
+  
 
 - name: Install K3s on Master1 and Retrieve Token
   hosts: master1
@@ -15,7 +27,7 @@
     - name: Install k3s on master1 and disable servicelb, use Docker runtime
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
-        --disable servicelb --docker \
+        --docker \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
     - name: Fetch k3s token
@@ -65,7 +77,7 @@
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
         --token {{ hostvars['master1']['k3s_token'] }} \
-        --disable servicelb --docker \
+        --docker \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
 - name: Join Worker Nodes

@@ -1,0 +1,9 @@
+---
+- name: Uninstall HAProxy
+  hosts: masters
+  gather_facts: true
+  become: true
+  
+  roles:
+    - role: haproxy-uninstall
+      tags: [ haproxy-uninstall ]

@@ -1,5 +1,4 @@
 ---
-# roles/haproxy/tasks/main.yml
 - name: Update the package cache
   apt:
     update_cache: yes
@@ -8,12 +7,6 @@
   apt:
     name: haproxy
     state: present
-
-- name: Ensure HAProxy service is started and enabled
-  service:
-    name: haproxy
-    state: started
-    enabled: yes
 
 - name: Create file from template
   template:

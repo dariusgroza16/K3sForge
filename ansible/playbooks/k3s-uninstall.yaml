@@ -1,0 +1,18 @@
+---
+- name: Uninstall K3s
+  hosts: all
+  gather_facts: true
+
+  roles:
+    - role: master-uninstall
+      tags: [ master-uninstall ]
+      when: var_master is defined  
+
+    - role: worker-uninstall
+      tags: [ worker-uninstall ]
+      when: var_worker is defined  
+
+    - role: docker-kill
+      tags: [ docker-kill ]
+
+   

@@ -24,10 +24,11 @@
   hosts: master1
   become: true
   tasks:
+  # --disable servicelb --docker \
     - name: Install k3s on master1 and disable servicelb, use Docker runtime
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
-        --docker \
+        --docker \       
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
     - name: Fetch k3s token
@@ -73,6 +74,7 @@
   hosts: master2,master3
   become: true
   tasks:
+#  --disable servicelb --docker \
     - name: Install k3s on master nodes
       shell: |
         curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \

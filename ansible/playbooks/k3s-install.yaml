@@ -84,7 +84,7 @@
 #        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
 - name: Join Worker Nodes
-  hosts: worker1,worker2
+  hosts: worker1,worker2,vm01,vm02
   become: true
   tasks:
     - name: Install k3s agent on worker nodes with Docker as container runtime

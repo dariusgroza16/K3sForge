@@ -9,4 +9,6 @@ all:
       hosts:
         worker1:
         worker2:
+        vm01:
+        vm02:
     

@@ -3,12 +3,12 @@ all:
     masters:
       hosts:
         master1:
-        master2:
-        master3:
+        master2:       
     workers:
       hosts:
         worker1:
         worker2:
+        worker3:
         vm01:
         vm02:
     

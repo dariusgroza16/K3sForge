@@ -2,6 +2,7 @@ all:
   children:
     masters:
       hosts:
+        vm01:
         master1:
         master2:       
     workers:
@@ -9,6 +10,5 @@ all:
         worker1:
         worker2:
         worker3:
-        vm01:
         vm02:
     

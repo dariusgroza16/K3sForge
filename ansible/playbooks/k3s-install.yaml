@@ -5,8 +5,8 @@
   become: true
 
   roles:
-    - role: docker-install
-      tags: [docker-install]
+    # - role: docker-install
+    #   tags: [docker-install]
 
   pre_tasks:
     - name: Ensure ~/.kube directory exists
@@ -24,13 +24,12 @@
   hosts: vm01
   become: true
   tasks:
-  # --disable servicelb --docker \
     - name: Install k3s on vm01 and disable servicelb, use Docker runtime
       shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
-        --docker  
-#        --disable servicelb --docker \              
-#        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.121 \
+        --docker \
+        --disable servicelb --docker \              
+        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
     - name: Fetch k3s token
       shell: cat /var/lib/rancher/k3s/server/node-token
@@ -53,8 +52,8 @@
       lineinfile:
         path: /tmp/k3s.yaml
         regexp: '^\s*server:.*$'
-        line: '    server: https://192.168.1.201:6443'
-
+        line: '    server: https://192.168.1.121:6443' 
+        
     - name: Move kubeconfig to WSL ~/.kube/k3s.yaml
       delegate_to: localhost
       become: false
@@ -63,8 +62,11 @@
         dest: ~/.kube/k3s.yaml
         mode: '0666'
 
+    
+
+
 - name: Wait for k3s token to be available
-  hosts: master1,master2,master3,worker1,worker2,vm02
+  hosts: master1,master2,worker1,worker2,worker3,vm02
   tasks:
     - name: Ensure k3s token is available
       wait_for:
@@ -72,22 +74,21 @@
       when: hostvars['vm01'].k3s_token is not defined
 
 - name: Join Additional Master Nodes
-  hosts: master1,master2,master3
+  hosts: master1,master2
   become: true
   tasks:
     - name: Install k3s on master nodes
       shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
+        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.121:6443 \
         --token {{ hostvars['vm01']['k3s_token'] }} \
-        --docker 
-#        --disable servicelb --docker \
-#        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
+        --disable servicelb --docker \
+        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
 
 - name: Join Worker Nodes
-  hosts: worker1,worker2,vm01,vm02
+  hosts: worker1,worker2,worker3,vm02
   become: true
   tasks:
     - name: Install k3s agent on worker nodes with Docker as container runtime
       shell: |
-        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.201:6443 \
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.121:6443 \
         K3S_TOKEN={{ hostvars['vm01']['k3s_token'] }} sh -s - --docker

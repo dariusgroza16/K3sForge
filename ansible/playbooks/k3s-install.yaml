@@ -9,16 +9,18 @@
     #   tags: [docker-install]
 
   pre_tasks:
+  
     - name: Ensure ~/.kube directory exists
       command: "mkdir -p ~/.kube"
       delegate_to: localhost
+      become: false
 
     - name: Ensure ~/.kube directory is empty
       shell: "rm -rf ~/.kube/*"
       delegate_to: localhost
+      become: false
 
 
-  
 
 - name: Install K3s on Master1 and Retrieve Token
   hosts: vm01
@@ -53,7 +55,7 @@
         path: /tmp/k3s.yaml
         regexp: '^\s*server:.*$'
         line: '    server: https://192.168.1.121:6443' 
-        
+
     - name: Move kubeconfig to WSL ~/.kube/k3s.yaml
       delegate_to: localhost
       become: false

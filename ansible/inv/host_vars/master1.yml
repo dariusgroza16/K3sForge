@@ -1,10 +1,4 @@
 ---
 server_ip: 192.168.1.201
 var_master: true
-#HaProxy Vars
-haproxy_server_1: 
-  name: master2
-  ip: 192.168.1.202
-haproxy_server_2: 
-  name: master3
-  ip: 192.168.1.203
+

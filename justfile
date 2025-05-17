@@ -13,9 +13,9 @@ run:
 
 [doc("Install ClusterWatch with k3s")]
 ik: 
-  ansible-playbook ansible/playbooks/k3s-install.yaml
+  ansible-playbook -i ansible/inv ansible/playbooks/k3s-install.yaml
 
 [doc("Uninstall ClusterWatch with k3s")]  
 uk:
-  ansible-playbook ansible/playbooks/k3s-uninstall.yaml
+  ansible-playbook -i ansible/inv ansible/playbooks/k3s-uninstall.yaml
 

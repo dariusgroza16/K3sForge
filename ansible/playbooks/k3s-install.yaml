@@ -5,8 +5,8 @@
   become: true
 
   roles:
-    - role: docker-install
-      tags: [docker-install]
+    # - role: docker-install
+    #   tags: [docker-install]
 
     - role: master-install
       tags: [master-install]

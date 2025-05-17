@@ -5,11 +5,11 @@
     - name: Wait for k3s token to be available
       wait_for:
         timeout: 10
-      when: hostvars['vm01'].k3s_token is not defined
+      when: hostvars['master1'].k3s_token is not defined
 
     - name: Install k3s agent with Docker runtime
       shell: |
-        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.121:6443 \
-        K3S_TOKEN={{ hostvars['vm01']['k3s_token'] }} sh -s - --docker
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.201:6443 \
+        K3S_TOKEN={{ hostvars['master1']['k3s_token'] }} sh -s - --docker
 
   when: hostvars[inventory_hostname].var_worker | default(false)

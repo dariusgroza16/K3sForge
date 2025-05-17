@@ -1,5 +1,9 @@
 all:
   children:
+    outsiders:
+      hosts:
+        vm01:
+        vm02:
     masters:
       hosts:
         master1:

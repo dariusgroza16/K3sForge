@@ -10,7 +10,7 @@
 
 - name: Create file from template
   template:
-    src: "{{ templates_dir }}/haproxy.cfg"
+    src: "haproxy.cfg"
     dest: /etc/haproxy/haproxy.cfg
     owner: root
     group: root

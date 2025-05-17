@@ -1,6 +1,6 @@
 ---
 - name: Uninstall HAProxy
-  hosts: masters
+  hosts: vm01
   gather_facts: true
   become: true
   

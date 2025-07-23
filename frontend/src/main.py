@@ -4,7 +4,8 @@ import os
 
 app = Flask(__name__)
 
-HOST_VARS_DIR = 'vm_data/host_vars'
+inv_location = 'ansible/inv'  # Change this variable to set the inventory location
+HOST_VARS_DIR = os.path.join(inv_location, 'host_vars')
 os.makedirs(HOST_VARS_DIR, exist_ok=True)
 
 @app.route('/')
@@ -40,7 +41,8 @@ def generate():
         with open(os.path.join(HOST_VARS_DIR, f"{name}.yaml"), 'w') as f:
             yaml.dump(vm_data, f)
 
-    with open(os.path.join('vm_data', 'all.yaml'), 'w') as f:
+    # Save the all.yaml inventory file inside the chosen inventory folder
+    with open(os.path.join(inv_location, 'all.yaml'), 'w') as f:
         yaml.dump(all_data, f)
 
     return jsonify({'status': 'success'})

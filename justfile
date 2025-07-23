@@ -9,7 +9,7 @@ _default:
 
 [doc("Start the frontend for ClusterWatch")]
 run:
-  python3 $this_dir/frontend/src/frontend.py
+  python3 $this_dir/frontend/src/main.py
 
 [doc("Install ClusterWatch with k3s")]
 ik: 

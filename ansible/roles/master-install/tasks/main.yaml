@@ -2,31 +2,31 @@
 - name: Run master role only on master nodes
   block:
 
-    - name: Install k3s on First Master (master1)
+    - name: Install k3s on First Master (master01)
       shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.201 \
+        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.81 \
         --docker \
         --disable servicelb \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
-      when: inventory_hostname == 'master1'
+      when: inventory_hostname == 'master01'
 
-    - name: Fetch k3s token (only from master1)
+    - name: Fetch k3s token (only from master01)
       shell: cat /var/lib/rancher/k3s/server/node-token
       register: k3s_token
       changed_when: false
-      when: inventory_hostname == 'master1'
+      when: inventory_hostname == 'master01'
 
     - name: Set k3s_token for all hosts
       set_fact:
         k3s_token: "{{ k3s_token.stdout }}"
-      when: inventory_hostname == 'master1'
+      when: inventory_hostname == 'master01'
 
-    - name: Fetch kubeconfig file from master1
+    - name: Fetch kubeconfig file from master01
       fetch:
         src: /etc/rancher/k3s/k3s.yaml
         dest: /tmp/k3s.yaml
         flat: yes
-      when: inventory_hostname == 'master1'
+      when: inventory_hostname == 'master01'
 
     - name: Update kubeconfig server IP
       delegate_to: localhost
@@ -34,8 +34,8 @@
       lineinfile:
         path: /tmp/k3s.yaml
         regexp: '^\s*server:.*$'
-        line: '    server: https://192.168.1.201:6443'
-      when: inventory_hostname == 'master1'
+        line: '    server: https://192.168.1.81:6443'
+      when: inventory_hostname == 'master01'
 
     - name: Copy kubeconfig to ~/.kube/k3s.yaml on WSL
       delegate_to: localhost
@@ -44,15 +44,15 @@
         src: /tmp/k3s.yaml
         dest: ~/.kube/k3s.yaml
         mode: '0666'
-      when: inventory_hostname == 'master1'
+      when: inventory_hostname == 'master01'
 
     - name: Install k3s on other master nodes
       shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.201:6443 \
-        --token {{ hostvars['master1']['k3s_token'] }} \
+        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.81:6443 \
+        --token {{ hostvars['master01']['k3s_token'] }} \
         --docker \
         --disable servicelb  \
         --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
-      when: inventory_hostname != 'master1'
+      when: inventory_hostname != 'master01'
 
   when: hostvars[inventory_hostname].var_master | default(false)

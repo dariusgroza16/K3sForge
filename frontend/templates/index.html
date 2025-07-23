@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VM Inventory Generator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="container">
+    <div class="logo-wrapper">
+  <img src="{{ url_for('static', filename='k3s-logo.png') }}" alt="K3S Forger" class="logo-image">
+</div>
+
+
+
+    <div class="form-section">
+      <input type="text" id="vmName" placeholder="VM Name">
+      <input type="text" id="vmIP" placeholder="VM IP">
+      <label class="switch">
+        <input type="checkbox" id="roleSwitch">
+        <span class="slider"></span>
+      </label>
+      <span id="roleLabel">Worker</span>
+      <button id="addVM">Add VM</button>
+    </div>
+
+    <div id="vmList" class="vm-list">
+      <!-- Animated list of added VMs -->
+    </div>
+
+    <button id="generate">Generate Inventory</button>
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

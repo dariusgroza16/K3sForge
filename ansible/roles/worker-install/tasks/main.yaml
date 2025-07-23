@@ -9,7 +9,7 @@
 
     - name: Install k3s agent with Docker runtime
       shell: |
-        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.201:6443 \
+        curl -sfL https://get.k3s.io | K3S_URL=https://192.168.1.81:6443 \
         K3S_TOKEN={{ hostvars['master1']['k3s_token'] }} sh -s - --docker
 
   when: hostvars[inventory_hostname].var_worker | default(false)

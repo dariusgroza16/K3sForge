@@ -4,16 +4,6 @@
   gather_facts: yes
   become: true
 
-  roles:
-    # - role: docker-install
-    #   tags: [docker-install]
-
-    - role: master-install
-      tags: [master-install]
-    
-    - role: worker-install
-      tags: [worker-install]
-
   pre_tasks:
   
     - name: Ensure ~/.kube directory exists
@@ -25,4 +15,17 @@
       shell: "rm -rf ~/.kube/*"
       delegate_to: localhost
       become: false
+
+
+  roles:
+    - role: docker-install
+      tags: [docker-install]
+
+    - role: master-install
+      tags: [master-install]
+    
+    - role: worker-install
+      tags: [worker-install]
+
+  
 

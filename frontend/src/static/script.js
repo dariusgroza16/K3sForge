@@ -1,4 +1,5 @@
 let vms = [];
+let primordialMaster = null; // Track the unique primordial master
 
 document.getElementById('roleSwitch').addEventListener('change', function () {
   document.getElementById('roleLabel').textContent = this.checked ? 'Master' : 'Worker';
@@ -25,7 +26,7 @@ document.getElementById('generate').addEventListener('click', async function () 
   const response = await fetch('/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ vms })
+    body: JSON.stringify({ vms, primordialMaster })
   });
 
   const result = await response.json();
@@ -35,7 +36,16 @@ document.getElementById('generate').addEventListener('click', async function () 
 });
 
 function deleteVM(index) {
+  // If deleting the primordial master, unset it
+  if (primordialMaster === vms[index].name) {
+    primordialMaster = null;
+  }
   vms.splice(index, 1);
+  renderVMList();
+}
+
+function setPrimordialMaster(name) {
+  primordialMaster = name;
   renderVMList();
 }
 
@@ -46,10 +56,22 @@ function renderVMList() {
   vms.forEach((vm, index) => {
     const div = document.createElement('div');
     div.className = `vm-entry ${vm.role}`;
+    let primordialHTML = '';
+    if (vm.role === 'master') {
+      primordialHTML = `
+        <label style="margin-left:10px;">
+          <input type="radio" name="primordialMaster" ${primordialMaster === vm.name ? 'checked' : ''} onclick="setPrimordialMaster('${vm.name}')">
+          Primordial Master
+        </label>
+      `;
+    }
     div.innerHTML = `
-      <span><strong>${vm.name}</strong> (${vm.ip}) — <em>${vm.role.toUpperCase()}</em></span>
+      <span><strong>${vm.name}</strong> (${vm.ip}) — <em>${vm.role.toUpperCase()}</em>${primordialHTML}</span>
       <button onclick="deleteVM(${index})">Delete</button>
     `;
     container.appendChild(div);
   });
 }
+
+// Expose setPrimordialMaster globally for inline onclick
+window.setPrimordialMaster = setPrimordialMaster;

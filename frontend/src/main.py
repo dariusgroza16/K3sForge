@@ -15,6 +15,7 @@ def index():
 @app.route('/generate', methods=['POST'])
 def generate():
     vms = request.json.get('vms', [])
+    primordial_master = request.json.get('primordialMaster', None)
     
     all_data = {'all': {'children': {'masters': {'hosts': {}}, 'workers': {'hosts': {}}}}}
 
@@ -30,6 +31,8 @@ def generate():
                 'server_ip': ip,
                 'var_master': True
             }
+            if primordial_master == name:
+                vm_data['var_primordial_master'] = True
         else:
             all_data['all']['children']['workers']['hosts'][name] = None
             vm_data = {

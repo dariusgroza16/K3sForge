@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-inv_location = 'ansible/inv'  # Change this variable to set the inventory location
+inv_location = '~/repos/ClusterWatch/ansible/inv'  # Change this variable to set the inventory location
 HOST_VARS_DIR = os.path.join(inv_location, 'host_vars')
 os.makedirs(HOST_VARS_DIR, exist_ok=True)
 
@@ -35,7 +35,7 @@ def generate():
             vm_data = {
                 'server_name': name,
                 'server_ip': ip,
-                'var_worker': True  # ✅ Correct key only for workers
+                'var_worker': True  
             }
 
         with open(os.path.join(HOST_VARS_DIR, f"{name}.yaml"), 'w') as f:

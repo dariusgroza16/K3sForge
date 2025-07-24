@@ -10,11 +10,15 @@
       command: "mkdir -p ~/.kube"
       delegate_to: localhost
       become: false
+      changed_when: true
+      run_once: true
 
     - name: Ensure ~/.kube directory is empty
       shell: "rm -rf ~/.kube/*"
       delegate_to: localhost
       become: false
+      changed_when: true
+      run_once: true
 
 
   roles:

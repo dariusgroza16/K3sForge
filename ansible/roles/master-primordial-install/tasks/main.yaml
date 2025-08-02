@@ -1,0 +1,8 @@
+- name: Install Primordial Master
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - server \
+      --cluster-init \
+      --write-kubeconfig-mode=666 \
+      --disable servicelb \
+      --disable traefik \
+      --docker

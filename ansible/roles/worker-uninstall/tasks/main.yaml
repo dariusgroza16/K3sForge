@@ -1,4 +1,3 @@
 ---
-
 - name: Uninstall K3s Master
   shell: k3s-agent-uninstall.sh

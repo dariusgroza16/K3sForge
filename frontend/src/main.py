@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 
-inv_location = '/home/dariusmurk/repos/ClusterWatch/ansible/inv'  # Change this variable to set the inventory location
+inv_location = './ansible/inv'  # Change this variable to set the inventory location
 HOST_VARS_DIR = os.path.join(inv_location, 'host_vars')
 os.makedirs(HOST_VARS_DIR, exist_ok=True)
 

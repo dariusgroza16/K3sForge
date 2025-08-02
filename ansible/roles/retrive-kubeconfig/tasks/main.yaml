@@ -1,0 +1,21 @@
+- name: Copy kubeconfig to local ~/.kube/k3s.yaml
+  fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ lookup('env','HOME') }}/.kube/k3s.yaml"
+    flat: true
+  become: true
+
+- name: Get primordial master hostname
+  set_fact:
+    primordial_master: >-
+      {{ hostvars | dict2items
+         | selectattr('value.var_primordial_master', 'defined')
+         | selectattr('value.var_primordial_master', 'equalto', true)
+         | map(attribute='key') | list | first }}
+
+- name: Replace server IP in local ~/.kube/k3s.yaml with primordial master's IP
+  local_action:
+    module: replace
+    path: "{{ lookup('env','HOME') }}/.kube/k3s.yaml"
+    regexp: "https://127\\.0\\.0\\.1(:[0-9]+)?"
+    replace: "https://{{ hostvars[primordial_master].server_ip }}\\1"

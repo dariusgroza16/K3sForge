@@ -1,58 +1,16 @@
----
-- name: Run master role only on master nodes
-  block:
+- name: Get primordial master IP
+  set_fact:
+    primordial_ip: "{{ hostvars | dict2items
+      | selectattr('value.var_primordial_master', 'defined')
+      | selectattr('value.var_primordial_master', 'equalto', true)
+      | map(attribute='value.server_ip') | list | first }}"
 
-    - name: Install k3s on First Master (master01)
-      shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --cluster-init --tls-san 192.168.1.81 \
-        --docker \
-        --disable servicelb \
-        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
-      when: inventory_hostname == 'master01'
 
-    - name: Fetch k3s token (only from master01)
-      shell: cat /var/lib/rancher/k3s/server/node-token
-      register: k3s_token
-      changed_when: false
-      when: inventory_hostname == 'master01'
-
-    - name: Set k3s_token for all hosts
-      set_fact:
-        k3s_token: "{{ k3s_token.stdout }}"
-      when: inventory_hostname == 'master01'
-
-    - name: Fetch kubeconfig file from master01
-      fetch:
-        src: /etc/rancher/k3s/k3s.yaml
-        dest: /tmp/k3s.yaml
-        flat: yes
-      when: inventory_hostname == 'master01'
-
-    - name: Update kubeconfig server IP
-      delegate_to: localhost
-      become: false
-      lineinfile:
-        path: /tmp/k3s.yaml
-        regexp: '^\s*server:.*$'
-        line: '    server: https://192.168.1.81:6443'
-      when: inventory_hostname == 'master01'
-
-    - name: Copy kubeconfig to ~/.kube/k3s.yaml on WSL
-      delegate_to: localhost
-      become: false
-      copy:
-        src: /tmp/k3s.yaml
-        dest: ~/.kube/k3s.yaml
-        mode: '0666'
-      when: inventory_hostname == 'master01'
-
-    - name: Install k3s on other master nodes
-      shell: |
-        curl -sfL https://get.k3s.io | sh -s - server --server https://192.168.1.81:6443 \
-        --token {{ hostvars['master01']['k3s_token'] }} \
-        --docker \
-        --disable servicelb  \
-        --node-taint "node-role.kubernetes.io/control-plane=true:NoSchedule"
-      when: inventory_hostname != 'master01'
-
-  when: hostvars[inventory_hostname].var_master | default(false)
+- name: Install Master Node
+  shell: |
+    curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - server \
+    --server https://{{ primordial_ip }}:6443 \
+    --disable servicelb \
+    --disable traefik \
+    --docker
+  become: true

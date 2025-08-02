@@ -6,7 +6,7 @@
   roles:
     - role: master-uninstall
       tags: [ master-uninstall ]
-      when: var_master is defined  
+      when: var_master is defined  or var_primordial_master is defined
 
     - role: worker-uninstall
       tags: [ worker-uninstall ]

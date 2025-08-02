@@ -22,14 +22,24 @@
 
 
   roles:
-    - role: docker-install
-      tags: [docker-install]
+    # - role: docker-install
+    #   tags: [docker-install]
+      
+    - role: master-primordial-install
+      tags: [master-primordial-install]
+      when: var_primordial_master is defined
+
+    - role: retrive-kubeconfig
+      tags: [retrive-kubeconfig]
+      when: var_primordial_master is defined
 
     - role: master-install
       tags: [master-install]
+      when: var_master is defined and var_primordial_master is not defined
     
     - role: worker-install
       tags: [worker-install]
+      when: var_worker is defined
 
   
 

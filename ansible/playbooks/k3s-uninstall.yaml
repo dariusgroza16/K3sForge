@@ -2,7 +2,21 @@
 - name: Uninstall K3s
   hosts: all
   gather_facts: true
+  pre_tasks:
+  
+    - name: Ensure ~/.kube directory exists
+      command: "mkdir -p ~/.kube"
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      run_once: true
 
+    - name: Ensure ~/.kube directory is empty
+      shell: "rm -rf ~/.kube/*"
+      delegate_to: localhost
+      become: false
+      changed_when: true
+      run_once: true
   roles:
     - role: master-uninstall
       tags: [ master-uninstall ]

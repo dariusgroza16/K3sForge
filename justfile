@@ -7,15 +7,30 @@ this_dir := justfile_directory()
 _default:
    just --list
 
-[doc("Start the frontend for ClusterWatch")]
+[doc("Start the frontend for K3SForge")]
 run:
   python3 $this_dir/frontend/src/main.py
 
-[doc("Install ClusterWatch with k3s")]
+[doc("Install K3S")]
 ik: 
-  ansible-playbook -i ansible/inv ansible/playbooks/k3s-install.yaml
+  cd ansible && \
+  ansible-playbook -i inv playbooks/k3s-install.yaml
 
-[doc("Uninstall ClusterWatch with k3s")]  
+[doc("Uninstall K3S")]  
 uk:
-  ansible-playbook -i ansible/inv ansible/playbooks/k3s-uninstall.yaml
+  cd ansible && \
+  ansible-playbook -i inv playbooks/k3s-uninstall.yaml
+
+
+# CORE SERVICES
+[doc("Install MetalLB HelmChart")] 
+metallb-install:
+   cd core-services/metallb && \
+   ./install.sh
+
+[doc("Uninstall MetalLB HelmChart")] 
+metallb-uninstall:
+   cd core-services/metallb && \
+   ./uninstall.sh
+
 

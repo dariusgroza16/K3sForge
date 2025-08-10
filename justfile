@@ -34,3 +34,14 @@ metallb-uninstall:
    ./uninstall.sh
 
 
+[doc("Install nginx-ingress-controller HelmChart")] 
+ingress-install:
+   cd core-services/nginx-ingress-controller && \
+   ./install.sh
+
+[doc("Uninstall nginx-ingress-controlle HelmChart")] 
+ingress-uninstall:
+   cd core-services/nginx-ingress-controller && \
+   ./uninstall.sh
+
+

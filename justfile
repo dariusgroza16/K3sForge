@@ -45,3 +45,15 @@ ingress-uninstall:
    ./uninstall.sh
 
 
+[doc("Install cert-manager HelmChart")] 
+cert-install:
+   cd core-services/cert-manager && \
+   ./install.sh
+
+[doc("Uninstall cert-manager HelmChart")] 
+cert-uninstall:
+   cd core-services/cert-manager && \
+   ./uninstall.sh
+
+
+

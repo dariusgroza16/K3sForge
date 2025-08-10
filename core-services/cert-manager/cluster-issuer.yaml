@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Use the Let’s Encrypt production ACME server
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: darius.groza16@gmail.com  # Change this to your email
+    privateKeySecretRef:
+      name: letsencrypt-prod-private-key
+    solvers:
+    - http01:
+        ingress:
+          class: nginx

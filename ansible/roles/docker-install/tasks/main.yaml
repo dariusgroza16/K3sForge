@@ -1,8 +1,4 @@
 ---
-- name: Update apt package index
-  apt:
-    update_cache: yes
-
 - name: Install required packages
   apt:
     name:
@@ -12,18 +8,9 @@
       - software-properties-common
     state: present
 
-- name: Add Docker's official GPG key
-  shell: curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-- name: Set up the stable Docker repository
-  apt_repository:
-    repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-    state: present
-
-- name: Install Docker Engine
-  apt:
-    name: docker-ce
-    state: present
+- name: Install Docker
+  shell: |
+    curl -fsSL https://get.docker.com | sh
 
 - name: Start Docker service
   service:
@@ -38,18 +25,3 @@
     groups: docker
     append: yes
   
-
-# - name: Restart Docker daemon with sudo
-#   command: sudo dockerd
-#   async: 0
-#   poll: 0
-
-# - name: Verify Docker installation
-#   command: docker --version
-#   register: docker_version
-#   changed_when: false
-
-# - name: Show Docker version
-#   debug:
-#     var: docker_version.stdout
-#   notify: "Ensure Docker service is running"

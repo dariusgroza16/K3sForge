@@ -1,4 +1,14 @@
 ---
+- name: Check if Docker is installed
+  command: docker --version
+  register: docker_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: Set docker_installed fact
+  set_fact:
+    docker_installed: "{{ docker_check.rc == 0 }}"
+
 - name: Install required packages
   apt:
     name:
@@ -7,10 +17,12 @@
       - curl
       - software-properties-common
     state: present
+  when: not docker_installed
 
 - name: Install Docker
   shell: |
     curl -fsSL https://get.docker.com | sh
+  when: not docker_installed
 
 - name: Start Docker service
   service:
@@ -18,10 +30,11 @@
     state: started
     enabled: yes
   notify: "Ensure Docker service is running"
+  when: not docker_installed
 
 - name: Add user to docker group
   user:
     name: "{{ ansible_user }}"
     groups: docker
     append: yes
-  
+  when: not docker_installed

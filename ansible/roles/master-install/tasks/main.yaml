@@ -6,7 +6,7 @@
       | map(attribute='value.server_ip') | list | first }}"
 
 
-- name: Install Master Node
+- name: Install non primordial Master Node
   shell: |
     curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - server \
     --server https://{{ primordial_ip }}:6443 \

@@ -60,10 +60,10 @@ fi
 # Wait for MetalLB components
 # ------------------------------
 log "Waiting for MetalLB controller Deployment to be ready..."
-kubectl -n "$NAMESPACE" rollout status deploy/metallb-controller --timeout=120s
+kubectl -n "$NAMESPACE" rollout status deploy/metallb-controller --timeout=180s
 
 log "Waiting for MetalLB speaker DaemonSet to be ready..."
-kubectl -n "$NAMESPACE" rollout status daemonset/metallb-speaker --timeout=120s
+kubectl -n "$NAMESPACE" rollout status daemonset/metallb-speaker --timeout=180s
 
 # ------------------------------
 # Apply the MetalLB IP Address Pool

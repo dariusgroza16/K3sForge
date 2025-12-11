@@ -32,3 +32,13 @@ metallb-install:
 metallb-uninstall:
    cd core-services/metallb && \
    ./uninstall.sh
+
+[doc("Install Traefik HelmChart")] 
+traefik-install:
+   cd core-services/traefik && \
+   ./install.sh
+
+[doc("Uninstall Traefik HelmChart")] 
+traefik-uninstall:
+   cd core-services/traefik && \
+   ./uninstall.sh   

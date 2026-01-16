@@ -14,9 +14,32 @@ def index():
 
 @app.route('/generate', methods=['POST'])
 def generate():
-    vms = request.json.get('vms', [])
-    primordial_master = request.json.get('primordialMaster', None)
-    
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Invalid or missing JSON body.'}), 400
+
+    vms = data.get('vms', [])
+    primordial_master = data.get('primordialMaster', None)
+
+    if not isinstance(vms, list):
+        return jsonify({'status': 'error', 'message': 'Invalid payload: vms must be a list.'}), 400
+
+    # Basic validation: each vm must have name, ip, and role
+    for idx, vm in enumerate(vms):
+        if not isinstance(vm, dict):
+            return jsonify({'status': 'error', 'message': f'Invalid VM entry at index {idx}.'}), 400
+        if 'name' not in vm or 'ip' not in vm or 'role' not in vm:
+            return jsonify({'status': 'error', 'message': f'VM at index {idx} is missing name/ip/role.'}), 400
+
+    masters = [vm for vm in vms if vm.get('role') == 'master']
+    if len(masters) == 0:
+        return jsonify({'status': 'error', 'message': 'At least one master node is required.'}), 400
+
+    master_names = [m['name'] for m in masters]
+    # Auto-assign primordial_master if not provided or invalid
+    if not primordial_master or primordial_master not in master_names:
+        primordial_master = master_names[0]
+
     all_data = {'all': {'children': {'masters': {'hosts': {}}, 'workers': {'hosts': {}}}}}
 
     for vm in vms:
@@ -38,7 +61,7 @@ def generate():
             vm_data = {
                 'server_name': name,
                 'server_ip': ip,
-                'var_worker': True  
+                'var_worker': True
             }
 
         with open(os.path.join(HOST_VARS_DIR, f"{name}.yaml"), 'w') as f:
@@ -48,7 +71,7 @@ def generate():
     with open(os.path.join(inv_location, 'all.yaml'), 'w') as f:
         yaml.dump(all_data, f)
 
-    return jsonify({'status': 'success'})
+    return jsonify({'status': 'success', 'primordial_master': primordial_master})
 
 if __name__ == '__main__':
     app.run(debug=True)

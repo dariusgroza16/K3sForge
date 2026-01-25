@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
+  <div class="light-pillar-container" aria-hidden="true"></div>
   <div class="container">
     <header class="header">
       <div class="logo-wrapper">
@@ -57,5 +58,7 @@
   <div id="toast" class="toast" aria-hidden="true"></div>
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="{{ url_for('static', filename='lightpillar.js') }}"></script>
 </body>
 </html>

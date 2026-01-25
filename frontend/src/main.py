@@ -1,6 +1,11 @@
 from flask import Flask, render_template, request, jsonify
 import yaml
 import os
+import paramiko
+import io
+import socket
+from threading import Thread
+import time
 
 app = Flask(__name__)
 
@@ -72,6 +77,83 @@ def generate():
         yaml.dump(all_data, f)
 
     return jsonify({'status': 'success', 'primordial_master': primordial_master})
+
+@app.route('/test-ssh', methods=['POST'])
+def test_ssh():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Invalid or missing JSON body.'}), 400
+
+    name = data.get('name')
+    ip = data.get('ip')
+    username = data.get('username')
+    ssh_key = data.get('ssh_key')
+
+    if not all([name, ip, username, ssh_key]):
+        return jsonify({'status': 'error', 'message': 'Missing required fields.'}), 400
+
+    # Test SSH connection
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    try:
+        # Parse the private key
+        key_file = io.StringIO(ssh_key)
+        try:
+            pkey = paramiko.RSAKey.from_private_key(key_file)
+        except paramiko.ssh_exception.SSHException:
+            # Try Ed25519
+            key_file.seek(0)
+            try:
+                pkey = paramiko.Ed25519Key.from_private_key(key_file)
+            except paramiko.ssh_exception.SSHException:
+                # Try other key types
+                key_file.seek(0)
+                try:
+                    pkey = paramiko.ECDSAKey.from_private_key(key_file)
+                except paramiko.ssh_exception.SSHException:
+                    key_file.seek(0)
+                    try:
+                        pkey = paramiko.DSSKey.from_private_key(key_file)
+                    except paramiko.ssh_exception.SSHException:
+                        return jsonify({'status': 'error', 'message': 'Invalid SSH key format.'}), 400
+
+        # Attempt connection with timeout
+        client.connect(
+            hostname=ip,
+            username=username,
+            pkey=pkey,
+            timeout=10,
+            banner_timeout=10,
+            auth_timeout=10
+        )
+        
+        # Test command execution
+        stdin, stdout, stderr = client.exec_command('echo "SSH test successful"', timeout=5)
+        output = stdout.read().decode('utf-8').strip()
+        
+        client.close()
+        
+        if 'SSH test successful' in output:
+            return jsonify({'status': 'success', 'message': f'Connected successfully to {name}'})
+        else:
+            return jsonify({'status': 'error', 'message': 'Connection established but command execution failed.'}), 400
+
+    except paramiko.AuthenticationException:
+        return jsonify({'status': 'error', 'message': 'Authentication failed. Check username and SSH key.'}), 400
+    except paramiko.SSHException as e:
+        return jsonify({'status': 'error', 'message': f'SSH error: {str(e)}'}), 400
+    except socket.timeout:
+        return jsonify({'status': 'error', 'message': 'Connection timeout. Check IP address and network.'}), 400
+    except socket.error as e:
+        return jsonify({'status': 'error', 'message': f'Network error: {str(e)}'}), 400
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Unexpected error: {str(e)}'}), 400
+    finally:
+        try:
+            client.close()
+        except:
+            pass
 
 if __name__ == '__main__':
     app.run(debug=True)

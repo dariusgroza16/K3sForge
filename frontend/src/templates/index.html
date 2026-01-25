@@ -18,7 +18,7 @@
       <p class="subtitle">Quickly compose Ansible inventories for your K3s clusters</p>
     </header>
 
-    <main class="main-card">
+    <main class="main-card" id="inventoryView">
       <section class="form-section">
         <input type="text" id="vmName" placeholder="VM Name" aria-label="VM Name">
         <input type="text" id="vmIP" placeholder="VM IP" aria-label="VM IP">
@@ -52,6 +52,35 @@
       <div class="actions">
         <button id="generate" class="primary generate">Generate Inventory</button>
       </div>
+    </main>
+
+    <main class="main-card" id="connectionView" style="display: none;">
+      <div class="connection-header">
+        <h2 class="section-title">Connection Check Up</h2>
+        <p class="section-subtitle">Test SSH connectivity to all configured servers</p>
+      </div>
+
+      <section class="ssh-config-section">
+        <div class="input-group">
+          <label for="sshUsername">SSH Username</label>
+          <input type="text" id="sshUsername" placeholder="root" aria-label="SSH Username">
+        </div>
+        <div class="input-group">
+          <label for="sshKey">SSH Private Key</label>
+          <textarea id="sshKey" placeholder="Paste your SSH private key here (RSA or Ed25519)..." aria-label="SSH Private Key" rows="12"></textarea>
+        </div>
+        <div class="actions">
+          <button id="backToInventory" class="secondary">Back to Inventory</button>
+          <button id="testConnections" class="primary">Test Connections</button>
+        </div>
+      </section>
+
+      <section id="connectionResults" class="connection-results" style="display: none;">
+        <h3 class="results-title">Connection Test Results</h3>
+        <div id="connectionList" class="connection-list">
+          <!-- Connection test results will appear here -->
+        </div>
+      </section>
     </main>
   </div>
 

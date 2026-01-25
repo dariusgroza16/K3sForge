@@ -184,3 +184,40 @@ input[type="text"]:focus { box-shadow: 0 4px 18px rgba(196,30,30,0.3); transform
 body{ position: relative; }
 .container { z-index: 2; }
 
+/* Connection Check Up Section */
+.connection-header { text-align: center; margin-bottom: 24px; }
+.section-title { color: #fff; margin: 0; font-size: 1.4rem; font-weight: 700; }
+.section-subtitle { color: var(--card); margin: 8px 0 0 0; font-size: 0.95rem; opacity: 0.9; }
+
+.ssh-config-section { margin-bottom: 24px; }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; color: #fff; font-size: 0.9rem; font-weight: 600; margin-bottom: 6px; }
+.input-group textarea { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.5); color: var(--card); outline: none; font-family: 'Courier New', monospace; font-size: 0.85rem; resize: vertical; min-height: 200px; backdrop-filter: blur(8px); transition: box-shadow .15s, border-color .15s; }
+.input-group textarea:focus { box-shadow: 0 4px 18px rgba(196,30,30,0.3); border-color: rgba(255,255,255,0.3); }
+.input-group input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.5); color: var(--card); outline: none; transition: box-shadow .15s, transform .08s; backdrop-filter: blur(8px); }
+.input-group input[type="text"]:focus { box-shadow: 0 4px 18px rgba(196,30,30,0.3); transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+
+.secondary { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: background .12s, border-color .12s; }
+.secondary:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.35); }
+
+.connection-results { margin-top: 24px; }
+.results-title { color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }
+.connection-list { display: grid; gap: 12px; }
+.connection-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 10px; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px); transition: transform .12s, box-shadow .12s; gap: 12px; }
+.connection-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+.connection-info { display: flex; align-items: center; gap: 12px; flex: 1; }
+.connection-actions { display: flex; align-items: center; gap: 8px; }
+.connection-status { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.connection-status.loading { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); animation: pulse 1.5s ease-in-out infinite; }
+.connection-status.success { background: #22c55e; color: #fff; }
+.connection-status.failure { background: #ef4444; color: #fff; }
+.connection-details { flex: 1; }
+.connection-name { color: #fff; font-weight: 600; font-size: 0.95rem; }
+.connection-ip { color: #ddd; font-size: 0.85rem; margin-top: 2px; }
+.connection-message { color: #aaa; font-size: 0.85rem; margin-top: 4px; font-style: italic; }
+.retry-btn { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; transition: background .12s, border-color .12s; }
+.retry-btn:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.35); }
+.retry-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+

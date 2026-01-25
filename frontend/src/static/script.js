@@ -52,8 +52,16 @@ function setupHandlers(){
       let json = null; try{ json = await res.json(); }catch(e){}
       if (!res.ok) { showToast((json&&json.message)?json.message:'Generation failed'); return; }
       showToast('Inventory files generated!');
+      // Switch to connection check view
+      setTimeout(()=>{ switchToConnectionView(); }, 800);
     } catch(e){ showToast('Network error.'); }
   });
+
+  const backBtn = document.getElementById('backToInventory');
+  if (backBtn) backBtn.addEventListener('click', ()=>{ switchToInventoryView(); });
+
+  const testBtn = document.getElementById('testConnections');
+  if (testBtn) testBtn.addEventListener('click', ()=>{ testConnections(); });
 
   const dl = document.getElementById('downloadTopo');
   if (dl) dl.addEventListener('click', ()=>{
@@ -98,6 +106,14 @@ function renderTopology(){ const container=document.getElementById('topology'); 
   if (masters.length>1){ for(let i=0;i<masters.length-1;i++){ const x1=nodeX(i,mCount); const x2=nodeX(i+1,mCount); const y=topY+30; const link=document.createElementNS(svgNS,'path'); const d=`M ${x1} ${y} C ${x1} ${y+36} ${x2} ${y+36} ${x2} ${y}`; link.setAttribute('d',d); link.setAttribute('stroke','#c41e1e'); link.setAttribute('stroke-width','2'); link.setAttribute('fill','none'); link.setAttribute('class','topo-link master-link'); svg.appendChild(link); } }
   container.appendChild(svg);
 }
+
+function switchToConnectionView(){ const inv=document.getElementById('inventoryView'); const conn=document.getElementById('connectionView'); if(inv) inv.style.display='none'; if(conn) conn.style.display='block'; }
+
+function switchToInventoryView(){ const inv=document.getElementById('inventoryView'); const conn=document.getElementById('connectionView'); if(inv) inv.style.display='block'; if(conn) conn.style.display='none'; const results=document.getElementById('connectionResults'); if(results) results.style.display='none'; }
+
+async function testConnections(){ const username=document.getElementById('sshUsername')?.value.trim(); const sshKey=document.getElementById('sshKey')?.value.trim(); if(!username||!sshKey){ showToast('Please provide SSH username and private key'); return; } const resultsSection=document.getElementById('connectionResults'); const connectionList=document.getElementById('connectionList'); if(!resultsSection||!connectionList) return; resultsSection.style.display='block'; connectionList.innerHTML=''; vms.forEach(vm=>{ const item=document.createElement('div'); item.className='connection-item'; item.id=`conn-${vm.name}`; item.innerHTML=`<div class="connection-info"><div class="connection-status loading"></div><div class="connection-details"><div class="connection-name">${escapeHtml(vm.name)}</div><div class="connection-ip">${escapeHtml(vm.ip)}</div><div class="connection-message">Testing connection...</div></div></div>`; connectionList.appendChild(item); }); for(const vm of vms){ await testSingleConnection(vm.name, vm.ip, username, sshKey); } }
+
+async function testSingleConnection(name, ip, username, sshKey, isRetry=false){ const item=document.getElementById(`conn-${name}`); if(!item) return; const statusEl=item.querySelector('.connection-status'); const messageEl=item.querySelector('.connection-message'); const actionsEl=item.querySelector('.connection-actions'); if(actionsEl) actionsEl.remove(); if(statusEl){ statusEl.className='connection-status loading'; statusEl.textContent=''; } if(messageEl) messageEl.textContent='Testing connection...'; try{ const res=await fetch('/test-ssh', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, ip, username, ssh_key: sshKey}) }); const json=await res.json(); if(res.ok && json.status==='success'){ if(statusEl){ statusEl.className='connection-status success'; statusEl.textContent='✓'; } if(messageEl) messageEl.textContent=json.message || 'Connection successful'; }else{ if(statusEl){ statusEl.className='connection-status failure'; statusEl.textContent='✕'; } if(messageEl) messageEl.textContent=json.message || 'Connection failed'; const actions=document.createElement('div'); actions.className='connection-actions'; const retryBtn=document.createElement('button'); retryBtn.className='retry-btn'; retryBtn.textContent='🔄 Retry'; retryBtn.addEventListener('click', async ()=>{ retryBtn.disabled=true; await testSingleConnection(name, ip, username, sshKey, true); retryBtn.disabled=false; }); actions.appendChild(retryBtn); item.appendChild(actions); } }catch(e){ if(statusEl){ statusEl.className='connection-status failure'; statusEl.textContent='✕'; } if(messageEl) messageEl.textContent='Network error during test'; const actions=document.createElement('div'); actions.className='connection-actions'; const retryBtn=document.createElement('button'); retryBtn.className='retry-btn'; retryBtn.textContent='🔄 Retry'; retryBtn.addEventListener('click', async ()=>{ retryBtn.disabled=true; await testSingleConnection(name, ip, username, sshKey, true); retryBtn.disabled=false; }); actions.appendChild(retryBtn); item.appendChild(actions); } }
 
 function showTopoInfo(name, ip, role, x, y){ const info=document.getElementById('topoInfo'); if(!info) return; info.innerHTML=`<strong>${escapeHtml(name)}</strong><div class="topo-sub">${escapeHtml(ip)} • ${escapeHtml(role.toUpperCase())}</div>`; info.style.left='auto'; info.style.right='18px'; info.style.top=`${Math.max(12,y)}px`; info.classList.add('show'); info.setAttribute('aria-hidden','false'); clearTimeout(info._hide); info._hide=setTimeout(()=>{ info.classList.remove('show'); info.setAttribute('aria-hidden','true'); },4500); }
 

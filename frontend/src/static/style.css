@@ -61,6 +61,7 @@ input[type="text"]:focus { box-shadow: 0 4px 18px rgba(196,30,30,0.3); transform
 
 .primary { background: linear-gradient(180deg, var(--accent), var(--accent-strong)); color: #fff; border: none; padding:10px 14px; border-radius:10px; cursor:pointer; box-shadow: 0 8px 22px rgba(196,30,30,0.18); transition: transform .12s ease, opacity .12s; }
 .primary:hover { transform: translateY(-3px); opacity:0.98; }
+.primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 .generate { float:right; }
 
 .vm-list { display: grid; gap:12px; margin: 12px 0 18px 0; }
@@ -73,10 +74,11 @@ input[type="text"]:focus { box-shadow: 0 4px 18px rgba(196,30,30,0.3); transform
 .vm-entry button { background: transparent; color: #fff; border:1px solid rgba(255,255,255,0.06); padding:6px 10px; border-radius:8px; cursor:pointer; }
 .vm-entry button:hover { background: rgba(255,255,255,0.02); border-color: rgba(255,255,255,0.12); }
 
-.actions { display:flex; justify-content:flex-end; }
+.actions { display:flex; justify-content:space-between; align-items: center; }
+.actions-right { display: flex; gap: 12px; }
 
 /* Toast */
-.toast { position: fixed; right: 20px; bottom: 30px; min-width: 220px; max-width: 360px; background: #111; color: #fff; padding: 12px 14px; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .25s, transform .25s; z-index: 9999; }
+.toast { position: fixed; right: 20px; bottom: 30px; min-width: 220px; max-width: 420px; background: #111; color: #fff; padding: 12px 14px; border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .25s, transform .25s; z-index: 9999; }
 .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
 /* Topology diagram */

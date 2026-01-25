@@ -1,6 +1,8 @@
 // Client-side state
 let vms = [];
 let primordialMaster = null;
+let inventoryExists = false;
+let deletedVMs = []; // Track VMs to delete on next generate
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -17,6 +19,36 @@ function showToast(message, timeout = 3000) {
   t.setAttribute('aria-hidden','false');
   clearTimeout(t._timer);
   t._timer = setTimeout(()=>{ t.classList.remove('show'); t.setAttribute('aria-hidden','true'); }, timeout);
+}
+
+function showConfirmToast(message, onConfirm, onCancel) {
+  const t = document.getElementById('toast');
+  if (!t) return console.warn('toast element missing');
+  t.innerHTML = `${escapeHtml(message)}<div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end;"><button id="toast-confirm" style="padding:6px 12px;background:#c41e1e;color:#fff;border:none;border-radius:6px;cursor:pointer;">Proceed</button><button id="toast-cancel" style="padding:6px 12px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;cursor:pointer;">Cancel</button></div>`;
+  t.classList.add('show');
+  t.setAttribute('aria-hidden','false');
+  
+  const confirmBtn = document.getElementById('toast-confirm');
+  const cancelBtn = document.getElementById('toast-cancel');
+  
+  const cleanup = () => {
+    t.classList.remove('show');
+    t.setAttribute('aria-hidden','true');
+    setTimeout(() => { t.innerHTML = ''; }, 300);
+  };
+  
+  if (confirmBtn) confirmBtn.addEventListener('click', () => { cleanup(); if(onConfirm) onConfirm(); });
+  if (cancelBtn) cancelBtn.addEventListener('click', () => { cleanup(); if(onCancel) onCancel(); });
+}
+
+function updateProceedButton() {
+  const proceedBtn = document.getElementById('proceedToTest');
+  if (!proceedBtn) return;
+  if (inventoryExists) {
+    proceedBtn.disabled = false;
+  } else {
+    proceedBtn.disabled = true;
+  }
 }
 
 function setupHandlers(){
@@ -48,14 +80,28 @@ function setupHandlers(){
     const masters = vms.filter(x=>x.role==='master');
     if (masters.length===0) { showToast('Add at least one master before generating.'); return; }
     try {
+      // Delete files for removed VMs
+      for (const vmName of deletedVMs) {
+        await deleteHostFile(vmName);
+      }
+      deletedVMs = [];
+      
       const res = await fetch('/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({vms, primordialMaster}) });
       let json = null; try{ json = await res.json(); }catch(e){}
       if (!res.ok) { showToast((json&&json.message)?json.message:'Generation failed'); return; }
+      inventoryExists = true;
+      updateProceedButton();
       showToast('Inventory files generated!');
       // Switch to connection check view
       setTimeout(()=>{ switchToConnectionView(); }, 800);
     } catch(e){ showToast('Network error.'); }
   });
+
+  const proceedBtn = document.getElementById('proceedToTest');
+  if (proceedBtn) proceedBtn.addEventListener('click', ()=>{ switchToConnectionView(); });
+
+  const detectBtn = document.getElementById('detectInventory');
+  if (detectBtn) detectBtn.addEventListener('click', async ()=>{ await detectInventory(); });
 
   const backBtn = document.getElementById('backToInventory');
   if (backBtn) backBtn.addEventListener('click', ()=>{ switchToInventoryView(); });
@@ -68,11 +114,14 @@ function setupHandlers(){
     const container = document.getElementById('topology'); if (!container) { showToast('Nothing to download'); return; }
     const svg = container.querySelector('svg'); if (!svg) { showToast('Nothing to download'); return; }
     const clone = svg.cloneNode(true);
-    // Calculate actual width needed for all masters
+    // Calculate actual width needed for all masters and workers
     const masters = vms.filter(n=>n.role==='master');
+    const workers = vms.filter(n=>n.role==='worker');
     const masterRectW = 220; const minMasterSpacing = 50;
     const minWidthForMasters = masters.length * (masterRectW + minMasterSpacing) + minMasterSpacing;
-    const w = Math.max(container.clientWidth || 900, minWidthForMasters);
+    const workerRectW = 200; const minWorkerSpacing = 50;
+    const minWidthForWorkers = workers.length > 0 ? workers.length * (workerRectW + minWorkerSpacing) + minWorkerSpacing : 0;
+    const w = Math.max(container.clientWidth || 900, minWidthForMasters, minWidthForWorkers);
     const h = Math.max(240, Math.floor((vms.length+1)*40));
     clone.setAttribute('width', w); clone.setAttribute('height', h); clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
     const s = new XMLSerializer().serializeToString(clone);
@@ -84,11 +133,54 @@ function setupHandlers(){
   });
 }
 
-function deleteVM(index){ if (index<0||index>=vms.length) return; if (primordialMaster===vms[index].name) primordialMaster=null; vms.splice(index,1); renderVMList(); showToast('Entry removed'); }
+function deleteVM(index){ if (index<0||index>=vms.length) return; const vmName = vms[index].name; if (primordialMaster===vmName) primordialMaster=null; deletedVMs.push(vmName); vms.splice(index,1); renderVMList(); showToast('Entry removed'); }
+
+async function deleteHostFile(name) {
+  try {
+    await fetch('/delete-host', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name}) });
+  } catch(e) {
+    console.error('Failed to delete host file:', e);
+  }
+}
+
+async function detectInventory() {
+  if (vms.length > 0) {
+    showConfirmToast('This will overwrite current VMs. Continue?', async () => {
+      await loadInventory();
+    }, () => {
+      showToast('Detection cancelled');
+    });
+  } else {
+    await loadInventory();
+  }
+}
+
+async function loadInventory() {
+  try {
+    const res = await fetch('/detect-inventory');
+    const json = await res.json();
+    
+    if (!res.ok) {
+      showToast(json.message || 'No inventory found');
+      return;
+    }
+    
+    vms = json.vms || [];
+    primordialMaster = json.primordial_master || null;
+    deletedVMs = []; // Clear deletion tracking when loading fresh inventory
+    inventoryExists = true;
+    updateProceedButton();
+    renderVMList();
+    showToast(`Loaded ${vms.length} VM(s) from inventory`);
+  } catch(e) {
+    showToast('Failed to detect inventory');
+    console.error('Detect error:', e);
+  }
+}
 
 function setPrimordialMaster(name){ primordialMaster=name; renderVMList(); showToast(`${name} set as primordial master`); }
 
-function updateGenerateState(){ const btn=document.getElementById('generate'); if(!btn) return; const masters=vms.filter(x=>x.role==='master'); if(masters.length===0){ btn.setAttribute('aria-disabled','true'); btn.classList.add('disabled'); } else { btn.setAttribute('aria-disabled','false'); btn.classList.remove('disabled'); } }
+function updateGenerateState(){ const btn=document.getElementById('generate'); if(!btn) return; const masters=vms.filter(x=>x.role==='master'); if(masters.length===0){ btn.setAttribute('aria-disabled','true'); btn.classList.add('disabled'); } else { btn.setAttribute('aria-disabled','false'); btn.classList.remove('disabled'); } updateProceedButton(); }
 
 function renderVMList(){ const container=document.getElementById('vmList'); if(!container) return; container.innerHTML=''; const masters=vms.filter(vm=>vm.role==='master'); const multipleMasters=masters.length>1; vms.forEach((vm,index)=>{ const div=document.createElement('div'); div.className=`vm-entry ${vm.role}`; const left=document.createElement('div'); const title=document.createElement('span'); title.innerHTML=`<strong>${escapeHtml(vm.name)}</strong> (${escapeHtml(vm.ip)}) — <em>${vm.role.toUpperCase()}</em>`; left.appendChild(title); if(vm.role==='master'){ const label=document.createElement('label'); label.style.marginLeft='12px'; if(multipleMasters){ label.innerHTML=`<input type="radio" name="primordialMaster" ${primordialMaster===vm.name?'checked':''}> Primordial Master`; const radio = label.querySelector('input'); if (radio) radio.addEventListener('click', ()=>setPrimordialMaster(vm.name)); } else { const badge=document.createElement('span'); badge.textContent='Primordial Master (auto)'; badge.style.marginLeft='12px'; badge.style.opacity='0.9'; badge.style.fontSize='0.9rem'; badge.style.color='#ffdede'; label.appendChild(badge); } left.appendChild(label);} const rightBtn=document.createElement('button'); rightBtn.textContent='Delete'; rightBtn.addEventListener('click', ()=>deleteVM(index)); div.appendChild(left); div.appendChild(rightBtn); container.appendChild(div); }); updateGenerateState(); renderTopology(); }
 
@@ -96,7 +188,11 @@ function renderTopology(){ const container=document.getElementById('topology'); 
   // Calculate required width to prevent master node overlap
   const masterRectW = 220; const minMasterSpacing = 50;
   const minWidthForMasters = mCount * (masterRectW + minMasterSpacing) + minMasterSpacing;
-  const width = Math.max(baseWidth, minWidthForMasters);
+  // Calculate required width to prevent worker node overlap
+  const workerRectW = 200; const minWorkerSpacing = 50;
+  const minWidthForWorkers = wCount > 0 ? wCount * (workerRectW + minWorkerSpacing) + minWorkerSpacing : 0;
+  // Use the maximum of base width, masters width, and workers width
+  const width = Math.max(baseWidth, minWidthForMasters, minWidthForWorkers);
   const height = Math.max(240, Math.floor((vms.length+1)*40)); const svgNS='http://www.w3.org/2000/svg'; const svg=document.createElementNS(svgNS,'svg'); svg.setAttribute('viewBox',`0 0 ${width} ${height}`); svg.setAttribute('preserveAspectRatio','xMidYMid meet'); svg.setAttribute('xmlns',svgNS);
   const topY=60; const botY=height-60;
   function nodeX(i,count){ return Math.round((i+1)*(width/(count+1))); }

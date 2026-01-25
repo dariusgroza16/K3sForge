@@ -78,6 +78,81 @@ def generate():
 
     return jsonify({'status': 'success', 'primordial_master': primordial_master})
 
+@app.route('/detect-inventory', methods=['GET'])
+def detect_inventory():
+    all_yaml_path = os.path.join(inv_location, 'all.yaml')
+    
+    # Check if all.yaml exists
+    if not os.path.exists(all_yaml_path):
+        return jsonify({'status': 'error', 'message': 'No inventory found.'}), 404
+    
+    try:
+        # Load all.yaml
+        with open(all_yaml_path, 'r') as f:
+            all_data = yaml.safe_load(f)
+        
+        if not all_data or 'all' not in all_data:
+            return jsonify({'status': 'error', 'message': 'Invalid inventory format.'}), 400
+        
+        vms = []
+        primordial_master = None
+        
+        # Extract masters
+        masters_hosts = all_data.get('all', {}).get('children', {}).get('masters', {}).get('hosts', {})
+        for master_name in masters_hosts.keys():
+            host_var_file = os.path.join(HOST_VARS_DIR, f"{master_name}.yaml")
+            if os.path.exists(host_var_file):
+                with open(host_var_file, 'r') as f:
+                    host_data = yaml.safe_load(f)
+                    vm = {
+                        'name': master_name,
+                        'ip': host_data.get('server_ip', ''),
+                        'role': 'master'
+                    }
+                    if host_data.get('var_primordial_master'):
+                        primordial_master = master_name
+                    vms.append(vm)
+        
+        # Extract workers
+        workers_hosts = all_data.get('all', {}).get('children', {}).get('workers', {}).get('hosts', {})
+        for worker_name in workers_hosts.keys():
+            host_var_file = os.path.join(HOST_VARS_DIR, f"{worker_name}.yaml")
+            if os.path.exists(host_var_file):
+                with open(host_var_file, 'r') as f:
+                    host_data = yaml.safe_load(f)
+                    vm = {
+                        'name': worker_name,
+                        'ip': host_data.get('server_ip', ''),
+                        'role': 'worker'
+                    }
+                    vms.append(vm)
+        
+        return jsonify({'status': 'success', 'vms': vms, 'primordial_master': primordial_master})
+    
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to load inventory: {str(e)}'}), 500
+
+@app.route('/delete-host', methods=['POST'])
+def delete_host():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'status': 'error', 'message': 'Invalid or missing JSON body.'}), 400
+    
+    name = data.get('name')
+    if not name:
+        return jsonify({'status': 'error', 'message': 'Missing host name.'}), 400
+    
+    host_var_file = os.path.join(HOST_VARS_DIR, f"{name}.yaml")
+    
+    try:
+        if os.path.exists(host_var_file):
+            os.remove(host_var_file)
+            return jsonify({'status': 'success', 'message': f'Host {name} deleted.'})
+        else:
+            return jsonify({'status': 'success', 'message': f'Host {name} not found in inventory.'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': f'Failed to delete host: {str(e)}'}), 500
+
 @app.route('/test-ssh', methods=['POST'])
 def test_ssh():
     data = request.get_json(silent=True)

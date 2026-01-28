@@ -5,9 +5,34 @@
       | selectattr('value.var_primordial_master', 'equalto', true)
       | map(attribute='value.server_ip') | list | first }}"
 
+- name: Wait for master API to be available
+  wait_for:
+    host: "{{ primordial_ip }}"
+    port: 6443
+    timeout: 300
 
 - name: Install Worker Node
   shell: |
-    curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - agent --server https://{{ primordial_ip }}:6443 \
+    curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - agent \
+      --server https://{{ primordial_ip }}:6443 \
       --docker
+  become: true
+  register: k3s_agent_install
+  failed_when: false
+
+- name: Wait for k3s-agent service to be ready
+  systemd:
+    name: k3s-agent
+    state: started
+  become: true
+  retries: 10
+  delay: 10
+  register: k3s_agent_service
+  until: k3s_agent_service is succeeded
+  when: k3s_agent_install.rc != 0
+
+- name: Verify k3s-agent service is running
+  systemd:
+    name: k3s-agent
+    state: started
   become: true

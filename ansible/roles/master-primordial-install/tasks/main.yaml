@@ -3,6 +3,28 @@
     curl -sfL https://get.k3s.io | K3S_TOKEN=SECRET sh -s - server \
       --cluster-init \
       --write-kubeconfig-mode=666 \
+      --tls-san={{ server_ip }} \
       --disable servicelb \
       --disable traefik \
       --docker
+  become: true
+  register: primordial_install
+
+- name: Wait for k3s service to be active
+  systemd:
+    name: k3s
+    state: started
+  become: true
+  retries: 10
+  delay: 5
+  register: k3s_service
+  until: k3s_service is succeeded
+
+- name: Wait for Kubernetes API to be ready
+  command: k3s kubectl get nodes
+  become: true
+  retries: 12
+  delay: 5
+  register: k3s_ready
+  until: k3s_ready.rc == 0
+  changed_when: false

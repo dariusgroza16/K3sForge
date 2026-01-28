@@ -18,7 +18,33 @@
       <p class="subtitle">Quickly compose Ansible inventories for your K3s clusters</p>
     </header>
 
-    <main class="main-card" id="inventoryView">
+    <!-- Tab Navigation -->
+    <nav class="tab-navigation" id="tabNavigation">
+      <div class="bubble-indicator" id="bubbleIndicator"></div>
+      <ul id="navList">
+        <li class="active" data-tab="inventory">
+          <a href="#inventory">
+            <img src="{{ url_for('static', filename='icons/LogoAnsibleCommunity.svg') }}" alt="" class="tab-icon">
+            Inventory
+          </a>
+        </li>
+        <li data-tab="connections">
+          <a href="#connections">
+            <img src="{{ url_for('static', filename='icons/Network.svg') }}" alt="" class="tab-icon">
+            Test Connections
+          </a>
+        </li>
+        <li data-tab="deploy">
+          <a href="#deploy">
+            <img src="{{ url_for('static', filename='icons/K3s.svg') }}" alt="" class="tab-icon">
+            Deploy
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Tab Content -->
+    <main class="main-card" id="inventoryView" data-tab-content="inventory">
       <section class="form-section">
         <input type="text" id="vmName" placeholder="VM Name" aria-label="VM Name">
         <input type="text" id="vmIP" placeholder="VM IP" aria-label="VM IP">
@@ -50,15 +76,18 @@
       </section>
 
       <div class="actions">
-        <button id="detectInventory" class="secondary">Detect Inventory</button>
+        <div class="actions-left">
+          <button id="detectInventory" class="secondary">Detect Inventory</button>
+          <button id="clearInventory" class="secondary">Clear</button>
+        </div>
         <div class="actions-right">
-          <button id="proceedToTest" class="primary" disabled>Proceed to Connection Test</button>
           <button id="generate" class="primary generate">Generate Inventory</button>
+          <button id="proceedToTest" class="primary" disabled>Proceed</button>
         </div>
       </div>
     </main>
 
-    <main class="main-card" id="connectionView" style="display: none;">
+    <main class="main-card" id="connectionView" data-tab-content="connections" style="display: none;">
       <div class="connection-header">
         <h2 class="section-title">Connection Check Up</h2>
         <p class="section-subtitle">Test SSH connectivity to all configured servers</p>
@@ -85,6 +114,14 @@
           <!-- Connection test results will appear here -->
         </div>
       </section>
+    </main>
+
+    <main class="main-card" id="deployView" data-tab-content="deploy" style="display: none;">
+      <div class="empty-state">
+        <div class="empty-state-icon">🚀</div>
+        <h2 class="empty-state-title">Deployment Coming Soon</h2>
+        <p class="empty-state-text">Cluster deployment features will be available here</p>
+      </div>
     </main>
   </div>
 

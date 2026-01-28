@@ -9,7 +9,9 @@ import time
 
 app = Flask(__name__)
 
-inv_location = './ansible/inv'  # Change this variable to set the inventory location
+# Get the absolute path to the workspace root (two levels up from this file)
+WORKSPACE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+inv_location = os.path.join(WORKSPACE_ROOT, 'ansible', 'inv')
 HOST_VARS_DIR = os.path.join(inv_location, 'host_vars')
 os.makedirs(HOST_VARS_DIR, exist_ok=True)
 
@@ -231,4 +233,4 @@ def test_ssh():
             pass
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

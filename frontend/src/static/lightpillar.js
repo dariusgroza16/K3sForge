@@ -62,8 +62,8 @@
   };
 
   // Shader configuration - using red & white
-  const topColor = '#ff2934';
-  const bottomColor = '#c0bfc0';
+  const topColor = '#8942fc';
+  const bottomColor = '#3b85f3';
   const intensity = 1.3;
   const rotationSpeed = 0.4;
   const interactive = false;

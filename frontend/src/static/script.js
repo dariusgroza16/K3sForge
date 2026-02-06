@@ -4,6 +4,8 @@ let primordialMaster = null;
 let inventoryExists = false;
 let deletedVMs = []; // Track VMs to delete on next generate
 let allConnectionsPass = false; // Track if all connection tests passed
+let clusterDeployed = false;    // Track if a cluster was successfully deployed
+let _eventSource = null;        // active SSE connection
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return '';
@@ -230,6 +232,35 @@ function setupHandlers(){
   const testBtn = document.getElementById('testConnections');
   if (testBtn) testBtn.addEventListener('click', ()=>{ testConnections(); });
 
+  // ── Deploy tab button wiring ──
+  const startDeployBtn = document.getElementById('startDeploy');
+  if (startDeployBtn) startDeployBtn.addEventListener('click', () => {
+    if (clusterDeployed) {
+      showToast('⚠️ A cluster is already deployed. Uninstall first before redeploying.', 4000);
+      return;
+    }
+    startDeploy();
+  });
+
+  const abortDeployBtn = document.getElementById('abortDeploy');
+  if (abortDeployBtn) abortDeployBtn.addEventListener('click', () => abortDeploy());
+
+  const uninstallBtn = document.getElementById('uninstallCluster');
+  if (uninstallBtn) uninstallBtn.addEventListener('click', () => startUninstall());
+
+  const redeployBtn = document.getElementById('redeployCluster');
+  if (redeployBtn) redeployBtn.addEventListener('click', () => {
+    clusterDeployed = false;
+    _showDeployIdle();
+  });
+
+  const abortUninstallBtn = document.getElementById('abortUninstall');
+  if (abortUninstallBtn) abortUninstallBtn.addEventListener('click', () => {
+    showConfirmToast('Abort the running uninstall?', async () => {
+      try { await fetch('/deploy-abort', { method: 'POST' }); } catch(e) { showToast('Failed to abort'); }
+    });
+  });
+
   const dl = document.getElementById('downloadTopo');
   if (dl) dl.addEventListener('click', ()=>{
     const container = document.getElementById('topology'); if (!container) { showToast('Nothing to download'); return; }
@@ -398,6 +429,262 @@ async function testConnections(){ const username=document.getElementById('sshUse
 async function testSingleConnection(name, ip, username, sshKey, isRetry=false){ const item=document.getElementById(`conn-${name}`); if(!item) return false; const statusEl=item.querySelector('.connection-status'); const messageEl=item.querySelector('.connection-message'); const actionsEl=item.querySelector('.connection-actions'); if(actionsEl) actionsEl.remove(); if(statusEl){ statusEl.className='connection-status loading'; statusEl.textContent=''; } if(messageEl) messageEl.textContent='Testing connection...'; try{ const res=await fetch('/test-ssh', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name, ip, username, ssh_key: sshKey}) }); const json=await res.json(); if(res.ok && json.status==='success'){ if(statusEl){ statusEl.className='connection-status success'; statusEl.textContent='✓'; } if(messageEl) messageEl.textContent=json.message || 'Connection successful'; return true; }else{ if(statusEl){ statusEl.className='connection-status failure'; statusEl.textContent='✕'; } if(messageEl) messageEl.textContent=json.message || 'Connection failed'; const actions=document.createElement('div'); actions.className='connection-actions'; const retryBtn=document.createElement('button'); retryBtn.className='retry-btn'; retryBtn.textContent='🔄 Retry'; retryBtn.addEventListener('click', async ()=>{ retryBtn.disabled=true; await testSingleConnection(name, ip, username, sshKey, true); retryBtn.disabled=false; }); actions.appendChild(retryBtn); item.appendChild(actions); return false; } }catch(e){ if(statusEl){ statusEl.className='connection-status failure'; statusEl.textContent='✕'; } if(messageEl) messageEl.textContent='Network error during test'; const actions=document.createElement('div'); actions.className='connection-actions'; const retryBtn=document.createElement('button'); retryBtn.className='retry-btn'; retryBtn.textContent='🔄 Retry'; retryBtn.addEventListener('click', async ()=>{ retryBtn.disabled=true; await testSingleConnection(name, ip, username, sshKey, true); retryBtn.disabled=false; }); actions.appendChild(retryBtn); item.appendChild(actions); return false; } }
 
 function showTopoInfo(name, ip, role, x, y){ const info=document.getElementById('topoInfo'); if(!info) return; info.innerHTML=`<strong>${escapeHtml(name)}</strong><div class="topo-sub">${escapeHtml(ip)} • ${escapeHtml(role.toUpperCase())}</div>`; info.style.left='auto'; info.style.right='18px'; info.style.top=`${Math.max(12,y)}px`; info.classList.add('show'); info.setAttribute('aria-hidden','false'); clearTimeout(info._hide); info._hide=setTimeout(()=>{ info.classList.remove('show'); info.setAttribute('aria-hidden','true'); },4500); }
+
+// ── Deploy / Uninstall helpers ──────────────────────────────────────────
+
+const STEP_ICONS = {
+  docker: '🐳', primordial: '👑', kubeconfig: '🔑', masters: '🖥️', workers: '⚙️',
+  pre_tasks: '🧹',
+};
+const DONE_ICON = '✓';
+const FAIL_ICON = '✕';
+
+function _getSSHCreds() {
+  const username = document.getElementById('sshUsername')?.value.trim() || '';
+  const sshKey = document.getElementById('sshKey')?.value.trim() || '';
+  return { username, sshKey };
+}
+
+function _renderStepCards(container, steps) {
+  container.innerHTML = '';
+  steps.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'step-card pending';
+    card.id = `step-${s.id}`;
+    card.innerHTML = `<div class="step-icon">${STEP_ICONS[s.id] || '📦'}</div><div class="step-label">${escapeHtml(s.label)}</div><div class="step-task"></div>`;
+    container.appendChild(card);
+  });
+}
+
+function _setCardState(stepId, state, taskText) {
+  const card = document.getElementById(`step-${stepId}`);
+  if (!card) return;
+  card.className = `step-card ${state}`;
+  const icon = card.querySelector('.step-icon');
+  if (state === 'done' && icon) icon.textContent = DONE_ICON;
+  if (state === 'failed' && icon) icon.textContent = FAIL_ICON;
+  if (taskText !== undefined) {
+    const taskEl = card.querySelector('.step-task');
+    if (taskEl) taskEl.textContent = taskText;
+  }
+}
+
+function _showDeployIdle() {
+  document.getElementById('deployIdle').style.display = '';
+  document.getElementById('deployRunning').style.display = 'none';
+  document.getElementById('uninstallRunning').style.display = 'none';
+}
+
+function _showDeployRunning() {
+  document.getElementById('deployIdle').style.display = 'none';
+  document.getElementById('deployRunning').style.display = '';
+  document.getElementById('uninstallRunning').style.display = 'none';
+  document.getElementById('abortDeploy').style.display = '';
+  document.getElementById('uninstallCluster').style.display = 'none';
+  document.getElementById('redeployCluster').style.display = 'none';
+  document.getElementById('deployTitle').textContent = 'Deploying…';
+  document.getElementById('deploySubtitle').textContent = 'Running the k3s-install playbook';
+}
+
+function _showUninstallRunning() {
+  document.getElementById('deployIdle').style.display = 'none';
+  document.getElementById('deployRunning').style.display = 'none';
+  document.getElementById('uninstallRunning').style.display = '';
+  document.getElementById('abortUninstall').style.display = '';
+  document.getElementById('uninstallTitle').textContent = 'Uninstalling…';
+  document.getElementById('uninstallSubtitle').textContent = 'Running the k3s-uninstall playbook';
+}
+
+function startDeploy() {
+  const { username, sshKey } = _getSSHCreds();
+  if (!username || !sshKey) {
+    showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
+    return;
+  }
+
+  _showDeployRunning();
+
+  const container = document.getElementById('deploySteps');
+  container.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;">Connecting…</div>';
+
+  const params = new URLSearchParams({ username, ssh_key: sshKey });
+  const es = new EventSource(`/deploy?${params.toString()}`);
+  _eventSource = es;
+
+  es.onmessage = (ev) => {
+    let data;
+    try { data = JSON.parse(ev.data); } catch { return; }
+
+    if (data.type === 'steps') {
+      _renderStepCards(container, data.steps);
+      return;
+    }
+
+    if (data.type === 'step_start') {
+      _setCardState(data.step, 'active', '');
+      return;
+    }
+
+    if (data.type === 'step_done') {
+      _setCardState(data.step, 'done');
+      return;
+    }
+
+    if (data.type === 'task') {
+      _setCardState(data.step, 'active', data.task);
+      return;
+    }
+
+    if (data.type === 'task_warning') {
+      _setCardState(data.step, 'active', '⚠ ' + (data.msg || '').slice(0, 80));
+      return;
+    }
+
+    if (data.type === 'step_failed') {
+      _setCardState(data.step, 'failed', 'Failed');
+      return;
+    }
+
+    if (data.type === 'finished') {
+      es.close();
+      _eventSource = null;
+      document.getElementById('abortDeploy').style.display = 'none';
+      if (data.success) {
+        clusterDeployed = true;
+        document.getElementById('deployTitle').textContent = '✅ Cluster Deployed';
+        document.getElementById('deploySubtitle').textContent = 'All roles completed successfully';
+        document.getElementById('uninstallCluster').style.display = '';
+        showToast('🎉 K3s cluster deployed successfully!', 5000);
+      } else if (data.aborted) {
+        document.getElementById('deployTitle').textContent = '⛔ Deployment Aborted';
+        document.getElementById('deploySubtitle').textContent = 'The process was cancelled by the user';
+        document.getElementById('redeployCluster').style.display = '';
+        // Mark remaining active cards as aborted
+        container.querySelectorAll('.step-card.active').forEach(c => c.className = 'step-card aborted');
+        container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
+      } else {
+        document.getElementById('deployTitle').textContent = '❌ Deployment Failed';
+        document.getElementById('deploySubtitle').textContent = 'Check the step that failed for details';
+        document.getElementById('redeployCluster').style.display = '';
+        // Mark remaining pending cards
+        container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
+      }
+      return;
+    }
+
+    if (data.type === 'error') {
+      es.close();
+      _eventSource = null;
+      showToast('❌ ' + (data.msg || 'Unknown error'), 5000);
+      document.getElementById('abortDeploy').style.display = 'none';
+      document.getElementById('redeployCluster').style.display = '';
+      document.getElementById('deployTitle').textContent = '❌ Error';
+      document.getElementById('deploySubtitle').textContent = data.msg || '';
+    }
+  };
+
+  es.onerror = () => {
+    es.close();
+    _eventSource = null;
+    // Only show error if we haven't already shown a finished message
+    const title = document.getElementById('deployTitle')?.textContent || '';
+    if (!title.includes('✅') && !title.includes('❌') && !title.includes('⛔')) {
+      document.getElementById('abortDeploy').style.display = 'none';
+      document.getElementById('redeployCluster').style.display = '';
+      document.getElementById('deployTitle').textContent = '❌ Connection Lost';
+      document.getElementById('deploySubtitle').textContent = 'The SSE stream was interrupted';
+    }
+  };
+}
+
+function abortDeploy() {
+  showConfirmToast('Abort the running deployment?', async () => {
+    try {
+      await fetch('/deploy-abort', { method: 'POST' });
+    } catch(e) {
+      showToast('Failed to send abort signal');
+    }
+  });
+}
+
+function startUninstall() {
+  const { username, sshKey } = _getSSHCreds();
+  if (!username || !sshKey) {
+    showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
+    return;
+  }
+
+  showConfirmToast('Uninstall the K3s cluster from all nodes?', () => {
+    _showUninstallRunning();
+
+    const container = document.getElementById('uninstallSteps');
+    container.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;">Connecting…</div>';
+
+    const params = new URLSearchParams({ username, ssh_key: sshKey });
+    const es = new EventSource(`/uninstall?${params.toString()}`);
+    _eventSource = es;
+
+    es.onmessage = (ev) => {
+      let data;
+      try { data = JSON.parse(ev.data); } catch { return; }
+
+      if (data.type === 'steps') { _renderStepCards(container, data.steps); return; }
+      if (data.type === 'step_start') { _setCardState(data.step, 'active', ''); return; }
+      if (data.type === 'step_done') { _setCardState(data.step, 'done'); return; }
+      if (data.type === 'task') { _setCardState(data.step, 'active', data.task); return; }
+      if (data.type === 'task_warning') { _setCardState(data.step, 'active', '⚠ ' + (data.msg||'').slice(0,80)); return; }
+      if (data.type === 'step_failed') { _setCardState(data.step, 'failed', 'Failed'); return; }
+
+      if (data.type === 'finished') {
+        es.close();
+        _eventSource = null;
+        document.getElementById('abortUninstall').style.display = 'none';
+
+        if (data.success) {
+          clusterDeployed = false;
+          document.getElementById('uninstallTitle').textContent = '✅ Cluster Uninstalled';
+          document.getElementById('uninstallSubtitle').textContent = 'All nodes cleaned up successfully';
+          showToast('Cluster uninstalled.', 4000);
+          // After 2s return to idle deploy view
+          setTimeout(() => { _showDeployIdle(); }, 2500);
+        } else if (data.aborted) {
+          document.getElementById('uninstallTitle').textContent = '⛔ Uninstall Aborted';
+          document.getElementById('uninstallSubtitle').textContent = 'Cancelled by user';
+          container.querySelectorAll('.step-card.active, .step-card.pending').forEach(c => c.className = 'step-card aborted');
+          setTimeout(() => {
+            document.getElementById('deployRunning').style.display = '';
+            document.getElementById('uninstallRunning').style.display = 'none';
+          }, 2500);
+        } else {
+          document.getElementById('uninstallTitle').textContent = '❌ Uninstall Failed';
+          document.getElementById('uninstallSubtitle').textContent = 'Check the step that failed';
+          container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
+        }
+        return;
+      }
+
+      if (data.type === 'error') {
+        es.close();
+        _eventSource = null;
+        showToast('❌ ' + (data.msg || 'Unknown error'), 5000);
+        document.getElementById('abortUninstall').style.display = 'none';
+        document.getElementById('uninstallTitle').textContent = '❌ Error';
+        document.getElementById('uninstallSubtitle').textContent = data.msg || '';
+      }
+    };
+
+    es.onerror = () => {
+      es.close();
+      _eventSource = null;
+      const title = document.getElementById('uninstallTitle')?.textContent || '';
+      if (!title.includes('✅') && !title.includes('❌') && !title.includes('⛔')) {
+        document.getElementById('abortUninstall').style.display = 'none';
+        document.getElementById('uninstallTitle').textContent = '❌ Connection Lost';
+        document.getElementById('uninstallSubtitle').textContent = 'The SSE stream was interrupted';
+      }
+    };
+  });
+}
 
 function openTopoEditor(name){ const node=vms.find(n=>n.name===name); if(!node) return; const container=document.getElementById('topology'); if(!container) return; const svg=container.querySelector('svg'); if(!svg) return; const existing=document.querySelector('.floating-editor'); if(existing) existing.remove(); const bboxNode = Array.from(svg.querySelectorAll('g')).find(g=>g.getAttribute('data-name')===name); if(!bboxNode) return; const bbox=bboxNode.getBBox(); const svgRect=svg.getBoundingClientRect(); const viewBox=svg.getAttribute('viewBox')?.split(' ').map(Number) || [0,0,svgRect.width,svgRect.height]; const vbW=viewBox[2]||svgRect.width; const vbH=viewBox[3]||svgRect.height; const scaleX=svgRect.width/vbW; const scaleY=svgRect.height/vbH; const clientX=Math.round(svgRect.left + bbox.x*scaleX + window.scrollX); const clientY=Math.round(svgRect.top + bbox.y*scaleY + window.scrollY); const clientW=Math.round(bbox.width*scaleX); const clientH=Math.round(bbox.height*scaleY); const editor=document.createElement('div'); editor.className='floating-editor inline-editor-fo'; editor.style.position='absolute'; editor.style.zIndex=99999; editor.style.pointerEvents='auto'; const effectiveWidth=Math.min(320, Math.max(280, Math.round(Math.min(window.innerWidth-48, svgRect.width*0.5)))); const effectiveHeight=Math.max(180, Math.round(Math.min(300, svgRect.height*0.5))); const viewportWidth = window.innerWidth + window.scrollX; const viewportHeight = window.innerHeight + window.scrollY; let px = clientX + clientW + 12; let py = clientY; if(px + effectiveWidth > viewportWidth - 12){ const leftX=clientX - effectiveWidth - 12; if(leftX>=window.scrollX + 12) px = leftX; else { px = Math.round(clientX + clientW/2 - effectiveWidth/2); if(px<window.scrollX + 12) px=window.scrollX + 12; if(px+effectiveWidth>viewportWidth-12) px=viewportWidth-effectiveWidth-12; py = clientY + clientH + 12; } } const currentViewportBottom = window.scrollY + window.innerHeight; if(py + effectiveHeight > currentViewportBottom - 12){ py = Math.max(window.scrollY + 12, py - effectiveHeight - clientH - 24); if(py < window.scrollY + 12) py = window.scrollY + 12; } editor.style.left = px + 'px'; editor.style.top = py + 'px'; editor.style.width = effectiveWidth + 'px'; editor.style.minHeight = effectiveHeight + 'px'; editor.innerHTML = `<div style="position:relative; background:#0b0b0b; padding:10px 12px 12px 12px; padding-top:34px; border-radius:8px; border:1px solid #6366f1; box-shadow:0 14px 40px rgba(0,0,0,0.6);"> <button id="__fe_close" aria-label="Close" style="position:absolute; right:8px; top:8px; background:transparent; border:none; color:#fff; font-size:20px; opacity:0.9; cursor:pointer; padding:2px 6px;">×</button> <div style="margin-bottom:8px;"><input id="__fe_name" class="svg-fo-input" placeholder="Name" value="${escapeHtml(node.name)}"></div> <div style="margin-bottom:8px;"><input id="__fe_ip" class="svg-fo-input" placeholder="IP" value="${escapeHtml(node.ip)}"></div> <div style="margin-bottom:12px; display:flex; align-items:center; gap:10px; color:#fff;"><label class="switch"><input type="checkbox" id="__fe_roleswitch" ${node.role==='master'?'checked':''}><span class="slider"></span></label><span id="__fe_rolelabel">${node.role==='master'?'Master':'Worker'}</span></div> <div class="svg-fo-actions"><button id="__fe_save" class="primary" style="padding:6px 12px;">Save</button> <button id="__fe_cancel" style="padding:6px 10px; background:transparent; border:1px solid rgba(255,255,255,0.06); color:#fff; border-radius:6px;">Cancel</button></div> </div>`; document.body.appendChild(editor); requestAnimationFrame(()=>editor.classList.add('show')); const nameIn = editor.querySelector('#__fe_name'); const ipIn = editor.querySelector('#__fe_ip'); const roleSwitch = editor.querySelector('#__fe_roleswitch'); const roleLabel = editor.querySelector('#__fe_rolelabel'); const saveBtn = editor.querySelector('#__fe_save'); const cancelBtn = editor.querySelector('#__fe_cancel'); const closeBtn = editor.querySelector('#__fe_close'); if(nameIn) nameIn.focus(); if(roleSwitch) roleSwitch.addEventListener('change', ()=>{ if(roleLabel) roleLabel.textContent = roleSwitch.checked ? 'Master' : 'Worker'; }); const onKeyDown=(e)=>{ if(e.key==='Enter'){ e.preventDefault(); saveBtn && saveBtn.click(); } else if(e.key==='Escape'){ e.preventDefault(); cleanup(); } }; const onPointerDownOutside = (ev)=>{ if(editor.contains(ev.target)) return; cleanup(); }; function cleanup(){ try{ if(nameIn) nameIn.removeEventListener('keydown', onKeyDown); if(ipIn) ipIn.removeEventListener('keydown', onKeyDown); document.removeEventListener('pointerdown', onPointerDownOutside, true); }catch(e){} if(!editor) return; editor.classList.remove('show'); setTimeout(()=>{ if(editor.parentNode) editor.remove(); },220); } if(nameIn) nameIn.addEventListener('keydown', onKeyDown); if(ipIn) ipIn.addEventListener('keydown', onKeyDown); document.addEventListener('pointerdown', onPointerDownOutside, true); saveBtn.addEventListener('click', ()=>{ const newName = nameIn.value.trim(); const newIP = ipIn.value.trim(); const newRole = roleSwitch.checked ? 'master' : 'worker'; if(!newName||!newIP){ showToast('Name and IP cannot be empty'); return; } const vm = vms.find(n=>n.name===name); if(!vm){ cleanup(); return; } const oldRole = vm.role; if(primordialMaster===vm.name && newRole==='worker') primordialMaster=null; vm.name=newName; vm.ip=newIP; vm.role=newRole; if(newRole==='master' && oldRole==='worker'){ const existingMasters = vms.filter(v=>v.role==='master' && v.name!==newName).length; if(existingMasters===0) primordialMaster=newName; } cleanup(); renderVMList(); showToast('Node updated'); }); cancelBtn.addEventListener('click', ()=>{ cleanup(); }); if(closeBtn) closeBtn.addEventListener('click', ()=>{ cleanup(); }); }
 

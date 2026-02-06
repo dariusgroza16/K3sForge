@@ -117,10 +117,49 @@
     </main>
 
     <main class="main-card" id="deployView" data-tab-content="deploy" style="display: none;">
-      <div class="empty-state">
-        <div class="empty-state-icon">🚀</div>
-        <h2 class="empty-state-title">Deployment Coming Soon</h2>
-        <p class="empty-state-text">Cluster deployment features will be available here</p>
+      <!-- Pre-deploy state -->
+      <div id="deployIdle" class="deploy-section">
+        <div class="deploy-header">
+          <h2 class="section-title">Deploy K3s Cluster</h2>
+          <p class="section-subtitle">Launch the installation playbook on all configured nodes</p>
+        </div>
+        <div class="deploy-actions-top">
+          <button id="startDeploy" class="primary deploy-btn">🚀 Deploy Cluster</button>
+        </div>
+      </div>
+
+      <!-- Running / finished state -->
+      <div id="deployRunning" class="deploy-section" style="display:none;">
+        <div class="deploy-header">
+          <h2 class="section-title" id="deployTitle">Deploying…</h2>
+          <p class="section-subtitle" id="deploySubtitle">Running the k3s-install playbook</p>
+        </div>
+
+        <div id="deploySteps" class="deploy-steps">
+          <!-- step cards injected by JS -->
+        </div>
+
+        <div class="deploy-actions-bottom">
+          <button id="abortDeploy" class="secondary abort-btn">✕ Abort</button>
+          <button id="uninstallCluster" class="secondary uninstall-btn" style="display:none;">🗑 Uninstall Cluster</button>
+          <button id="redeployCluster" class="primary" style="display:none;">🔄 Redeploy</button>
+        </div>
+      </div>
+
+      <!-- Uninstall running state -->
+      <div id="uninstallRunning" class="deploy-section" style="display:none;">
+        <div class="deploy-header">
+          <h2 class="section-title" id="uninstallTitle">Uninstalling…</h2>
+          <p class="section-subtitle" id="uninstallSubtitle">Running the k3s-uninstall playbook</p>
+        </div>
+
+        <div id="uninstallSteps" class="deploy-steps">
+          <!-- step cards injected by JS -->
+        </div>
+
+        <div class="deploy-actions-bottom">
+          <button id="abortUninstall" class="secondary abort-btn">✕ Abort</button>
+        </div>
       </div>
     </main>
   </div>

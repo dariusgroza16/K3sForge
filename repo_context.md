@@ -57,6 +57,31 @@ Current default: Ask first for clarifications and confirmation before taking act
 2026-02-06 — Assistant — Created initial context file.
 - Summarized repository structure and set clarification policy.
 
+2026-02-06 — Assistant — Implemented Deploy tab (Step 3 of the UI workflow).
+- **Backend (`frontend/src/main.py`)**:
+  - Added `GET /deploy` — SSE endpoint that streams `ansible-playbook k3s-install.yaml` progress in real time. Uses the SSH username and private key provided by the user in the Test Connections tab (passed via `--user` / `--private-key`), bypassing the hardcoded `ansible.cfg` credentials.
+  - Added `POST /deploy-abort` — Sends `SIGTERM` to the running ansible process group to cleanly cancel a deploy or uninstall mid-flight.
+  - Added `GET /uninstall` — SSE endpoint that streams `ansible-playbook k3s-uninstall.yaml` with the same user-provided SSH credentials.
+  - Added `GET /deploy-status` — Quick poll endpoint returning the current process state (`idle` / `running` / `success` / `failed` / `aborted`).
+  - SSH key is written to a temp file with `0600` permissions and auto-deleted after the playbook finishes.
+  - New imports: `subprocess`, `signal`, `json`, `tempfile`, `queue`.
+- **HTML (`frontend/src/templates/index.html`)**:
+  - Replaced the "Coming Soon" placeholder in the Deploy tab with three views: Idle (big "Deploy Cluster" button), Running (animated step cards + Abort button), and Uninstall Running (separate step cards for teardown).
+  - After successful deploy: shows "Uninstall Cluster" button; redeploy is blocked until uninstall completes.
+  - After failure/abort: shows "Redeploy" button.
+- **CSS (`frontend/src/static/style.css`)**:
+  - Added step card styles with five visual states: `pending` (dimmed), `active` (pulsing icon + shimmer bar), `done` (green border + ✓), `failed` (red), `aborted` (amber).
+  - Added styled abort button (red), uninstall button (amber), and deploy-specific layout classes.
+  - Added `@keyframes spinPulse` and `@keyframes shimmer` animations.
+- **JS (`frontend/src/static/script.js`)**:
+  - Added `startDeploy()` — opens `EventSource` to `/deploy`, parses SSE step events, and animates cards in real time.
+  - Added `startUninstall()` — same pattern against `/uninstall`.
+  - Added `abortDeploy()` — confirmation toast then `POST /deploy-abort`.
+  - Added helper functions: `_renderStepCards`, `_setCardState`, `_showDeployIdle`, `_showDeployRunning`, `_showUninstallRunning`, `_getSSHCreds`.
+  - Deploy button guards: if `clusterDeployed === true`, user is told to uninstall first.
+  - Wired all new buttons (`startDeploy`, `abortDeploy`, `uninstallCluster`, `redeployCluster`, `abortUninstall`) in `setupHandlers()`.
+  - New client-side state variables: `clusterDeployed`, `_eventSource`.
+
 ---
 
 If you'd like different naming, file location, or an alternate structured format (JSON/YAML), tell me which and I'll convert this file. If you want me to commit this to git and create a commit message, I can do that next (I'll ask before committing).

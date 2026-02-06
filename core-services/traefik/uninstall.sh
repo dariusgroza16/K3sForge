@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE="traefik"
-RELEASE="traefik"
-REPO_NAME="traefik"
+NAMESPACE="kube-system"
+HELMCHART_NAME="traefik"
+HELMCHART_FILE="traefik-helmchart.yaml"
 
 log() {
   echo -e "\e[32m[INFO]\e[0m $1"
@@ -18,43 +18,52 @@ error() {
 }
 
 # ------------------------------
-# Delete the LoadBalancer service
+# Delete Traefik HelmChart
 # ------------------------------
-if kubectl get svc traefik-lb -n "$NAMESPACE" >/dev/null 2>&1; then
-    log "Deleting Traefik LoadBalancer service..."
-    kubectl delete svc traefik-lb -n "$NAMESPACE"
+if kubectl get helmchart "$HELMCHART_NAME" -n "$NAMESPACE" >/dev/null 2>&1; then
+    log "Deleting Traefik HelmChart resource..."
+    kubectl delete helmchart "$HELMCHART_NAME" -n "$NAMESPACE"
 else
-    log "Traefik LoadBalancer service not found (already removed)."
+    warn "HelmChart '$HELMCHART_NAME' not found in namespace '$NAMESPACE' (already removed)."
 fi
 
 # ------------------------------
-# Uninstall Traefik Helm release
+# Wait for resources to be cleaned up
 # ------------------------------
-if helm status "$RELEASE" -n "$NAMESPACE" >/dev/null 2>&1; then
-    log "Uninstalling Helm release '$RELEASE'..."
-    helm uninstall "$RELEASE" -n "$NAMESPACE" --wait
-else
-    warn "Helm release '$RELEASE' not found (already removed)."
-fi
+log "Waiting for Traefik deployment to be removed..."
+kubectl -n "$NAMESPACE" wait --for=delete deployment/traefik --timeout=60s 2>/dev/null || {
+    warn "Traefik deployment may have already been removed."
+}
 
 # ------------------------------
-# Clean up namespace
+# Clean up any leftover resources
 # ------------------------------
-if kubectl get ns "$NAMESPACE" >/dev/null 2>&1; then
-    log "Deleting namespace '$NAMESPACE'..."
-    kubectl delete namespace "$NAMESPACE" --wait=true --timeout=120s || true
-else
-    log "Namespace '$NAMESPACE' not found (already removed)."
-fi
+log "Cleaning up remaining Traefik resources..."
+
+# Delete service
+kubectl -n "$NAMESPACE" delete svc traefik --ignore-not-found=true
+
+# Delete service account
+kubectl -n "$NAMESPACE" delete serviceaccount traefik --ignore-not-found=true
+
+# Delete cluster role and binding
+kubectl delete clusterrole traefik-kube-system --ignore-not-found=true
+kubectl delete clusterrolebinding traefik-kube-system --ignore-not-found=true
+
+# Delete IngressRoute for dashboard
+kubectl -n "$NAMESPACE" delete ingressroute traefik-dashboard --ignore-not-found=true
 
 # ------------------------------
-# Remove Helm repo
+# Clean up CRDs (optional - only if you want full removal)
 # ------------------------------
-if helm repo list 2>/dev/null | grep -q "^$REPO_NAME"; then
-    log "Removing Helm repo '$REPO_NAME'..."
-    helm repo remove "$REPO_NAME"
+log "Checking for Traefik CRDs..."
+TRAEFIK_CRDS=$(kubectl get crds | grep traefik.io | awk '{print $1}' || true)
+
+if [[ -n "$TRAEFIK_CRDS" ]]; then
+    warn "Traefik CRDs found. These are typically shared resources."
+    warn "To remove CRDs, run: kubectl delete crd \$(kubectl get crds | grep traefik.io | awk '{print \$1}')"
 else
-    warn "Helm repo '$REPO_NAME' is not configured."
+    log "No Traefik CRDs found or already removed."
 fi
 
-log "Traefik uninstall complete."
+log "Traefik uninstall complete. Core resources cleaned."

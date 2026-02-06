@@ -41,14 +41,4 @@ traefik-install:
 [doc("Uninstall Traefik HelmChart")] 
 traefik-uninstall:
    cd core-services/traefik && \
-   ./uninstall.sh   
-
-[doc("Install Rancher UI")] 
-rancher-install:
-   cd core-services/rancher && \
-   ./install.sh
-
-[doc("Uninstall Rancher UI")] 
-rancher-uninstall:
-   cd core-services/rancher && \
    ./uninstall.sh

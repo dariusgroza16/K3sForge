@@ -1,6 +1,6 @@
 # Repository Context — K3sForge
 
-Last updated: 2026-02-06
+Last updated: 2026-03-07
 Maintainer (initial entry): GitHub Copilot (assistant)
 
 ## Short description
@@ -85,3 +85,106 @@ Current default: Ask first for clarifications and confirmation before taking act
 ---
 
 If you'd like different naming, file location, or an alternate structured format (JSON/YAML), tell me which and I'll convert this file. If you want me to commit this to git and create a commit message, I can do that next (I'll ask before committing).
+
+---
+
+2026-03-07 — Assistant — Added per-node CPU/memory resource cards to the Existing Cluster — Overview section.
+- **Backend (`frontend/src/main.py`)**:
+  - Added `POST /kubectl-node-resources` — runs `kubectl get nodes -o json` to read allocatable CPU/memory/pods, then optionally runs `kubectl top nodes` (metrics-server) to get live usage. Returns a JSON payload with one entry per node: `name`, `role`, `cpu_allocatable`, `memory_allocatable`, `pods_allocatable`, `metrics_available`, `cpu_used`, `cpu_percent`, `memory_used`, `memory_percent`.
+- **HTML (`frontend/src/templates/index.html`)**:
+  - Added `<div id="nodeResourcesContainer"></div>` in the Overview section above the nodes table.
+- **JS (`frontend/src/static/script.js`)**:
+  - `_clusterData` extended with `nodeResources: null`.
+  - `enterClusterDashboard()` and `refreshCurrentSection()` now call the new endpoint.
+  - Added helpers: `handleNodeResourcesData()`, `renderNodeResourceCards()`, `_barClass()`, `_formatCpuAllocatable()`, `_formatMemory()`.
+  - Each card shows node name, role badge, a CPU bar + allocatable value, a memory bar + allocatable value, and pod capacity. Bar colour: green < 70 %, amber < 90 %, red ≥ 90 %.
+- **CSS (`frontend/src/static/style.css`)**:
+  - Added `.node-resources-grid`, `.node-resource-card`, `.nrc-*` family of classes.
+  - Bar fill states: `.bar-ok` (green), `.bar-warn` (amber), `.bar-critical` (red).
+
+2026-03-07 — Assistant — Added a persistent "Home" button available from both cluster flows.
+- **HTML**: Added `<button id="btnHomeFixed" class="home-fixed-btn" style="display:none;">⌂ Home</button>` as a fixed-position overlay before `#toast`.
+- **JS**: Added `_goHome()` (hides both containers, resets `_clusterData`, hides button). `initWelcomeScreen()` now shows the button when entering any flow and wires a click handler on `btnHomeFixed`. A running-process guard shows a confirmation toast before navigating away if `_eventSource` is active.
+- **CSS**: Added `.home-fixed-btn` — fixed top-left, purple gradient matching `.primary` button style (`linear-gradient(180deg, #4f46e5, #6366f1)`), same hover/active transitions.
+
+2026-03-07 — Assistant — Modularised JS and CSS into component files; `script.js` and `style.css` are no longer loaded.
+
+### Current frontend file layout
+
+```
+frontend/src/
+├── main.py                     Flask backend (all endpoints)
+├── templates/
+│   └── index.html              Single-page app shell
+└── static/
+    ├── script.js               LEGACY — kept on disk, no longer loaded
+    ├── style.css               LEGACY — kept on disk, no longer loaded
+    ├── lightpillar.js          WebGL background effect (unchanged)
+    ├── icons/                  SVG icons for tab nav
+    ├── js/                     JS modules (loaded via <script> tags in order)
+    │   ├── state.js            All shared `let` globals
+    │   ├── utils.js            escapeHtml, showToast, showConfirmToast
+    │   ├── navigation.js       Tab bubble, switchTab, updateTabStates
+    │   ├── inventory.js        VM management, renderVMList, detectInventory
+    │   ├── topology.js         renderTopology, showTopoInfo, openTopoEditor
+    │   ├── connections.js      testConnections, testSingleConnection
+    │   ├── deploy.js           Step cards, startDeploy, abortDeploy, startUninstall
+    │   ├── cluster.js          Welcome screen wiring, cluster dashboard, node resource cards
+    │   ├── handlers.js         setupHandlers() — all button event wiring
+    │   └── main.js             DOMContentLoaded init block
+    └── css/                    CSS modules (loaded via <link> tags)
+        ├── base.css            :root vars, body, container, header, light-pillar, @keyframes popIn
+        ├── buttons.css         .primary, .secondary, .toast, .retry-btn
+        ├── navigation.css      .tab-navigation, .bubble-indicator, tab li/a, .actions
+        ├── inventory.css       inputs, role switch, vm-list/entry, primordial selector
+        ├── topology.css        .topology, .topo-*, SVG foreignObject editor, floating editor
+        ├── connections.css     .connection-*, .ssh-config-section, @keyframes pulse
+        ├── deploy.css          .step-card states, deploy/abort/uninstall buttons, @keyframes shimmer
+        ├── welcome.css         .welcome-screen, .welcome-content, .welcome-buttons, .welcome-btn
+        └── cluster.css         .nodes-table*, .cluster-nav*, .cluster-table-*, .nrc-*, .home-fixed-btn
+```
+
+### `index.html` script/style load order
+
+```html
+<!-- CSS -->
+<link rel="stylesheet" href="static/css/base.css" />
+<link rel="stylesheet" href="static/css/buttons.css" />
+<link rel="stylesheet" href="static/css/navigation.css" />
+<link rel="stylesheet" href="static/css/inventory.css" />
+<link rel="stylesheet" href="static/css/topology.css" />
+<link rel="stylesheet" href="static/css/connections.css" />
+<link rel="stylesheet" href="static/css/deploy.css" />
+<link rel="stylesheet" href="static/css/welcome.css" />
+<link rel="stylesheet" href="static/css/cluster.css" />
+
+<!-- JS (global scope, dependency order) -->
+<script src="static/js/state.js"></script>
+<script src="static/js/utils.js"></script>
+<script src="static/js/navigation.js"></script>
+<script src="static/js/inventory.js"></script>
+<script src="static/js/topology.js"></script>
+<script src="static/js/connections.js"></script>
+<script src="static/js/deploy.js"></script>
+<script src="static/js/cluster.js"></script>
+<script src="static/js/handlers.js"></script>
+<script src="static/js/main.js"></script>
+<!-- three.js + lightpillar.js loaded after -->
+```
+
+### Flask endpoints summary (current)
+
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET | `/` | Serves `index.html` |
+| POST | `/generate` | Generates Ansible inventory files from VM list JSON |
+| POST | `/detect-inventory` | Scans `ansible/inv/` to detect an existing inventory |
+| POST | `/test-ssh` | Tests SSH connectivity to a single host via paramiko |
+| GET | `/deploy` | SSE stream — runs `k3s-install.yaml` playbook |
+| GET | `/uninstall` | SSE stream — runs `k3s-uninstall.yaml` playbook |
+| POST | `/deploy-abort` | Sends SIGTERM to the running ansible process group |
+| GET | `/deploy-status` | Returns current process state (idle/running/success/failed/aborted) |
+| POST | `/kubectl-nodes` | Runs `kubectl get nodes` with provided kubeconfig; returns table data |
+| POST | `/kubectl-pods` | Runs `kubectl get pods -A` with provided kubeconfig; returns table data |
+| POST | `/kubectl-services` | Runs `kubectl get services -A` with provided kubeconfig; returns table data |
+| POST | `/kubectl-node-resources` | Runs `kubectl get nodes -o json` + optional `kubectl top nodes`; returns per-node CPU/memory/pod metrics |

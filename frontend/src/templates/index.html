@@ -9,7 +9,24 @@
 </head>
 <body>
   <div class="light-pillar-container" aria-hidden="true"></div>
-  <div class="container">
+
+  <!-- ═══ Welcome Screen ═══════════════════════════════════════════════ -->
+  <div id="welcomeScreen" class="welcome-screen">
+    <div class="welcome-content">
+      <div class="logo-wrapper">
+        <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
+      </div>
+      <h1 class="app-title">K3sForge</h1>
+      <p class="subtitle">Kubernetes cluster management made simple</p>
+      <div class="welcome-buttons">
+        <button id="btnExistingCluster" class="secondary welcome-btn">Existing Cluster</button>
+        <button id="btnCreateCluster" class="primary welcome-btn">Create new Cluster</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Create New Cluster flow (original app) ═══════════════════════ -->
+  <div class="container" id="mainContainer" style="display: none;">
     <header class="header">
       <div class="logo-wrapper">
         <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
@@ -161,6 +178,95 @@
           <button id="abortUninstall" class="secondary abort-btn">✕ Abort</button>
         </div>
       </div>
+    </main>
+  </div>
+
+  <!-- ═══ Existing Cluster flow ══════════════════════════════════════ -->
+  <div id="existingContainer" class="container" style="display: none;">
+    <header class="header">
+      <div class="logo-wrapper">
+        <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
+      </div>
+      <h1 class="app-title">K3sForge</h1>
+      <p class="subtitle">Existing Cluster</p>
+    </header>
+
+    <!-- Step 1: Paste Kubeconfig -->
+    <main id="kubeconfigView" class="main-card">
+      <div class="connection-header">
+        <h2 class="section-title">Paste your Kubeconfig</h2>
+        <p class="section-subtitle">Paste your cluster kubeconfig to load an overview of your nodes</p>
+      </div>
+      <div class="input-group">
+        <label for="kubeconfigInput">Kubeconfig</label>
+        <textarea id="kubeconfigInput" rows="14" placeholder="Paste your kubeconfig YAML here..."></textarea>
+      </div>
+      <div class="actions" style="margin-top: 16px;">
+        <button id="btnBackToWelcome" class="secondary">&#8592; Back</button>
+        <button id="btnProceedKubeconfig" class="primary">Proceed</button>
+      </div>
+    </main>
+
+    <!-- Step 2: Cluster dashboard (navbar + sections) -->
+    <main id="clusterDashboard" style="display: none;">
+
+      <!-- Horizontal cluster navbar -->
+      <nav class="cluster-nav">
+        <div class="cluster-nav-bubble" id="clusterNavBubble"></div>
+        <ul id="clusterNavList">
+          <li class="active" data-section="overview"><span>Overview</span></li>
+          <li data-section="workloads"><span>Workloads</span></li>
+          <li data-section="services"><span>Services</span></li>
+        </ul>
+        <div class="cluster-nav-actions">
+          <button id="btnRefreshSection" class="secondary cluster-refresh-btn" title="Refresh current section">&#8635; Refresh</button>
+          <button id="btnBackToKubeconfig" class="secondary cluster-back-btn">&#8592; Change Config</button>
+        </div>
+      </nav>
+
+      <!-- Overview section -->
+      <section id="sectionOverview" class="cluster-section" data-section="overview">
+        <div class="cluster-section-header">
+          <h2 class="section-title">Nodes</h2>
+          <p class="section-subtitle" id="overviewSubtitle">Loading…</p>
+        </div>
+        <!-- Per-node resource cards (CPU / Memory / Pods) -->
+        <div id="nodeResourcesContainer"></div>
+        <div class="cluster-table-card">
+          <div id="nodesTableContainer" class="cluster-table-scroll"><!-- injected --></div>
+        </div>
+      </section>
+
+      <!-- Workloads section -->
+      <section id="sectionWorkloads" class="cluster-section" data-section="workloads" style="display:none;">
+        <div class="cluster-section-header">
+          <div>
+            <h2 class="section-title">Pods</h2>
+            <p class="section-subtitle" id="workloadsSubtitle">Loading…</p>
+          </div>
+          <div class="cluster-filter">
+            <label for="nsFilter" class="cluster-filter-label">Namespace</label>
+            <select id="nsFilter" class="cluster-filter-select">
+              <option value="">All namespaces</option>
+            </select>
+          </div>
+        </div>
+        <div class="cluster-table-card">
+          <div id="podsTableContainer" class="cluster-table-scroll"><!-- injected --></div>
+        </div>
+      </section>
+
+      <!-- Services section -->
+      <section id="sectionServices" class="cluster-section" data-section="services" style="display:none;">
+        <div class="cluster-section-header">
+          <h2 class="section-title">Services</h2>
+          <p class="section-subtitle" id="servicesSubtitle">Loading…</p>
+        </div>
+        <div class="cluster-table-card">
+          <div id="servicesTableContainer" class="cluster-table-scroll"><!-- injected --></div>
+        </div>
+      </section>
+
     </main>
   </div>
 

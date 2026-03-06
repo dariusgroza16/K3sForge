@@ -1,0 +1,30 @@
+.welcome-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-content {
+  text-align: center;
+  padding: 40px 24px;
+  max-width: 560px;
+  width: 100%;
+}
+
+.welcome-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 44px;
+  flex-wrap: wrap;
+}
+
+.welcome-btn {
+  padding: 15px 36px !important;
+  font-size: 1.05rem !important;
+  min-width: 200px !important;
+  border-radius: 12px !important;
+}

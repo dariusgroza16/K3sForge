@@ -5,7 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>K3sForge Inventory Generator</title>
   <link rel="icon" href="{{ url_for('static', filename='k3sforgelogo.png') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/inventory.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/topology.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/connections.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/deploy.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/welcome.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/cluster.css') }}" />
 </head>
 <body>
   <div class="light-pillar-container" aria-hidden="true"></div>
@@ -275,7 +283,16 @@
 
   <div id="toast" class="toast" aria-hidden="true"></div>
 
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/state.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/utils.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/inventory.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/topology.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/connections.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/deploy.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/cluster.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/handlers.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
   <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
   <script src="{{ url_for('static', filename='lightpillar.js') }}"></script>
 </body>

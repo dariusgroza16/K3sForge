@@ -1,0 +1,80 @@
+/* Tab Navigation with Sliding Bubble */
+.tab-navigation {
+  display: flex;
+  position: relative;
+  background: rgba(0,0,0,0.4);
+  padding: 6px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+}
+
+.bubble-indicator {
+  position: absolute;
+  background: var(--accent);
+  border-radius: 16px;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.tab-navigation ul {
+  display: flex;
+  gap: 0.5em;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.tab-navigation ul li {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+}
+
+.tab-navigation ul li a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.6em 0.8em;
+  text-decoration: none;
+  color: rgba(255,255,255,0.6);
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-icon {
+  width: 28px;
+  height: 28px;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+  filter: brightness(0) invert(1);
+}
+
+.tab-navigation ul li:hover .tab-icon,
+.tab-navigation ul li.active .tab-icon {
+  opacity: 1;
+}
+
+.tab-navigation ul li:hover a {
+  color: rgba(255,255,255,0.9);
+}
+
+.tab-navigation ul li.active a {
+  color: #fff;
+}
+
+.actions { display: flex; justify-content: space-between; align-items: center; }
+.actions-left  { display: flex; gap: 12px; }
+.actions-right { display: flex; gap: 12px; }

@@ -22,23 +22,4 @@ uk:
   ansible-playbook -i inv playbooks/k3s-uninstall.yaml
 
 
-# CORE SERVICES
-[doc("Install MetalLB HelmChart")] 
-metallb-install:
-   cd core-services/metallb && \
-   ./install.sh
 
-[doc("Uninstall MetalLB HelmChart")] 
-metallb-uninstall:
-   cd core-services/metallb && \
-   ./uninstall.sh
-
-[doc("Install Traefik HelmChart")] 
-traefik-install:
-   cd core-services/traefik && \
-   ./install.sh
-
-[doc("Uninstall Traefik HelmChart")] 
-traefik-uninstall:
-   cd core-services/traefik && \
-   ./uninstall.sh

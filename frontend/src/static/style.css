@@ -1008,3 +1008,33 @@ td.status-notready {
   align-items: center;
   gap: 8px;
 }
+
+/* ── Persistent Home Button ──────────────────────────────────────────── */
+.home-fixed-btn {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 9999;
+  padding: 11px 20px;
+  background: linear-gradient(180deg, #4f46e5, #6366f1);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+  transition: all 0.25s ease;
+  letter-spacing: 0.02em;
+}
+
+.home-fixed-btn:hover {
+  background: linear-gradient(180deg, #7c3aed, #8b5cf6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+}
+
+.home-fixed-btn:active {
+  transform: translateY(0px);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+}

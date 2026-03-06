@@ -696,6 +696,14 @@ document.addEventListener('DOMContentLoaded', ()=>{ try{ setupHandlers(); update
 let _clusterData = { nodes: null, pods: null, services: null, nodeResources: null };
 let _activeClusterSection = 'overview';
 
+function _goHome() {
+  document.getElementById('mainContainer').style.display = 'none';
+  document.getElementById('existingContainer').style.display = 'none';
+  document.getElementById('welcomeScreen').style.display = '';
+  _clusterData = { nodes: null, pods: null, services: null, nodeResources: null };
+  document.getElementById('btnHomeFixed').style.display = 'none';
+}
+
 function initWelcomeScreen() {
   const btnCreate   = document.getElementById('btnCreateCluster');
   const btnExisting = document.getElementById('btnExistingCluster');
@@ -704,6 +712,7 @@ function initWelcomeScreen() {
     btnCreate.addEventListener('click', () => {
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('mainContainer').style.display = '';
+      document.getElementById('btnHomeFixed').style.display = '';
     });
   }
 
@@ -711,6 +720,7 @@ function initWelcomeScreen() {
     btnExisting.addEventListener('click', () => {
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('existingContainer').style.display = '';
+      document.getElementById('btnHomeFixed').style.display = '';
     });
   }
 
@@ -719,6 +729,21 @@ function initWelcomeScreen() {
     btnBackToWelcome.addEventListener('click', () => {
       document.getElementById('existingContainer').style.display = 'none';
       document.getElementById('welcomeScreen').style.display = '';
+      document.getElementById('btnHomeFixed').style.display = 'none';
+    });
+  }
+
+  const btnHomeFixed = document.getElementById('btnHomeFixed');
+  if (btnHomeFixed) {
+    btnHomeFixed.addEventListener('click', () => {
+      if (_eventSource) {
+        showConfirmToast('A process is still running. Go home anyway?', () => {
+          if (_eventSource) { _eventSource.close(); _eventSource = null; }
+          _goHome();
+        });
+      } else {
+        _goHome();
+      }
     });
   }
 

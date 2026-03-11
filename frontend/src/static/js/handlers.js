@@ -95,6 +95,10 @@ function setupHandlers() {
   const backBtn = document.getElementById('backToInventory');
   if (backBtn) backBtn.addEventListener('click', () => { switchToInventoryView(); });
 
+  // ── Proceed to deploy ──────────────────────────────────────────────
+  const proceedToDeployBtn = document.getElementById('proceedToDeploy');
+  if (proceedToDeployBtn) proceedToDeployBtn.addEventListener('click', () => { switchTab('deploy'); });
+
   // ── Test connections ───────────────────────────────────────────────
   const testBtn = document.getElementById('testConnections');
   if (testBtn) testBtn.addEventListener('click', () => { testConnections(); });

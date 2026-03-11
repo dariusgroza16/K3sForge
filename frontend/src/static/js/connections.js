@@ -13,6 +13,8 @@ async function testConnections() {
   connectionList.innerHTML = '';
   allConnectionsPass = false;
   updateTabStates();
+  const proceedBtn = document.getElementById('proceedToDeploy');
+  if (proceedBtn) proceedBtn.classList.add('proceed-ghosted');
 
   vms.forEach(vm => {
     const item = document.createElement('div');
@@ -31,6 +33,8 @@ async function testConnections() {
   if (allPassed && vms.length > 0) {
     allConnectionsPass = true;
     updateTabStates();
+    const proceedBtn = document.getElementById('proceedToDeploy');
+    if (proceedBtn) proceedBtn.classList.remove('proceed-ghosted');
     showToast('All connections passed! Deploy tab is now available.', 4000);
   }
 }

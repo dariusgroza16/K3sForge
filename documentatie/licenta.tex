@@ -6,6 +6,7 @@
 \usepackage[left=3cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage[romanian]{babel}
 \usepackage{setspace}         % single line spacing
+\usepackage{url}              % proper URL formatting in bibliography
 %\usepackage{...insert other packages here...}
 \newtheorem{thm}{Teorema}[section]
 \newtheorem{lem}[thm]{Lema}
@@ -80,82 +81,75 @@ Facultatea de Calculatoare și Informatică Aplicată}}
 
 
 
-\noindent În contextul actual al dezvoltării infrastructurilor IT, în care containerizarea și orchestrarea aplicațiilor distribuite joacă un rol central, gestionarea eficientă a clusterelor Kubernetes devine o necesitate tot mai prezentă, datorită numeroaselore beneficii ce vin cu acestea. Deși tehnologiile de tip Kubernetes sunt preponderente in lumea enterprise a companiilor, așa cum a fost confirmat și de un studiu realizat de Edge Delta, care arată cum, in ultimi ani, peste 60\% din companiile IT au adoptat această tehnologie, utilizarea ei necesita un nivel crescut de cunoștiințe, alăturat de multe skill-uri din diferite arii, cum ar fi: Networking, Automatizare, Linux, Securitate, Container-ing, Orchestrare etc. 
+\noindent În contextul actual al dezvoltării infrastructurilor IT, în care containerizarea și orchestrarea aplicațiilor distribuite joacă un rol central, gestionarea eficientă a clusterelor Kubernetes devine o necesitate tot mai prezentă, datorită numeroaselore beneficii ce vin cu acestea. Deși tehnologiile de tip Kubernetes sunt preponderente in lumea enterprise a companiilor, așa cum a fost confirmat și de un studiu realizat de Edge Delta, care arată cum, in ultimi ani, peste 60\% din companiile IT au adoptat această tehnologie [3], utilizarea ei necesita un nivel crescut de cunoștiințe, alăturat de multe skill-uri din diferite arii, cum ar fi: Networking, Automatizare, Linux, Securitate, Container-ing, Orchestrare etc. 
 
-Astfel apare urmatoarea situatie: nevoia clara de tot mai multe clustere Kubernetes, problema: dificultatea operării acestora. InfraMind a fost creat ca un instrument dedicat automatizării și simplificării procesului de instalare și configurare a unui cluster Kubernetes, servind ca o solutie ce are ca scop ușurarea procesului de instalare și configurare a unuia sau mai multor clustere. Aceasta solutie are la baza tehnologii moderne: K3S, Ansible, GitHub Actions, Flask, dar și concepte moderne precum: IaC (infrastructure as Code), Infrastructură hibridă, Metric Monitoring etc.
+Astfel apare urmatoarea situatie: nevoia clara de tot mai multe clustere Kubernetes, problema: dificultatea operării acestora. InfraMind a fost creat ca un instrument dedicat automatizării și simplificării procesului de instalare și configurare a unui cluster Kubernetes, servind ca o soluție ce are ca scop ușurarea procesului de instalare și configurare a unuia sau mai multor clustere. Aceasta soluție are la baza tehnologii moderne: K3s, Ansible, Flask, Bash, Docker, dar și concepte moderne precum: IaC (Infrastructure as Code) și infrastructura hibridă.
 
-Scopul principal al acestei aplicații este de a oferi o soluție completă și scalabilă pentru implementarea unui cluster k3s (o variantă lightweight a Kubernetes) pe infrastructuri variate. InfraMind automatizează atât procesul inițial de instalare, cât și configurările ulterioare necesare pentru gestionarea unui mediu containerizat.
+Scopul principal al acestei aplicații este de a oferi o soluție completă și scalabilă pentru implementarea unui cluster K3s (o variantă lightweight a Kubernetes) pe infrastructuri variate. InfraMind automatizează atât procesul inițial de instalare, cât și configurările ulterioare necesare pentru gestionarea unui mediu containerizat.
 
-Aplicația are la bază următoarele tehnologii:
+Aplicația are la bază următoarele tehnologii principale:
 
-Bash pentru execuția scripturilor de bază și gestionarea sarcinilor locale.
-Ansible pentru automatizarea la scară larga a configurării nodurilor și instalarea componentelor software esențiale.
-Flask pentru orchestrarea fluxurilor de automatizare și integrarea cu diverse servicii externe, facilitând o interfață vizuală de control și monitorizare.
-Pe lângă instalarea propriu-zisă a clusterului, InfraMind include și un sistem de monitorizare a infrastructurii, bazat pe Prometheus și Grafana, pentru a oferi vizibilitate asupra stării sistemului și a performanței acestuia. Această abordare holistică asigură nu doar implementarea, ci și întreținerea eficientă a clusterului.
+\begin{itemize}
+  \item \textbf{K3s} — distribuție Kubernetes lightweight, utilizată ca motor de orchestrare al clusterului.
+  \item \textbf{Ansible} — unealtă de automatizare folosită pentru provizionarea și configurarea nodurilor prin SSH.
+  \item \textbf{Bash} — shell scripting utilizat pentru execuția scripturilor de instalare și dezinstalare K3s pe fiecare nod.
+  \item \textbf{Flask} — micro-framework web Python folosit atât ca backend REST, cât și ca server al interfeței utilizatorului.
+  \item \textbf{Docker} — platformă de containerizare utilizată pentru rularea portabilă a aplicației InfraMind.
+\end{itemize}
 
 În concluzie, InfraMind reprezintă o soluție modernă și eficientă pentru oricine dorește să implementeze și să gestioneze un cluster Kubernetes într-un mod automatizat, reducând complexitatea procesului și riscurile asociate erorilor de configurare manuală. Acest proiect demonstrează puterea automatizării în DevOps și importanța unor fluxuri de lucru bine structurate în gestionarea infrastructurilor moderne.
+
+Lucrarea este organizată după cum urmează: Capitolul~\ref{cap:similare} prezintă soluțiile similare existente pe piață. Capitolul~\ref{cap:tehnologii} descrie tehnologiile utilizate în implementarea InfraMind. Capitolul~\ref{cap:cerinte} analizează cerințele funcționale și non-funcționale ale aplicației. Capitolul~\ref{cap:structura} detaliază arhitectura și structura internă a soluției.
 \chapter{Soluții Similare}
+\label{cap:similare}
 \section{Soluții Enterprise}
-Soluțiile de tip Enterprise, oferă un număr ușor mai mare de serivicii/beneficii, însă la costuri mult mai mari, cu anumite limitări, cum ar fi tipul de infrastructură suportat de serviciu, și de asemenea nu toate pot fi la fel de versatile precum InfraMind. 
+Soluțiile de tip Enterprise oferă un număr mai mare de servicii și beneficii, însă la costuri mult mai mari, cu anumite limitări — cum ar fi tipul de infrastructură suportat — și nu toate pot fi la fel de versatile precum InfraMind.
 
-\textbf{Red Hat OpenShift}
+\subsection{Red Hat OpenShift}
 
-Descriere: OpenShift este o platformă enterprise pentru dezvoltarea și livrarea aplicațiilor care include Kubernetes la bază, dar adaugă și caracteristici suplimentare pentru securitate, integrare CI/CD, și gestionarea ușoară a aplicațiilor.
+OpenShift este o platformă enterprise pentru dezvoltarea și livrarea aplicațiilor care include Kubernetes la bază, dar adaugă și caracteristici suplimentare pentru securitate, integrare CI/CD și gestionarea ușoară a aplicațiilor [16].
 
-Caracteristici:
+\begin{itemize}
+  \item Management complet al clusterelor Kubernetes.
+  \item Securitate îmbunătățită (Role-Based Access Control, OAuth etc.).
+  \item Suport pentru aplicații de tip microservicii și integrare CI/CD.
+  \item Tooling pentru dezvoltatori, inclusiv imagini Docker integrate și un catalog de aplicații.
+  \item Deploy: instalabil atât pe infrastructură proprie (on-premise), cât și în cloud (AWS, Azure, GCP).
+\end{itemize}
 
-Management complet al clusterelor K8s.
+\subsection{Microsoft Azure Kubernetes Service (AKS)}
 
-Securitate îmbunătățită (Role-Based Access Control, OAuth, etc.).
+AKS este un serviciu complet gestionat de Kubernetes în Azure, care permite dezvoltatorilor să implementeze și să administreze ușor clustere Kubernetes [10]. Microsoft se ocupă de gestionarea infrastructurii, iar utilizatorii se pot concentra pe aplicațiile lor.
 
-Suport pentru aplicații de tip microservicii și integrare CI/CD.
+\begin{itemize}
+  \item Gestionare completă a clusterului Kubernetes, inclusiv patch-uri și actualizări.
+  \item Scalare automată și integrări cu alte servicii Azure (de exemplu, Azure Active Directory pentru autentificare).
+  \item Integrări cu DevOps pentru CI/CD și monitorizare avansată.
+  \item Deploy: exclusiv în cloud-ul Azure, gestionat complet de Microsoft.
+\end{itemize}
 
-Tooling pentru dezvoltatori, inclusiv imagini Docker integrate și un catalog de aplicații.
+\subsection{Rancher}
 
-Deploy: Poate fi instalat atât pe infrastructură proprie (on-premise), cât și în cloud (AWS, Azure, GCP).
-\\
-\textbf{Microsoft Azure Kubernetes Service (AKS)}
+Rancher este o soluție open-source care oferă o platformă de gestionare a clusterelor Kubernetes pentru multiple infrastructuri (on-premise, AWS, Azure etc.) [15]. Este ideală pentru organizațiile care doresc un control mai mare asupra modului în care își gestionează infrastructura Kubernetes.
 
-Descriere: AKS este un serviciu complet gestionat de Kubernetes în Azure, care permite dezvoltatorilor să implementeze și să administreze ușor clustere Kubernetes. Microsoft se ocupă de gestionarea infrastructurii, iar utilizatorii pot să se concentreze pe aplicațiile lor.
+\begin{itemize}
+  \item Gestionare unificată a mai multor clustere Kubernetes.
+  \item Integrări pentru CI/CD, monitorizare și gestionarea securității.
+  \item Multi-cloud și multi-cluster: suportă implementarea în mai multe medii (on-premise, AWS, Azure etc.).
+  \item Deploy: poate fi implementat pe orice infrastructură, inclusiv medii cloud sau on-premise.
+\end{itemize}
 
-Caracteristici:
+\subsection{Google Kubernetes Engine (GKE)}
 
-Gestionare completă a clusterei Kubernetes, inclusiv patch-uri și actualizări.
+GKE este un serviciu complet gestionat de Google pentru implementarea și gestionarea clusterelor Kubernetes [5]. Google, fiind creatorul Kubernetes, oferă un serviciu extrem de scalabil și bine integrat cu celelalte servicii Google Cloud.
 
-Scalare automată și integrări cu alte servicii Azure (de exemplu, Azure Active Directory pentru autentificare).
-
-Integrări cu DevOps pentru CI/CD și monitorizare avansată.
-
-Deploy: Exclusiv în cloud-ul Azure, gestionat complet de Microsoft.
-\\
-\textbf{Rancher} 
-
-Descriere: Rancher este o soluție open-source care oferă o platformă de gestionare a clusterelor Kubernetes pentru mai multe infrastructuri (on-premise, AWS, Azure, etc.). Este ideală pentru organizațiile care doresc un control mai mare asupra modului în care își gestionează infrastructura Kubernetes.
-
-Caracteristici:
-
-Gestionare unificată a mai multor clustere Kubernetes.
-
-Integrări pentru CI/CD, monitorizare și gestionarea securității.
-
-Multi-cloud și multi-cluster: suportă implementarea în mai multe medii (on-premise, AWS, Azure, etc.).
-
-Deploy: Poate fi implementat pe orice infrastructură, inclusiv pe medii cloud sau on-premise.
-\\
-\textbf{Google Kubernetes Engine (GKE)}
-Descriere: GKE este un serviciu complet gestionat de Google pentru implementarea și gestionarea clusterei Kubernetes. Google, fiind creatorul Kubernetes, oferă un serviciu extrem de scalabil și bine integrat cu celelalte servicii Google Cloud.
-
-Caracteristici:
-
-Management complet al clusterelor K8s cu upgrades automate și patch-uri.
-
-Scalare automată pe baza cerințelor de trafic.
-
-Integrare completă cu alte servicii Google Cloud (BigQuery, Pub/Sub etc.).
-
-Deploy: Exclusiv în Google Cloud, complet gestionat de Google.
-\\
-\textbf{Beneficii/Diferențe:}
+\begin{itemize}
+  \item Management complet al clusterelor Kubernetes cu upgrade-uri automate și patch-uri.
+  \item Scalare automată pe baza cerințelor de trafic.
+  \item Integrare completă cu alte servicii Google Cloud (BigQuery, Pub/Sub etc.).
+  \item Deploy: exclusiv în Google Cloud, complet gestionat de Google.
+\end{itemize}
+\subsection{Beneficii și diferențe față de soluțiile Enterprise}
 
 Un beneficiu direct al faptului că soluția InfraMind instalează clustere K3s folosind orice tip de infrastructură (fizică și virtuală) este flexibilitatea și portabilitatea maximă a implementării cluster-ului. Acest lucru înseamnă că utilizatorii pot implementa și gestiona clustere K3s indiferent dacă resursele sunt pe hardware fizic sau într-un mediu virtualizat, într-un cloud public sau privat, fără a fi limitați de tipul de infrastructură, spre deosebire de unele dintre soluțiile enterpise alternative care limitează utilizatorul la un singur tip de infrastructură, și posibil sub anumite reglementări/condiții.
 
@@ -171,60 +165,144 @@ Cu toate aceste beneficii, InfraMind este limitat însă în partea high-end de 
 
 \section{Soluții Open-source}
 
-Aceste soluții se asemănă mult cu aplicația InfraMind, folosind abordări minimale și econome.
-\\
-\textbf{Kubeadm}
+Aceste soluții se aseamănă mult cu aplicația InfraMind, folosind abordări minimale și econome.
 
-Descriere: Kubeadm este o unealtă open-source creată de Kubernetes pentru a ajuta la instalarea și gestionarea unui cluster Kubernetes. Este o soluție flexibilă care oferă un mod simplu și ușor de utilizat pentru a configura un cluster Kubernetes de la zero.
+\subsection{Kubeadm}
 
-Caracteristici:
+Kubeadm este o unealtă open-source creată de Kubernetes pentru a ajuta la instalarea și gestionarea unui cluster Kubernetes [8]. Este o soluție flexibilă care oferă un mod simplu de utilizat pentru a configura un cluster Kubernetes de la zero.
 
-Configurare rapidă a unui cluster K8s.
+\begin{itemize}
+  \item Configurare rapidă a unui cluster Kubernetes.
+  \item Permite crearea unui cluster pe infrastructuri on-premise sau în cloud.
+  \item Suportă funcționalități de upgrade, gestionare și inițializare a clusterelor.
+\end{itemize}
 
-Permite crearea unui cluster pe infrastructuri on-premise sau în cloud.
+\subsection{Minikube}
 
-Suportă funcționalități de upgrade, gestionare și inițializare a clusterelor.
-\\
-\textbf{Minikube}
+Minikube este o soluție open-source care permite crearea unui cluster Kubernetes local pe o singură mașină, fiind ideală pentru dezvoltatori și testare în medii de dezvoltare [11].
 
-Descriere: Minikube este o soluție open-source care permite crearea unui cluster Kubernetes local pe o singură mașină, fiind ideală pentru dezvoltatori și testare în medii de dezvoltare.
+\begin{itemize}
+  \item Instalare rapidă a unui cluster Kubernetes local pe mașini Windows și Linux.
+  \item Suportă pluginuri și extensii.
+  \item Permite testarea aplicațiilor în Kubernetes fără a necesita un cluster complet.
+\end{itemize}
 
-Caracteristici:
+\subsection{Kind}
 
-Instalare rapidă a unui cluster Kubernetes local pe mașini Windows, Linux
+Kind este o unealtă care permite crearea de clustere Kubernetes folosind containere Docker [7]. Este ideală pentru dezvoltatori care doresc să testeze Kubernetes într-un mediu izolat pe mașinile lor locale.
 
-Suportă pluginuri și extensii.
+\begin{itemize}
+  \item Permite rularea de clustere Kubernetes complete în containere Docker.
+  \item Ideal pentru testare rapidă și dezvoltare locală.
+  \item Suportă crearea unui cluster cu mai multe noduri.
+\end{itemize}
 
-Permite testarea aplicațiilor în Kubernetes fără a necesita un cluster complet.
-\\
-\textbf{Kind}
+\subsection{Kubicorn}
 
-Descriere: Kind este o unealtă care permite crearea de clustere Kubernetes folosind containere Docker. Este ideală pentru dezvoltatori care doresc să testeze Kubernetes într-un mediu izolat pe mașinile lor locale.
+Kubicorn este o soluție open-source care facilitează implementarea unui cluster Kubernetes în infrastructuri publice de cloud (AWS, Azure, Google Cloud) folosind o abordare declarativă.
 
-Caracteristici:
+\begin{itemize}
+  \item Suportă implementarea automată de clustere Kubernetes în cloud.
+  \item Permite implementarea în mai multe tipuri de infrastructuri.
+  \item Focalizat pe automatizare și ușurința de gestionare.
+\end{itemize}
 
-Permite rularea de clustere Kubernetes complete în containere Docker.
+\subsection{Beneficii și diferențe față de soluțiile Open-source}
 
-Ideal pentru testare rapidă și dezvoltare locală.
+Deși aceste aplicații au reprezentat, într-o oarecare măsură, o sursă de inspirație pentru InfraMind, acestea au un dezavantaj major față de InfraMind: lipsa unei interfețe grafice, care să ofere o experiență mai plăcută utilizatorului. De asemenea, folosirea acestor aplicații necesită, din nou, un nivel înalt de cunoștințe tehnice — lucru pe care dorim să îl evităm, scopul InfraMind fiind de a ușura cât mai mult procesul de instalare și configurare.
 
-Suportă crearea unui cluster cu mai multe noduri.
-\\
-\textbf{Kubicorn}
+\chapter{Tehnologii Utilizate}
+\label{cap:tehnologii}
 
-Descriere: Kubicorn este o soluție open-source care facilitează implementarea unui cluster Kubernetes în infrastructuri publice de cloud (AWS, Azure, Google Cloud) folosind cod sursă simplu și o abordare declarativă.
+Această secțiune prezintă principalele tehnologii și instrumente pe care se bazează InfraMind, motivând alegerea fiecăreia și descrizând rolul ei în cadrul arhitecturii globale a soluției.
 
-Caracteristici:
+\section{K3s}
 
-Suportă implementarea automată de clustere K8s în cloud.
+K3s este o distribuție Kubernetes certificată, creată de Rancher Labs (acum parte din SUSE), concepută special pentru medii cu resurse limitate, dispozitive IoT și scenarii edge [6]. Spre deosebire de Kubernetes clasic [9], K3s este ambalat ca un singur binar de mai puțin de 100 MB, eliminând dependențele externe și componentele considerate opționale în contextul unui deployment ușor.
 
-Permite implementarea în mai multe tipuri de infrastructuri.
+Principalele caracteristici care au motivat alegerea K3s în cadrul InfraMind sunt:
 
-Focalizat pe automatizare și ușurința de gestionare.
-\\
-\textbf{Beneficii/Diferențe:}
-Deși aceste aplicații au reprezentat, într-o oarecare măsură, o sursă de insăirație pentru InfraMind, acestea au un mare Minus față de InfraMind, și anume lipsa unei interfețe grafice, pentru a oferi cu adevărat o experință mai plăcută utilizatorului. De asemnea folosirea acestor aplicații necesită, din nou, un nivel înalt de cunoștiințe tehnice, lucru ce dorim să î-l evităm în acest context, scopul fiind de a ușura cât mai mult procesul instalării/configurării.
+\begin{itemize}
+  \item \textbf{Consum redus de resurse} — K3s necesită semnificativ mai puțin RAM și CPU față de Kubernetes standard, ceea ce îl face potrivit atât pentru hardware fizic de capacitate medie, cât și pentru mașini virtuale cu resurse limitate.
+  \item \textbf{Instalare simplificată} — Întregul proces de bootstrap al unui nod master sau worker se realizează printr-un singur script, ușurând automatizarea cu Ansible.
+  \item \textbf{Compatibilitate completă cu ecosistemul Kubernetes} — K3s respectă API-ul standard Kubernetes, ceea ce înseamnă că orice manifest YAML sau unealtă (kubectl, Helm, Prometheus etc.) funcționează neschimbat.
+  \item \textbf{Suport pentru clustere HA} — Prin utilizarea unui datastore extern sau a mecanismului de embedded etcd, K3s suportă configurații cu mai mulți masteri, așa cum este cazul topologiei implementate de InfraMind.
+\end{itemize}
+
+\section{Ansible}
+
+Ansible este o platformă open-source de automatizare IT dezvoltată de Red Hat, folosită pentru provizionarea infrastructurii, gestionarea configurației și orchestrarea aplicațiilor [1]. Funcționează fără agent (\textit{agentless}), comunicând cu nodurile țintă exclusiv prin SSH, ceea ce elimină necesitatea instalării unor componente suplimentare pe mașinile gestionate.
+
+Conceptele centrale ale Ansible utilizate în InfraMind sunt:
+
+\begin{itemize}
+  \item \textbf{Playbook-uri} — Fișiere YAML care definesc o secvență ordonată de sarcini ce vor fi executate pe grupuri de hosturi. InfraMind dispune de playbook-uri dedicate pentru instalarea și dezinstalarea clusterului K3s.
+  \item \textbf{Roluri} — Unități reutilizabile de automatizare care grupează task-uri, handlere și fișiere de configurare. Proiectul definește roluri separate pentru: instalarea nodului master primordial, alăturarea nodurilor master adiționale, înrolarea nodurilor worker, instalarea Docker și dezinstalarea componentelor.
+  \item \textbf{Inventar dinamic} — Fișierele de inventar (în format YAML) sunt generate automat de backend-ul Flask pe baza datelor introduse de utilizator, eliminând necesitatea editării manuale a configurațiilor.
+  \item \textbf{Variabile per-host} — Fiecare nod poate fi configurat individual prin fișiere \texttt{host\_vars}, permițând personalizarea adreselor IP, rolurilor și altor parametri specifici.
+\end{itemize}
+
+Alegerea Ansible față de alte unelte de tip IaC (Terraform, Chef, Puppet) a fost motivată de simplicitatea modelului push bazat pe SSH, de curba de învățare redusă și de faptul că nu necesită infrastructură de control dedicată.
+
+\section{Flask}
+
+Flask este un micro-framework web scris în Python, conceput pentru a fi minimal și ușor extensibil [4]. Spre deosebire de framework-uri mai grele precum Django, Flask nu impune o structură rigidă, oferind flexibilitate maximă în organizarea aplicației.
+
+În InfraMind, Flask îndeplinește simultan funcțiile de backend și de server pentru interfața web:
+
+\begin{itemize}
+  \item \textbf{Servirea interfetei utilizatorului} — Flask servește fișierul \texttt{index.html} și resursele statice (CSS, JavaScript), funcționând ca un server web simplu pentru aplicația single-page.
+  \item \textbf{Endpoint-uri REST} — Backend-ul expune un set de rute HTTP pentru generarea inventarului Ansible, testarea conexiunilor SSH, lansarea și monitorizarea playbook-urilor, precum și interogarea clusterului prin \texttt{kubectl}.
+  \item \textbf{Server-Sent Events (SSE)} — Pentru streaming-ul în timp real al progresului de instalare, Flask utilizează SSE, permițând frontend-ului să primească actualizări fără polling activ.
+  \item \textbf{Execuție de procese externe} — Prin modulul \texttt{subprocess}, Flask pornește și monitorizează procesele Ansible, capturând output-ul și transmițând-ul clientului în timp real.
+\end{itemize}
+
+\section{Python și librării asociate}
+
+Întregul backend al InfraMind este implementat în Python 3 [14], beneficiind de ecosistemul bogat de librării disponibile:
+
+\begin{itemize}
+  \item \textbf{Paramiko} [12] — Librărie Python pentru comunicare SSH, utilizată în endpoint-ul de testare a conexiunilor. Permite verificarea accesibilității și autentificarea pe nodurile infrastructurii înainte de a lansa instalarea.
+  \item \textbf{PyYAML} [13] — Utilizat pentru generarea și parsarea fișierelor de inventar și configurare Ansible în format YAML.
+  \item \textbf{subprocess / os / signal} — Module standard Python folosite pentru lansarea proceselor Ansible, trimiterea semnalelor de terminare și gestionarea căilor de fișiere.
+\end{itemize}
+
+\section{JavaScript, HTML și CSS}
+
+Interfața grafică a InfraMind este o aplicație web single-page (SPA) construită cu tehnologii web standard, fără a folosi un framework front-end complex:
+
+\begin{itemize}
+  \item \textbf{JavaScript vanilla (ES6+)} — Codul front-end este organizat în module independente (\texttt{state.js}, \texttt{inventory.js}, \texttt{topology.js}, \texttt{connections.js}, \texttt{deploy.js}, \texttt{cluster.js} etc.), fiecare responsabil de o secțiune specifică a aplicației. Comunicarea cu backend-ul se face prin \texttt{fetch()} și \texttt{EventSource}.
+  \item \textbf{HTML5} — Structura paginii este definită într-un singur fișier \texttt{index.html}, cu secțiuni ascunse/afișate dinamic prin JavaScript.
+  \item \textbf{CSS3} — Stilizarea este împărțită în fișiere CSS modulare (\texttt{base.css}, \texttt{buttons.css}, \texttt{navigation.css} etc.), folosind variabile CSS custom (\texttt{:root vars}), animații (\texttt{@keyframes}) și layout flexibil.
+  \item \textbf{Three.js / WebGL} [17] — Efectul vizual de fundal (\textit{light pillar}) este implementat cu Three.js, adăugând un element estetic modern interfeței.
+\end{itemize}
+
+\section{Bash}
+
+Bash (\textit{Bourne Again Shell}) este shell-ul implicit al majorității distribuțiilor Linux și reprezintă limbajul de scripting utilizat de scripturile oficiale de instalare și dezinstalare ale K3s [18]. În contextul InfraMind, Bash intervine în două moduri principale:
+
+\begin{itemize}
+  \item \textbf{Scripturi de instalare K3s} — Fiecare nod master și worker rulează scriptul oficial \texttt{get.k3s.io} prin intermediul \texttt{curl | sh}, care descarcă și configurează K3s cu parametrii transmiși de Ansible (token, adresă IP, rolul nodului).
+  \item \textbf{Scripturi de dezinstalare} — K3s furnizează scripturile \texttt{k3s-uninstall.sh} și \texttt{k3s-agent-uninstall.sh} care curăță complet instalarea de pe nodurile master, respectiv worker. Aceste scripturi sunt invocate din playbook-urile Ansible de dezinstalare.
+\end{itemize}
+
+Deși nu este un limbaj de programare cu scop general, Bash este indispensabil în ecosistemul Linux pentru automatizarea sarcinilor de nivel sistem — un rol pe care îl îndeplinește eficient în tandem cu Ansible în cadrul InfraMind.
+
+\section{Docker și Docker Compose}
+
+Docker este platforma standard de containerizare care permite ambalarea unei aplicații împreună cu toate dependențele sale într-un container portabil [2]. InfraMind include un \texttt{Dockerfile} și un fișier \texttt{docker-compose.yml} pentru a simplifica rularea aplicației în orice mediu fără configurare manuală a dependențelor Python sau a serviciilor adiacente.
+
+Utilizarea Docker în contextul InfraMind oferă:
+
+\begin{itemize}
+  \item \textbf{Portabilitate} — Aplicația rulează identic indiferent de sistemul de operare al gazdei.
+  \item \textbf{Izolare} — Dependențele Python (Flask, Paramiko, PyYAML) sunt izolate în container, evitând conflictele cu pachetele sistemului.
+  \item \textbf{Deployment simplificat} — O singură comandă (\texttt{docker compose up}) pornește întreaga aplicație.
+\end{itemize}
 
 \chapter{Cerințele aplicației}
+\label{cap:cerinte}
 \section{Scop}
 
 Scopul principal al InfraMind este de a elimina complexitatea asociată cu instalarea și administrarea Kubernetes, oferind o experiență fluidă și accesibilă chiar și pentru cei care nu sunt experți în orchestrarea containerelor. Aplicația se adresează atât administratorilor de infrastructură, cât și dezvoltatorilor care doresc să implementeze rapid un cluster Kubernetes fără a pierde timp cu configurări manuale și procese complicate.
@@ -252,133 +330,110 @@ Prin implementarea acestor principii, InfraMind va reuși să ofere o experienț
 
 \section{Eficiență}
 
-Eficiența este un pilon central al InfraMind, atât în ceea ce privește performanța aplicației, cât și procesul de instalare și gestionare a clusterelor K3s. Scopul nostru este de a reduce timpul necesar pentru implementare, eliminând pașii inutili și optimizând fiecare etapă astfel încât utilizatorii să poată avea un cluster funcțional în cel mai scurt timp posibil.\\
-\textbf{Automatizarea procesului de instalare}\\
+Eficiența este un pilon central al InfraMind, atât în ceea ce privește performanța aplicației, cât și procesul de instalare și gestionare a clusterelor K3s. Scopul este reducerea timpului necesar pentru implementare, eliminând pașii inutili și optimizând fiecare etapă astfel încât utilizatorii să poată avea un cluster funcțional în cel mai scurt timp posibil.
+
+\subsection{Automatizarea procesului de instalare}
+
 Unul dintre cele mai mari obstacole în implementarea unui cluster Kubernetes tradițional este necesitatea unei configurații manuale extinse. InfraMind elimină această barieră printr-un proces de instalare automatizat, care:
 
-Detectează și validează infrastructura disponibilă (fizică sau virtuală).
+\begin{itemize}
+  \item Detectează și validează infrastructura disponibilă (fizică sau virtuală).
+  \item Configurează nodurile, rolurile și resursele clusterului fără intervenția utilizatorului.
+  \item Aplică setări optimizate pentru performanță, fără a necesita ajustări manuale complexe.
+\end{itemize}
 
-Configurează nodurile, rolurile și resursele clusterului fără intervenția utilizatorului.
+Astfel, utilizatorii pot avea un cluster K3s operațional în câteva minute, comparativ cu ore sau chiar zile în cazul unei configurări manuale.
 
-Aplică setări optimizate pentru performanță, fără a necesita ajustări manuale complexe.\\
-Astfel, utilizatorii pot avea un cluster K3s operațional în doar câteva minute, comparativ cu ore sau chiar zile în cazul unei configurări manuale.
-\\
-\textbf{Optimizarea resurselor}\\
+\subsection{Optimizarea resurselor}
+
 Un alt aspect cheie al eficienței este utilizarea optimă a resurselor hardware și software. InfraMind asigură acest lucru prin:
 
-Alocarea dinamică a resurselor, evitând supra-provizionarea sau sub-provizionarea clusterului.
+\begin{itemize}
+  \item Alocarea dinamică a resurselor, evitând supra-provizionarea sau sub-provizionarea clusterului.
+  \item Detectarea și corectarea automată a erorilor comune, reducând timpul petrecut pe depanare.
+  \item Integrarea cu infrastructuri diverse, permițând rularea eficientă pe hardware low-power sau în medii cloud cost-eficiente.
+\end{itemize}
 
-Detectarea și corectarea automată a erorilor comune, reducând timpul petrecut pe depanare.
-
-Integrarea cu infrastructuri diverse, permițând rularea eficientă pe hardware low-power sau în medii cloud cost-eficiente.\\
 Prin aceste optimizări, aplicația garantează un consum minim de resurse, maximizând performanța clusterului fără risipă de procesare, memorie sau stocare.
-\\
-\textbf{Reducerea complexității operaționale}\\
+
+\subsection{Reducerea complexității operaționale}
+
 Gestionarea unui cluster Kubernetes poate fi un proces complex și predispus la erori. InfraMind rezolvă această problemă printr-un set de funcționalități care simplifică operațiunile de zi cu zi:
 
-Monitorizare și notificări în timp real, oferind utilizatorilor informații clare despre starea clusterului.
+\begin{itemize}
+  \item Feedback vizual și notificări în timp real, oferind utilizatorilor informații clare despre starea clusterului.
+  \item Mentenanță simplificată prin automatizarea pașilor repetitivi de configurare.
+  \item Suport pentru scalare, adaptând configurația clusterului în funcție de necesități.
+\end{itemize}
 
-Mentenanță automată, incluzând update-uri și patch-uri de securitate aplicate fără întreruperi majore.
-
-Suport pentru scalare automată, adaptând resursele clusterului în funcție de cerere și încărcare.\\
 Aceste caracteristici permit utilizatorilor să administreze clusterele cu un efort minim, reducând intervențiile manuale și optimizând fluxurile de lucru.
-\\
-\textbf{Performanță optimizată a aplicației}\\
+
+\subsection{Performanță optimizată a aplicației}
+
 Pentru a asigura o experiență fluidă și rapidă, InfraMind este construit pe principii moderne de dezvoltare software:
 
-Arhitectură scalabilă, capabilă să gestioneze multiple instalări simultan fără degradarea performanței.
+\begin{itemize}
+  \item Arhitectură scalabilă, capabilă să gestioneze multiple instalări simultan fără degradarea performanței.
+  \item Interfață web rapidă, optimizată pentru timpi de răspuns minimali și interacțiuni eficiente.
+  \item Procesare asincronă prin Server-Sent Events, astfel încât utilizatorii să primească feedback în timp real fără să blocheze interacțiunea cu aplicația.
+\end{itemize}
 
-Interfață web rapidă, optimizată pentru timpi de răspuns minimali și interacțiuni eficiente.
+Toate aceste aspecte contribuie la un proces de instalare și administrare care este nu doar rapid, ci și stabil și fiabil, permițând utilizatorilor să se concentreze pe rularea aplicațiilor lor în Kubernetes, fără griji legate de infrastructură.
 
-Procesare asincronă, astfel încât utilizatorii să nu fie nevoiți să aștepte finalizarea fiecărui pas pentru a continua utilizarea aplicației.\\
-Toate aceste aspecte contribuie la un proces de instalare și administrare care este nu doar rapid, dar și stabil și fiabil, permițând utilizatorilor să se concentreze pe rularea aplicațiilor lor în Kubernetes, fără griji legate de infrastructură.
-\\
-\textbf{Eficiență pe termen lung}\\
+\subsection{Eficiență pe termen lung}
+
 Pe lângă instalare, InfraMind se axează și pe menținerea eficienței în timp, prin:
 
-Actualizări continue, care îmbunătățesc securitatea și performanța clusterului.
+\begin{itemize}
+  \item Compatibilitate extinsă, suportând diverse tipuri de infrastructură și configurări personalizate.
+  \item Integrare cu unelte DevOps standard (Ansible, Docker), permițând extinderea și personalizarea fluxurilor de lucru.
+  \item Posibilitatea de a refolosi inventarele și configurațiile generate pentru noi instalări.
+\end{itemize}
 
-Integrare cu alte soluții DevOps, permițând gestionarea eficientă a resurselor.
-
-Compatibilitate extinsă, suportând diverse tipuri de infrastructură și configurări personalizate.\\
-Astfel, aplicația nu doar că optimizează implementarea inițială, dar și asigură un management eficient al clusterelor pe termen lung, reducând costurile și efortul operațional al utilizatorilor.\\
-Aceste mecanisme si principii ar trebui implementate si respectate pentru a avea o aplicație de calitate, ce își îndeplinește scopul.
+Astfel, aplicația nu doar că optimizează implementarea inițială, ci asigură și un management eficient al clusterelor pe termen lung, reducând costurile și efortul operațional al utilizatorilor.
 
 \chapter{Structura aplicației}
+\label{cap:structura}
 \section{Overview}
-InfraMind este împărțită in 2 mari părți, ce impreună alcătuiesc intreg procesul de lucru, respectiv:
 
-\textbf{Frontend \& Backend – Colectarea și conversia datelor în Infrastructure as Code (IaC)}
-\\
-\textbf{Frontend – Interfața Utilizatorului}\\
-Frontend-ul este o aplicație web care permite utilizatorilor să definească arhitectura clusterului printr-un proces ghidat și intuitiv.
-Utilizatorul poate introduce informații esențiale, precum:
+InfraMind este împărțită în 2 mari componente, care împreună alcătuiesc întregul proces de lucru.
 
-Numărul de noduri dorite (Master / Worker)
+\subsection{Frontend și Backend — Colectarea și conversia datelor în Infrastructure as Code}
 
-Tipul infrastructurii (fizică sau virtuală, on-premise sau cloud)
+\subsubsection{Frontend — Interfața Utilizatorului}
 
-Specificații hardware (CPU, RAM, stocare)
+Frontend-ul este o aplicație web care permite utilizatorilor să definească arhitectura clusterului printr-un proces ghidat și intuitiv. Utilizatorul poate introduce informații esențiale, precum:
 
-Sistemul de operare și distribuția Linux preferată
+\begin{itemize}
+  \item Numărul de noduri dorite (Master / Worker).
+  \item Tipul infrastructurii (fizică sau virtuală, on-premise sau cloud).
+  \item Specificații de rețea (adrese IP, acreditări SSH).
+  \item Configurații privind rolul fiecărui nod în cluster.
+\end{itemize}
 
-Configurații de rețea și DNS
+Pe lângă introducerea manuală, aplicația oferă vizualizarea topologiei clusterului în timp real, permițând utilizatorilor să valideze configurația înainte de a lansa instalarea.
 
-Integrarea cu servicii externe (monitorizare, logging, autentificare)
-\\
-Pe lângă introducerea manuală, aplicația poate oferi presetări pentru scenarii frecvente, permițând utilizatorilor să implementeze rapid clustere optimizate pentru diferite cazuri de utilizare (ex: dezvoltare, testare, producție).
-\\
-\textbf{Backend – Generarea IaC și Pregătirea pentru Instalare}\\
+\subsubsection{Backend — Generarea IaC și Pregătirea pentru Instalare}
+
 După colectarea datelor, backend-ul preia aceste informații și le transformă automat în Infrastructure as Code (IaC). Acest proces este crucial deoarece permite:
 
-Automatizare completă, eliminând pașii manuali și erorile umane
+\begin{itemize}
+  \item \textbf{Automatizare completă} — elimină pașii manuali și erorile umane.
+  \item \textbf{Reproductibilitate} — asigură că fiecare instalare este identică și coerentă.
+  \item \textbf{Flexibilitate} — oferă posibilitatea de a reutiliza configurațiile pentru noi instalări.
+\end{itemize}
 
-Reproducibilitate, asigurând că fiecare instalare este identică și coerentă
+Backend-ul generează fișiere de inventar Ansible în format YAML, pe baza datelor introduse de utilizator. Aceste fișiere descriu nodurile clusterului, adresele IP, token-urile de acces și rolurile fiecărui nod.
 
-Flexibilitate, oferind posibilitatea de a reutiliza configurațiile pentru noi instalări
+\subsubsection{Fluxul de Lucru}
 
-Backend-ul generează fișiere Terraform, Ansible, YAML sau alte formate compatibile cu orchestrarea infrastructurii. De exemplu, dacă utilizatorul dorește să implementeze clusterul într-un mediu cloud (AWS, Azure, GCP), backend-ul creează configurațiile Terraform necesare pentru a inițializa infrastructura. Dacă este vorba despre un mediu on-premise, backend-ul poate genera playbook-uri Ansible pentru a instala și configura K3s pe nodurile fizice.
-\\
-\textbf{Fluxul de Lucru}\\
-Utilizatorul introduce detaliile arhitecturii în interfața web
+\begin{itemize}
+  \item Utilizatorul introduce detaliile arhitecturii în interfața web.
+  \item Backend-ul validează și generează inventarul Ansible corespunzător.
+  \item Configurația este transmisă către componenta Agent, care va executa instalarea.
+\end{itemize}
 
-Backend-ul validează și generează codul IaC corespunzător
-
-Configurația este transmisă către componenta Agent, care va executa instalarea
-\\
-\textbf{Agentul – Instalarea efectivă a clusterului K3s pe infrastructura utilizatorului}
-\\
-Agentul este a doua componentă majoră a InfraMind și are rolul de a executa efectiv instalarea clusterului K3s pe nodurile definite de utilizator.\\
-\\
-\textbf{Rolul Agentului}
-
-Primește configurația generată de backend și o interpretează
-
-Instalează și configurează K3s pe nodurile master și worker
-
-Se ocupă de setările de rețea și securitate
-
-Aplică optimizări pentru performanță și stabilitate
-
-Monitorizează procesul de instalare și trimite feedback către utilizator
-\\
-\textbf{Cum funcționează?}\\
-După ce backend-ul generează fișierele IaC, agentul începe faza de implementare, care implică următorii pași:
-
-Inițializarea infrastructurii – Dacă se folosește cloud, agentul rulează Terraform pentru a crea resursele necesare. În cazul unui mediu on-premise, agentul verifică conectivitatea nodurilor și le pregătește pentru instalare.
-
-Instalarea K3s pe nodurile Master – Agentul descarcă și instalează K3s pe nodurile master, configurându-le ca orchestratoare ale clusterului. De asemenea, se asigură că sunt aplicate setările necesare pentru certificare, API server și alte componente esențiale.
-
-Adăugarea nodurilor Worker – Odată ce master-ul este gata, agentul se ocupă de înrolarea nodurilor worker în cluster, configurând automat networking-ul și politica de securitate.
-
-Configurarea componentelor suplimentare – Dacă utilizatorul a ales opțiuni avansate (monitorizare cu Prometheus, logging cu Loki, autentificare cu OIDC), agentul le instalează și le configurează în mod automat.
-
-Raportarea progresului – În timp real, agentul trimite mesaje către backend, informând utilizatorul despre stadiul instalării și eventualele probleme apărute.\\
-\textbf{Sinergia dintre cele doua componente}\\
-Frontend-ul și Backend-ul transformă datele/instrucțiunile utilizatorului într-o configurație precisă și reproductibilă.\\
-Agentul preia această configurație și o transformă într-un cluster K3s funcțional, gata de utilizare.
-
-Această relație se poate observa în \hyperref[fig01.png]{figure~\ref{fig01.png}}.
+Această relație se poate observa în \hyperref[fig01.png]{Figura~\ref{fig01.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{fig01.png}
@@ -386,10 +441,40 @@ Această relație se poate observa în \hyperref[fig01.png]{figure~\ref{fig01.pn
     \label{fig01.png}
 \end{figure}
 
+\subsection{Agentul — Instalarea efectivă a clusterului K3s}
+
+Agentul este a doua componentă majoră a InfraMind și are rolul de a executa efectiv instalarea clusterului K3s pe nodurile definite de utilizator.
+
+\subsubsection{Rolul Agentului}
+
+\begin{itemize}
+  \item Primește fișierele de inventar generate de backend și le interpretează.
+  \item Instalează și configurează K3s pe nodurile master și worker.
+  \item Se ocupă de setările de rețea și de autentificarea SSH.
+  \item Monitorizează procesul de instalare și trimite feedback în timp real către utilizator.
+\end{itemize}
+
+\subsubsection{Cum funcționează?}
+
+După ce backend-ul generează fișierele de inventar, agentul (implementat ca set de playbook-uri Ansible) începe faza de implementare parcurgând următorii pași:
+
+\begin{itemize}
+  \item \textbf{Verificarea conectivității} — Agentul testează conexiunile SSH către toate nodurile înainte de a lansa instalarea.
+  \item \textbf{Instalarea K3s pe nodul master primordial} — Se descarcă și instalează K3s cu parametrii de inițializare a clusterului (token, TLS SAN, embedded etcd).
+  \item \textbf{Adăugarea nodurilor master adiționale} — Nodurile master secundare se alătură clusterului existent, formând o topologie HA.
+  \item \textbf{Înrolarea nodurilor worker} — Nodurile worker sunt configurate și alăturate clusterului folosind token-ul generat de master.
+  \item \textbf{Raportarea progresului} — În timp real, output-ul Ansible este capturat de Flask și transmis frontend-ului prin Server-Sent Events.
+\end{itemize}
+
+\subsection{Sinergia dintre cele două componente}
+
+Frontend-ul și Backend-ul transformă datele utilizatorului într-o configurație precisă și reproductibilă. Agentul preia această configurație și o transformă într-un cluster K3s funcțional, gata de utilizare.
+
 \section{Structuri interne}
-\textbf{Frontend}\\
-Atât Frontend-ul aplicației, cât și Backend-ul rulează într-o singura aplicație Flask.\\
-Frontend-ul are 2 sarcini, respectiv de a servi interfața de operare utilizatoruilui cu scopul de a colecta date introduse de utilizator, iar a doua sarcină este să paseze aceste date backend-ului folosind un POST request, așa cu,m este ilustrat în \hyperref[frontend.png]{figure~\ref{frontend.png}}.
+
+\subsection{Frontend}
+
+Atât Frontend-ul aplicației, cât și Backend-ul rulează într-o singură aplicație Flask. Frontend-ul are 2 sarcini: să servească interfața de operare a utilizatorului cu scopul de a colecta datele introduse, iar a doua sarcină este să paseze aceste date backend-ului folosind un POST request, așa cum este ilustrat în \hyperref[frontend.png]{Figura~\ref{frontend.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{frontend.png}
@@ -397,17 +482,17 @@ Frontend-ul are 2 sarcini, respectiv de a servi interfața de operare utilizator
     \label{frontend.png}
 \end{figure}
 
-\textbf{Backend}
+\subsection{Backend}
 
 Backend-ul are 3 sarcini esențiale:
 
-Primește POST request-uri de la Frontend cu datele introduse de utilizator
+\begin{itemize}
+  \item Primește POST request-uri de la Frontend cu datele introduse de utilizator.
+  \item Prelucrează datele primite, validându-le și convertindu-le în fișiere YAML.
+  \item Transmite noile fișiere YAML spre Agent.
+\end{itemize}
 
-Prelucrează datele primite, validându-le și converti în fișiere YAML
-
-Transmite noile fișiere YAML spre Agent
-
-Aceste 3 sarcini se regăsesc în următorul workflow \hyperref[backend.png]{figure~\ref{backend.png}}.
+Aceste 3 sarcini se regăsesc în workflow-ul din \hyperref[backend.png]{Figura~\ref{backend.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{backend.png}
@@ -415,23 +500,67 @@ Aceste 3 sarcini se regăsesc în următorul workflow \hyperref[backend.png]{fig
     \label{backend.png}
 \end{figure}
 
-\textbf{Agent}
-Agentul intervine doar când va fi declanșat de către Backend, acest lucru îtâmplându-se în momentul în care Backend-ul a terminat de procesat datele și a creat cu succes Fișierele YAML, Agentul mai departe executând o serie de sarcini predefinite și bazate pe Fișierele YAML primite, precum în \hyperref[agent.png]{figure~\ref{agent.png}}.
+\subsection{Agent}
+
+Agentul intervine doar când este declanșat de Backend, în momentul în care Backend-ul a terminat de procesat datele și a creat cu succes fișierele YAML. Agentul execută o serie de sarcini predefinite bazate pe fișierele YAML primite, precum în \hyperref[agent.png]{Figura~\ref{agent.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{agent.png}
     \caption{Agent general}
     \label{agent.png}
 \end{figure}
-Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura realizarea sarcinii cu succes și de a oferi feedback pe parcurs ca in diagrama 
-\hyperref[overalluml.png]{figure~\ref{overalluml.png}}.
+
+Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura realizarea sarcinii cu succes și a oferi feedback pe parcurs, ca în diagrama din \hyperref[overalluml.png]{Figura~\ref{overalluml.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[height=0.5\textwidth]{overalluml.png}
-    \caption{Agent general}
+    \caption{Diagrama de comunicare dintre componente}
     \label{overalluml.png}
 \end{figure}
 
 
+
+\chapter*{Bibliografie}
+\addcontentsline{toc}{chapter}{Bibliografie}
+
+\begin{enumerate}
+
+\item Ansible (Red Hat), \textit{Ansible Documentation}, disponibil la: \url{https://docs.ansible.com/}, accesat 30 martie 2026.
+
+\item Docker Inc., \textit{Docker Documentation}, disponibil la: \url{https://docs.docker.com/}, accesat 30 martie 2026.
+
+\item Edge Delta, \textit{State of Kubernetes 2023 — Adoption Trends}, disponibil la: \url{https://edgedelta.com/company/blog/state-of-kubernetes-2023}, accesat 30 martie 2026.
+
+\item Flask (Pallets Projects), \textit{Flask Documentation}, disponibil la: \url{https://flask.palletsprojects.com/en/stable/}, accesat 30 martie 2026.
+
+\item Google Cloud, \textit{Google Kubernetes Engine Documentation}, disponibil la: \url{https://cloud.google.com/kubernetes-engine/docs}, accesat 30 martie 2026.
+
+\item K3s (SUSE/Rancher Labs), \textit{K3s — Lightweight Kubernetes}, disponibil la: \url{https://k3s.io/}, accesat 30 martie 2026.
+
+\item Kind (Kubernetes SIGs), \textit{Kind Documentation — Kubernetes IN Docker}, disponibil la: \url{https://kind.sigs.k8s.io/}, accesat 30 martie 2026.
+
+\item Kubernetes, \textit{Kubeadm Documentation}, disponibil la: \url{https://kubernetes.io/docs/reference/setup-tools/kubeadm/}, accesat 30 martie 2026.
+
+\item Kubernetes, \textit{Kubernetes Documentation}, disponibil la: \url{https://kubernetes.io/docs/}, accesat 30 martie 2026.
+
+\item Microsoft, \textit{Azure Kubernetes Service Documentation}, disponibil la: \url{https://learn.microsoft.com/en-us/azure/aks/}, accesat 30 martie 2026.
+
+\item Minikube (Kubernetes SIGs), \textit{Minikube Documentation}, disponibil la: \url{https://minikube.sigs.k8s.io/docs/}, accesat 30 martie 2026.
+
+\item Paramiko, \textit{Paramiko Documentation — SSH2 for Python}, disponibil la: \url{https://www.paramiko.org/}, accesat 30 martie 2026.
+
+\item PyYAML, \textit{PyYAML Documentation}, disponibil la: \url{https://pyyaml.org/wiki/PyYAMLDocumentation}, accesat 30 martie 2026.
+
+\item Python Software Foundation, \textit{Python 3 Documentation}, disponibil la: \url{https://docs.python.org/3/}, accesat 30 martie 2026.
+
+\item Rancher (SUSE), \textit{Rancher Documentation}, disponibil la: \url{https://www.rancher.com/docs/}, accesat 30 martie 2026.
+
+\item Red Hat, \textit{OpenShift Documentation}, disponibil la: \url{https://docs.openshift.com/}, accesat 30 martie 2026.
+
+\item Three.js, \textit{Three.js Documentation}, disponibil la: \url{https://threejs.org/docs/}, accesat 30 martie 2026.
+
+\item GNU Project, \textit{Bash Reference Manual}, disponibil la: \url{https://www.gnu.org/software/bash/manual/}, accesat 30 martie 2026.
+
+\end{enumerate}
 
 \end{document} 

@@ -1,0 +1,618 @@
+GHID PENTRU REDACTAREA LUCRĂRII DE LICENŢĂ
+Absolvenţii Facultăţii de Calculatoare şi Informatică Aplicată a Universităţii ”Tibiscus” din
+Timişoara vor prezenta la înscrierea pentru examenul de licenţă lucrarea de licenţă (minim 35 – 50
+de pagini fără cuprins și bibliografie), listată doar pe o faţă, conţinând referatul cu aviz pozitiv al
+coordonatorului ştiinţific și declaraţia pe proprie răspundere privind originalitatea lucrării, însoţită
+de un STICK conţinând lucrarea în format .DOCX sau .PDF (ori echivalente) și încărcarea pe
+platforma pregătită anului III, cu confirmarea secretarului de comisie prin documentul de la Anexa 10
+din Metodologia privind organizarea şi desfăşurarea examenelor de finalizare a studiilor universitare,
+anul universitar 2024-2025, că documentele au fost încărcate.
+
+Cuprinsul ghidului
+STRUCTURA Lucrării de licenţă ...................................................................................................2
+1.1
+Coperta, pagina de titlu, referatul de evaluare al cadrului didactic coordonator (descarcă
+model) 2
+1.2
+Mulţumiri (opţional) ...............................................................................................................2
+1.3
+Cuprinsul.................................................................................................................................3
+1.4
+Lista tabelelor (opţional) .........................................................................................................3
+1.5
+Lista figurilor (opţional) .........................................................................................................3
+1.6
+Introducerea ............................................................................................................................3
+1.7
+Conţinutul ...............................................................................................................................3
+1.7.1
+Partea teoretică a lucrării ................................................................................................3
+1.7.2
+Partea practică a lucrării .................................................................................................3
+1.8
+Concluziile ..............................................................................................................................4
+1.9
+Rezumatul ...............................................................................................................................4
+1.10
+Anexele (opţional) ..................................................................................................................4
+1.11
+Bibliografia .............................................................................................................................4
+1.12
+Prezentarea lucrării de licenţă în faţa comisiei .......................................................................4
+2
+INDICAŢII pentru TEHNOREDACTAREA lucrării de licenţă....................................................6
+2.1
+Pagină, paragraf, rând, literă, spaţiu .......................................................................................6
+2.2
+Titluri ......................................................................................................................................7
+2.3
+Material ilustrativ....................................................................................................................8
+2.4
+Tabele .....................................................................................................................................8
+2.5
+Aparatul ştiinţific/critic ...........................................................................................................9
+2.5.1
+Lista de referinţe bibliografice .......................................................................................9
+2.5.2
+Menţionarea sursei bibliografice în textul lucrării .........................................................9
+2.5.3
+Elaborarea notelor ........................................................................................................10
+3
+MOTIVE DE RESPINGERE a lucrării .........................................................................................10
+ANEXA 1. Paginile de coperţi ...............................................................................................................10
+ANEXA 2. Modele Liste........................................................................................................................15
+1
+
+Aspecte generale
+Lucrarea de licenţă trebuie să reflecte faptul că studentul:
+▪ stăpâneşte cunoştinţele specifice domeniului căruia îi aparţine tema aleasă;
+▪ este capabil să selecteze, extragă şi să sintetizeze din materialele bibliografice
+aspectele esenţiale ale problematicii tratate;
+▪ stăpâneşte tehnici şi instrumente de programare pentru a realiza o aplicaţie specifică
+domeniului ales;
+▪ este capabil să redacteze un material unitar care să cuprindă şi observaţii sau rezultate
+proprii; este capabil să redacteze documentaţia aferentă unei aplicaţii.
+
+Pag. 1 din 15
+
+1 STRUCTURA Lucrării de licenţă
+Lucrarea trebuie să cuprindă următoarele părţi:
+1.1
+
+Coperta, pagina de titlu, referatul de evaluare al cadrului didactic coordonator
+
+Figura 1. Coperta 1
+
+Figura 2. Coperta 2
+
+Figura 3. Foaia cu titlu
+
+Figura 4. Referatul de evaluare al cadrului didactic
+coordonator
+
+Mulţumiri (opţional)
+Mulţumirile (către persoane sau instituţii) sunt expresia recunoştinţei candidatului faţă
+de o persoană sau de o instituţie (profesor coordonator, universitatea, o bibliotecă, o firmă
+care a sponsorizat cercetarea etc.). În redactare, această pagină are, de obicei, un chenar mai
+mare decât restul paginilor.
+1.2
+
+Pag. 2 din 15
+
+1.3
+
+Cuprinsul
+Va conţine, titlurile tuturor părţilor care compun lucrarea (introducere, capitole,
+subcapitole, secţiuni şi subsecţiuni, concluzii, bibliografie, rezumat şi anexe) cu indicarea
+exactă a paginii la care se găseşte fiecare dintre ele.
+Plasarea lui la începutul lucrării facilitează accesul rapid la conţinut.
+Se recomandă executarea automată a cuprinsului (References->Table of Contents)
+pentru a se evita erorile de paginaţie.
+Lista tabelelor (opţional)
+Va cuprinde numele fiecărui tabel prezentat în lucrare şi numărul paginii la care se
+află acesta. Se poate face automat (References->Insert Table of Figures->Caption
+label=Tabel/Table). Vezi exemplu Anexa 2.
+1.4
+
+Lista figurilor (opţional)
+Va cuprinde numele fiecărei figuri incluse în textul lucrării şi numărul paginii la care
+se află aceasta. Se poate face automat (References->Insert Table of Figures->Caption
+label=Figura/Figure). Vezi exemplu Anexa 2.
+1.5
+
+1.6
+
+Introducerea
+Va conţine o scurtă prezentare relativă la:
+ enunţul problemei;
+ obiectivele urmărite/atinse;
+ rolul aplicaţiei;
+ structura lucrării.
+Ea trebuie să explice importanţa temei abordate şi să justifice alegerea ei. Se
+precizează etapele parcurse în cercetare, obiectivele pe care şi le-a propus autorul, precum şi
+metodologia aleasă, eventual dificultăţile pe care le-a întâmpinat în abordarea temei de
+cercetare. Introducerea va preciza punctul de vedere critic al autorului, noutatea cercetării în
+raport cu alte puncte de vedere cunoscute în acelaşi domeniu. În general, aici se evită citatele
+şi trimiterile la subsol. Introducerea nu se numerotează ca şi capitol şi se poate întinde pe 23 pagini.
+Conţinutul
+Este partea cea mai consistentă a lucrării. Ea va cuprinde între 2 şi 5 capitole care vor
+fi structurate în 2 mari părţi:
+1.7
+
+1.7.1 Partea teoretică a lucrării
+În acestă parte se vor prezenta principalele teorii şi puncte de vedere privind cercetarea
+întreprinsă, precum şi contribuţia proprie a candidatului (noi interpretări, conexiuni sau chiar
+elaborarea unei teorii originale). Această parte a lucrării trebuie să demonstreze capacitatea
+candidatului de a analiza, de selecta şi sintetiza cele mai relevante surse bibliografice şi de aşi formula propriul punct de vedere asupra subiectului studiat. Se prezintă, de asemenea,
+metodologia utilizată şi aplicarea ei la obiectul de studiu.
+Se poate întinde pe 15 – 20 de pagini.
+1.7.2 Partea practică a lucrării
+Dacă există o parte practică/aplicaţie a lucrării, aceasta trebuie să conţină:
+▪ structura generală a aplicaţiei;
+▪ funcţiile oferite;
+▪ exemple test;
+▪ detalii de implementare;
+▪ alte particularităţi.
+Pag. 3 din 15
+
+Marea majoritate a lucrărilor de licenţă în informatică conţin o aplicaţie software
+corelată cu tema tratată. Aplicaţia poate consta în:
+▪ proiectarea unui sistem software finalizată, eventual, cu implementarea unui
+prototip (dacă resursele implicate sunt accesibile);
+▪ implementarea software a unor algoritmi/metode/tehnici din domenii
+ştiinţifice/tehnice. În cazul existenţei unei implementări software, aceasta
+trebuie să satisfacă următoarele cerinţe calitative:
+▪ să fie funcţională;
+▪ să aibă o interfaţă utilizator agreabilă;
+▪ să conţină un sistem de help minimal.
+Se poate întinde pe 15 – 30 de pagini.
+În conţinutul ei, lucrarea trebuie să aibă o organizare logică prin înlănţuirea capitolelor
+şi să demonstreze capacitatea absolventului de a aplica în mod creativ cunoştinţele teoretice
+dobândite. Redactarea trebuie să demonstreze capacitatea candidatului de a-şi formula ideile
+cu claritate, precizie şi eleganţă, într-o manieră convingătoare.
+1.8
+
+Concluziile
+Aceste constituie, în economia lucrării, o parte deosebit de importantă. Ele rezumă
+rezultatele cercetării şi precizează importanţa lor în raport cu stadiul actual al cunoaşterii
+temei abordate. Concluziile subliniază specificul cercetării, oferă un comentariu personal
+despre rezultatele cercetării, în raport cu obiectivele propuse, enunţate în introducere, şi,
+eventual, indică eventuale aspecte rămase nerezolvate arătând posibile piste de cercetare
+pentru viitor.
+Concluziile lucrării nu se numerotează ca şi capitol şi se pot întinde pe 1-2 pagini.
+1.9
+
+Rezumatul
+Se realizează în limba română şi într-o limbă de circulaţie internaţională (engleză /
+opţional). Rezumatul descrie lucrarea, atestând capacitatea de sinteză a absolventului, precum
+şi cunoştinţele de limbă străină dobândite în timpul studiilor.
+Nu va depăşi o pagină.
+1.10 Anexele (opţional)
+Apar într-o secţiune separată, care nu se numerotează ca şi capitol. Fiecare anexă se va
+menţiona cel puţin o dată în textul lucrării. Anexele se numerotează crescător (Anexa 1,
+Anexa 2 etc). Ele pot conţine texte sau ilustraţii suplimentare (capturi de ecran, fotografii,
+figuri, desene, tabele, grafice, hărţi etc.) relevante pentru studiul întreprins, care au rolul de a
+aduce un plus de informaţie pertinentă în susţinerea argumentelor avansate în lucrare. Anexele
+mai pot să conţină texte considerate foarte importante pentru susţinerea unor puncte din
+argumentaţia lucrării, dar a căror inserare în textul propriu-zis ar ocupa un spaţiu prea mare
+(de exemplu, codul sursă al unei funcţii). Anexele nu pot reprezenta mai mult de 5% din
+lucrare.
+1.11 Bibliografia
+Sursele bibliografice citate în lucrare trebuie să se regăsească neapărat în lista finală.
+Lista va fi organizată în ordinea strict alfabetică a numelor autorilor.
+Bibliografia nu se va numerota ca şi capitol al lucrării.
+1.12 Prezentarea lucrării de licenţă în faţa comisiei
+Se recomandă prezentarea prin slide-uri în PowerPoint / Prezi. Prezentarea trebuie să fie:
+▪ clară, concisă, sugestivă;
+▪ să pună accent pe contribuţia proprie a studentului;
+Pag. 4 din 15
+
+▪
+
+ea trebuie să reflecte capacitatea studentului de a-şi prezenta şi susţine ideile şi
+a ceea ce a realizat.
+
+Structura prezentării:
+▪ descrierea (eventual prin exemple) a problemei tratate;
+▪ prezentarea succintă a stării de fapt în cadrul domeniului abordat
+(rezultate/realizări existente, aspecte care trebuie rezolvate etc.);
+▪ motivarea alegerii temei;
+▪ descrierea metodelor folosite/dezvoltate;
+▪ exemplificarea celor de mai sus folosind aplicaţia realizată.
+Tabel 1. Structura lucrării
+NR.
+PARTE A LUCRARII
+1.
+Coperta, pagina de titlu, referatul de evaluare al
+cadrului didactic coordonator
+2.
+Mulţumiri
+3.
+Cuprinsul
+4.
+Lista tabelelor
+5.
+Lista figurilor
+6.
+Introducerea
+7.
+Conţinutul / capitole
+8.
+Concluziile
+9.
+Rezumatul
+10.
+Anexele
+11.
+Bibliografia
+
+OBLIGATORIU
+X
+
+OPŢIONAL
+
+X
+X
+X
+X
+X
+X
+X
+X
+X
+X
+
+Pag. 5 din 15
+
+2 INDICAŢII pentru TEHNOREDACTAREA lucrării de
+licenţă
+Pentru lucrările copertate (la care textul este scrisă cu litere aurii):
+o Prima pagina (Figura 1. Coperta 1) reprezintă coperta-faţă.
+o Paginile a doua şi a treia (Figura 2. Coperta 2, Figura 3. Foaia cu titlu) reprezintă primele
+două pagini din lucrare (foile de titlu)
+o Cuprinsul lucrării începe pe pagina 4 sau 5.
+Pentru lucrările legate cu spirală
+o Coperta-faţă (Figura 1. Coperta 1) şi prima pagină (Figura 2. Coperta 2) a lucrării vor fi
+identice, însă coperta-faţă (Figura 1. Coperta 1) va fi listată pe filă albastră şi laminată.
+O filă albastră (nescrisă) laminată va constitui coperta-spate.
+o Paginile a doua şi a treia (Figura 2. Coperta 2, Figura 3. Foaia cu titlu) reprezintă primele
+două pagini din lucrare (foile de titlu)
+o Cuprinsul lucrării începe pe pagina 4 sau 5.
+După cele două pagini de titlu şi înaintea paginii de cuprins se introduce în lucrare fila
+cu referatul asupra lucrării (Figura 4. Referatul de evaluare al cadrului didactic coordonator), această
+filă poate fi completată pe calculator înainte de predarea lucrării sau de mână, după predarea
+lucrării la secretariat, de conducătorul ştiinţific.
+2.1
+
+Pagină, paragraf, rând, literă, spaţiu
+
+o Listarea se realizează pe o singură faţă a foilor de hârtie format A4.
+o Capitolele vor începe cu pagină nouă.
+o Pages normal: sus: 2 cm, jos: 2 cm, stânga: 3 cm, dreapta: 2 cm, antet: 2 cm, subsol: 2 cm.
+
+o Textul paragrafelor va fi aliniat între marginile din stânga şi dreapta (justified). Primul rând
+al fiecărui paragraf va avea o indentare de 1,27 cm. Excepţie fac titlurile de gradul 1
+(Heading 1), care vor fi aliniate centrat, ca şi etichetele figurilor.
+o Nu se lasă spaţiu între paragrafe, decât dacă prin aceasta se doreşte în mod special a se
+marca trecerea la o altă idee.
+o Spaţiere este la un rând (single).
+o Fontul recomandat Times New Roman 12 sau Arial 10 cu toate semnele diacritice specifice
+limbii române,
+o Caracterul literelor:
+Pag. 6 din 15
+
+a) literele cursive/italice se folosesc pentru a scoate în evidenţă cuvinte/pasaje citate în
+text, titluri de cărţi sau de periodice (în text sau în notele bibliografice/de subsol). În
+aceste cazuri nu se vor utiliza ghilimele.
+b) literele aldine/boldate se folosesc pentru titlurile de capitole/subcapitole, precum şi
+pentru a evidenţia acele cuvinte/sintagme/pasaje considerate foarte importante
+c) sublinierea cu o linie se foloseşte pentru a scoate în relief cuvinte/ sintagme/pasaje
+care exprimă puncte de vedere esenţiale sau care introduc o terminologie specială.
+o Spaţiile de dinainte sau de după semnele de punctuaţie (blancuri):
+- se lasă spaţiu liber după:
+– virgulă: cuvânt, cuvânt
+– punct: cuvânt. Cuvânt
+– semnul întrebării: cuvânt? Cuvânt
+– semnul exclamării: cuvânt! Cuvânt/cuvânt
+– două puncte: cuvânt: cuvânt
+– punct şi virgulă: cuvânt; cuvânt
+– puncte de suspensie: cuvânt... cuvânt/Cuvânt
+- se lasă spaţiu liber atât înainte, cât şi după:
+– linie de pauză: cuvânt – cuvânt
+- nu se lasă spaţiu liber în cazul semnelor:
+– cratimă: S-au relatat...
+– ghilimele: „cuvânt” «cuvânt» (ghilimelele ascuţite/franceze se folosesc
+pentru a intercala un citat în alt citat)
+– paranteze: (cuvânt) [cuvânt]
+– bară oblică cuvânt/cuvânt
+2.2
+
+Titluri
+
+o Lucrarea va fi împărţită în capitole, subcapitole, secţiuni, subsecţiuni cu titlurile
+respective, dar nu mai mult de 3 grade de titluri.
+o Titlurile de gradul 1, stil Heading 1, se vor utiliza pentru a denumi un capitol. Ele se vor
+scrie centrat, cu majuscule, font de 16 pt pentru Times New Roman bold și 14 pt pentru
+Arial, bold, şi vor fi precedate de un simbol numeric, începând cu cifra 1. Textul lucrării
+va începe la 2 spaţii sub titlu.
+o Titlurile de gradul 2, stil Heading 2, vor denumi un subcapitol. Ele se vor amplasa la cap
+de rând, font de mărimea textului (TNR 14 sau Arial 12) bold, indentare left 0,5 cm și
+hanging de 1 cm. Textul urmează la un spaţiu după titlu.
+o Titlurile de gradul 3, stil Heading 3, vor denumi o secţiune a unui subcapitol. Ele se vor
+amplasa la cap de rând, bold, indentare left 1 cm și hanging de 1 cm. Textul urmează la
+un spaţiu după titlu.
+
+1. CAPITOL
+1.1. Subcapitol
+1.1.1.Secţiune
+Figura 5. Formatarea titlurilor
+
+o După titluri nu se pune punct. Excepţie fac titlurile urmate de subtitluri (Exemplu: Mircea
+Flonta, Cognito. O introducere în teoria cunoaşterii, Bucureşti, Editura All, 2008).
+Pag. 7 din 15
+
+2.3
+
+Material ilustrativ
+
+o Figurile (imagini, grafice, capturi de ecran) nu trebuie să depăşească formatul paginii.
+o Figurile se numerotează cu 2 cifre, prima reprezentând numărul capitolului, iar cea de a
+doua fiind numărul figurii din capitolul respectiv; fiecare figură are număr şi titlu, care se
+menţionează sub figură, centrat. Lista figurilor se poate insera şi automat:
+Reference>Insert Caption>Label Figura
+o Legenda şi numărul figurii se sciu cu font mai mic cu 2 pt faţă de fontul de bază.
+o În cazul în care figura a fost preluată, se menţionează sursa ei bibliografică
+Exemplu:
+
+Figura 2.2. Canale de comunicare externă
+Autor: Echipa HR-Romania, Rezultate studiu: "Comunicare organizationala",
+21-05-2007, http://www.hr-romania.ro/articole_afis.php?artId=2046 , consultat în 18 martie 2025
+
+2.4
+
+Tabele
+
+o Se vor evita, pe cât posibil, tabelele mari, care depăşesc în lăţime formatul paginii de text.
+Tabelele dintr-o lucrare trebuie să aibă o prezentare unitară. Fiecare tabel va fi numerotat
+şi va avea un titlu. Dacă este cazul, sursa datelor se precizează sub tabel, aliniat între
+marginile din stânga şi dreapta (justified), indicând în mod obligatoriu toate datele de
+identificare.
+o Legenda şi numărul tabelului se scriu cu font mai mic cu 2 pt faţă de fontul de bază.
+Exemplu:
+Tabelul 2.1. Caracteristicile fontului pentru Times New Roman
+
+Text
+Normal
+Capitol
+Subcapitol
+Secţiune
+Subsecţiune
+Note de subsol
+Sursa datelor şi
+figurilor
+
+Marcare
+
+justify
+centrat
+stânga
+stânga
+stânga
+justify
+
+Mărimea
+literelor
+mici
+mari
+mici
+mici
+mici
+mici
+
+stânga
+
+mici
+
+-
+
+Dimensiune
+Font
+12
+14
+12
+12
+12
+10
+
+Aliniere
+
+10
+
+bold
+bold
+bold
+bold
+-
+
+Pag. 8 din 15
+
+2.5
+
+Aparatul ştiinţific/critic
+
+2.5.1 Lista de referinţe bibliografice
+o Bibliografia se plasează la sfârşitul lucrării, înainte de anexe.
+o De regulă, lucrările se scriu în ordinea alfabetică a numelor autorilor, numerotându-se cu
+cifre arabe urmate de punct puse între paranteze drepte; când sunt doi sau mai mulţi autori
+pentru o lucrare, regula privitoare la ordinea alfabetică este valabilă doar pentru numele
+primului autor.
+o Prenumele autorilor se poate reprezentat prin iniţială.
+o Pentru cărţile de autor se menţionează:
+Nume Prenume, Denumire carte, Editura, Oraș, An.
+o Cărţile cu mai mulţi autori se citează:
+Nume Prenume 1, Nume Prenume 2, Nume Prenume 3, Denumire carte, Editura, Oraș,
+An.
+o Dacă lucrarea are mai mult de 3 autori poate fi menţionat numai primul nume urmat de et
+al. (= şi alţii).
+Nume Prenume 1 et al., Denumire carte, Editura, Oraș, An.
+o Volumele colective care au un coordonator/editor cunoscut se vor cita:
+Paletz, D.,L., Novosel, P., (ed.), Glasnost and After : Media and Change in central and
+Eastern Europe, New Jersey, Hmpoton Press inc., 1995.
+o Volumele fără editor nominal se citează:
+* * *, Abrégé du droit de la presse, Paris, C.F.P.J., 1991.
+o Contribuţia unui autor într-un volum colectiv se citează:
+Gross, P., Romania, în Paletz, D.,L.,Novosel, P., (ed.), Glasnost and After : Media and
+Change in Central and Eastern Europe, New Jersey, Hmpoton Press Inc., 1995.
+o Capitol de carte:
+Argyle, M., « Les compétences sociales », cap. 4, în Moscovici, S., (ed.) Psychologie
+sociale des relations à autrui, Nathan, Paris, 1994.
+o Articolele şi studiile din periodice se citează după cum urmează:
+Landheer, R., „Le rôle de la métaphorisation dans le métalangage linguistique”, în :
+Verbum, 2002, n° 24 ('Au cœur de la langue : la métaphore'), Nelly Flaux (éd.), pp. 283294.
+o Sursele electronice se citează conform regulilor de mai sus la care se adaugă: adresa
+electronică exactă şi data ultimei accesări de către autor a acesteia:
+Stoichiţoiu Ichim Adriana, Semiotica discursului juridic, Universitatea din Bucureşti,
+2002, http://ebooks.unibuc.ro/filologie/discurs/index.htm - consultat 12.06.2003.
+o Documente ale unor organizaţii, la care s-a avut acces on-line:
+EC, Promoting a European Framework for Corporate Social Responsibility-Green Paper,
+European Commission, DG for Employment and Social Affairs, Unit EMPL/D.1, 2001
+[http://europa.eu.int/comm/employment_social/soc-dial/csr/greenpaper_en.pdf], accesat
+aprilie 2006.
+2.5.2 Menţionarea sursei bibliografice în textul lucrării
+În cazul în care se parafrazează sau se reproduc idei, menţionarea sursei bibliografice
+în textul lucrării, se poate realiza prin:
+• Înserarea numărul bibliografic reprezentativ între paranteze drepte. Exemplu:
+Pag. 9 din 15
+
+În [1] se consideră că referentul nu este obiect al lumii decât în măsura în care el este
+conform unui model cunoscut.
+o Dacă aceeaşi temă a fost abordată de mai mulţi autori, îi includem pe toţi într-o singură
+paranteză.
+Exemplu:
+Conectarea la o bază de date prin cod php a fost descrisă în mai multe tratate [2, 3, 4].
+2.5.3 Elaborarea notelor
+Notele – de subsol sau de final – sunt utilizate: pentru a indica sursele citatelor, pentru
+a adăuga alte indicaţii bibliografice de întărire despre un subiect discutat în text, pentru a face
+trimiteri externe şi interne, pentru a introduce un citat de întărire a unui punct de vedere
+exprimat în text, pentru a da amploare afirmaţiilor din text, pentru a nuanţa unele afirmaţii din
+text.
+
+3 MOTIVE DE RESPINGERE a lucrării
+-
+
+preluarea fără citare a unor texte cu copy-paste din literatura de specialitate sau de pe
+Internet;
+lipsa contribuţiei personale (exemplu preluarea integrală a unui studiu de caz);
+lipsa indicării surselor pentru datele prezentate;
+lipsa integrală a trimiterilor la surse teoretice;
+lipsa caracterelor româneşti (diacritice);
+lipsa bibliografiei.
+
+Paginile următoare indică
+ANEXA 1. Paginile de coperţi
+
+Pag. 10 din 15
+
+UNIVERSITATEA „TIBISCUS” DIN TIMIŞOARA
+FACULTATEA DE CALCULATOARE
+ŞI INFORMATICĂ APLICATĂ
+
+LUCRARE DE LICENŢĂ
+
+COORDONATOR ŞTIINŢIFIC:
+
+Conf.univ.dr. / Lect.univ.dr. ……….
+CANDIDAT:
+
+Nume prenume student
+
+TIMIŞOARA
+2025
+
+Pag. 11 din 15
+
+UNIVERSITATEA „TIBISCUS” DIN TIMIŞOARA
+FACULTATEA DE CALCULATOARE
+ŞI INFORMATICĂ APLICATĂ
+
+LUCRARE DE LICENŢĂ
+COORDONATOR ŞTIINŢIFIC:
+
+Conf.univ.dr. / Lect.univ.dr. ……….
+CANDIDAT:
+
+Nume prenume student
+
+TIMIŞOARA
+2 025
+
+Pag. 12 din 15
+
+Nume Prenume student
+
+Titlu lucrare
+licenţă
+
+Pag. 13 din 15
+
+REFERAT
+ASUPRA LUCRĂRII DE LICENŢĂ1
+1
+
+TITLUL LUCRĂRII ________________________________________________________
+ABSOLVENT _____________________________________________________________
+DOMENIUL FUNDAMENTAL ______________________________________________
+SPECIALIZARE: __________________________________________________________
+
+APRECIERI ASUPRA LUCRĂRII
+I. Extensia lucrării (numărul de pagini) este:
+a) adecvată conținutului și conformă cu standardul impus;
+b) insuficientă.
+Comentarii:
+___________________________________________________________________________
+II. Conținutul lucrării:
+a) este în concordanță cu tema lucrării, clar și bine structurat
+b) ideile sunt/ nu sunt foarte bine structurate,
+c) are o documentație adecvată,
+d) conține rezultate generale (elementare).
+Comentarii:
+___________________________________________________________________________
+III. Originalitatea / noutatea rezultatelor lucrării:
+a) lucrarea conține idei prezentate într-un mod original,
+b) lucrarea este exclusiv monografică (reiterare a altor lucrări).
+Comentarii:
+___________________________________________________________________________
+IV. Redactarea lucrării:
+a) este corectă,
+b) îndeplinește doar standarde minimale.
+Comentarii:
+_______________________________________________________________
+V. Comentarii finale (din care să rezulte dacă lucrarea este acceptată sau nu):
+___________________________________________________________________________
+___________________________________________________________________________
+___________________________________________________________________________
+VI. Nota propusă pentru redactarea lucrării: ___________________________________
+
+Data: ___________
+
+1
+
+Semnătura coordonator_____________
+
+Acest document se completează de către Coordonatorul științific
+Pag. 14 din 15
+
+ANEXA 2. Modele Liste
+Lista tabelelor
+Tabel 1. Structura lucrării ........................................................................................................... 5
+
+Lista figurilor
+Figura 1. Coperta 1 ..................................................................................................................... 2
+Figura 2. Coperta 2 ..................................................................................................................... 2
+Figura 3. Foaia cu titlu................................................................................................................ 2
+Figura 4. Referatul de evaluare al cadrului didactic coordonator............................................... 2
+Figura 5. Formatarea titlurilor .................................................................................................... 7
+
+Pag. 15 din 15
+
+

@@ -7,6 +7,8 @@
 \usepackage[romanian]{babel}
 \usepackage{setspace}         % single line spacing
 \usepackage{url}              % proper URL formatting in bibliography
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
 %\usepackage{...insert other packages here...}
 \newtheorem{thm}{Teorema}[section]
 \newtheorem{lem}[thm]{Lema}
@@ -492,12 +494,61 @@ Backend-ul are 3 sarcini esențiale:
   \item Transmite noile fișiere YAML spre Agent.
 \end{itemize}
 
-Aceste 3 sarcini se regăsesc în workflow-ul din \hyperref[backend.png]{Figura~\ref{backend.png}}.
+Aceste 3 sarcini se regăsesc în workflow-ul din \hyperref[fig:backend-flow]{Figura~\ref{fig:backend-flow}}.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{backend.png}
+    \begin{tikzpicture}[
+        node distance=0.7cm,
+        every node/.style={text width=7cm, minimum height=1cm, align=center,
+                           rounded corners=4pt, font=\small},
+        frontend/.style={fill=blue!15, draw=blue!50!black},
+        backend/.style={fill=yellow!20, draw=yellow!60!black},
+        ansible/.style={fill=violet!15, draw=violet!50!black},
+        success/.style={fill=green!15, draw=green!50!black, font=\small\bfseries},
+        arr/.style={-{Stealth[length=3mm]}, thick},
+        dasharr/.style={-{Stealth[length=3mm]}, thick, dashed, gray},
+        seclabel/.style={font=\small\itshape, text width=2cm, align=left, draw=none, fill=none, minimum height=0pt}
+    ]
+        % Nodes
+        \node[frontend, font=\small\bfseries] (n1)
+            {User creates inventory\\in Web UI};
+        \node[backend, below=of n1] (n2)
+            {Flask API receives data\\(POST /generate)};
+        \node[backend, below=of n2] (n3)
+            {Ansible inventory files\\written to disk\\(all.yaml + host\_vars/)};
+        \node[frontend, below=of n3] (n4)
+            {User triggers deploy\\(GET /deploy + SSH credentials)};
+        \node[backend, below=of n4, font=\small\bfseries] (n5)
+            {ansible-playbook\\subprocess spawned};
+        \node[ansible, below=of n5] (n6)
+            {Role: docker-install\\(all nodes)};
+        \node[ansible, below=of n6] (n7)
+            {Role: master-primordial-install\\(initialize K3s cluster)};
+        \node[ansible, below=of n7] (n8)
+            {Role: retrieve-kubeconfig\\(fetch k3s.yaml)};
+        \node[ansible, below=of n8] (n9)
+            {Role: master-install\\(join additional masters)};
+        \node[ansible, below=of n9] (n10)
+            {Role: worker-install\\(join worker nodes)};
+        \node[success, below=of n10] (n11)
+            {K3s Cluster Ready};
+
+        % Arrows
+        \foreach \i/\j in {n1/n2, n2/n3, n3/n4, n4/n5, n5/n6, n6/n7, n7/n8, n8/n9, n9/n10, n10/n11}
+            \draw[arr] (\i) -- (\j);
+
+        % SSE feedback dashed arrow
+        \draw[dasharr] (n5.east) -- ++(1.2,0) |- (n1.east)
+            node[pos=0.25, right, font=\scriptsize\itshape, text width=2.5cm, fill=none, draw=none, minimum height=0pt]
+            {SSE stream\\(real-time progress)};
+
+        % Section labels
+        \node[seclabel, left=0.6cm of n1, text=blue!50!black]  {Frontend};
+        \node[seclabel, left=0.6cm of n2, text=yellow!60!black] {Backend};
+        \node[seclabel, left=0.6cm of n6, text=violet!50!black] {Ansible};
+    \end{tikzpicture}
     \caption{Backend general}
-    \label{backend.png}
+    \label{fig:backend-flow}
 \end{figure}
 
 \subsection{Agent}

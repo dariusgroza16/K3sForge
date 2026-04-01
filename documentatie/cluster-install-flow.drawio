@@ -1,0 +1,137 @@
+<mxfile host="app.diagrams.net" agent="K3sForge" version="24.0.0">
+  <diagram name="Cluster Install Flow" id="cluster-install-flow">
+    <mxGraphModel dx="1200" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Box 1: User creates inventory -->
+        <mxCell id="2" value="User creates inventory&#xa;in Web UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=1;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="30" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 1→2 -->
+        <mxCell id="3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="2" target="4" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 2: Flask API generates inventory -->
+        <mxCell id="4" value="Flask API receives data&#xa;(POST /generate)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="130" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 2→3 -->
+        <mxCell id="5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="4" target="6" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 3: Inventory files written -->
+        <mxCell id="6" value="Ansible inventory files&#xa;written to disk&#xa;(all.yaml + host_vars/)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="230" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 3→4 -->
+        <mxCell id="7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="6" target="8" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 4: User triggers deploy -->
+        <mxCell id="8" value="User triggers deploy&#xa;(GET /deploy + SSH credentials)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="340" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 4→5 -->
+        <mxCell id="9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="8" target="10" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 5: ansible-playbook spawned -->
+        <mxCell id="10" value="ansible-playbook&#xa;subprocess spawned" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="440" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 5→6 -->
+        <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="10" target="12" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 6: docker-install -->
+        <mxCell id="12" value="Role: docker-install&#xa;(all nodes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="540" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 6→7 -->
+        <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="12" target="14" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 7: master-primordial-install -->
+        <mxCell id="14" value="Role: master-primordial-install&#xa;(initialize K3s cluster)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="640" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 7→8 -->
+        <mxCell id="15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="14" target="16" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 8: retrieve-kubeconfig -->
+        <mxCell id="16" value="Role: retrieve-kubeconfig&#xa;(fetch k3s.yaml)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="740" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 8→9 -->
+        <mxCell id="17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="16" target="18" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 9: master-install -->
+        <mxCell id="18" value="Role: master-install&#xa;(join additional masters)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="840" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 9→10 -->
+        <mxCell id="19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="18" target="20" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 10: worker-install -->
+        <mxCell id="20" value="Role: worker-install&#xa;(join worker nodes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=13;fontStyle=0;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="940" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow 10→11 -->
+        <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;" edge="1" source="20" target="22" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Box 11: Cluster ready -->
+        <mxCell id="22" value="K3s Cluster Ready" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1;arcSize=20;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="160" y="1040" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Dashed SSE feedback arrow from ansible-playbook back to UI -->
+        <mxCell id="23" value="SSE stream&#xa;(real-time progress)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;strokeWidth=2;strokeColor=#999999;fontColor=#666666;fontSize=11;fontStyle=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="10" target="2" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="465" />
+              <mxPoint x="500" y="55" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Section labels -->
+        <mxCell id="30" value="Frontend" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#6c8ebf;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="40" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="Backend" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#d6b656;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="145" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="Ansible" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#9673a6;align=left;" vertex="1" parent="1">
+          <mxGeometry x="70" y="555" width="80" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,5 @@
+server: "https://{{ primordial_ip }}:6443"
+token: "{{ token }}"
+{% if docker -%}
+docker: true
+{%- endif %}

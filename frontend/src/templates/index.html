@@ -147,8 +147,30 @@
       <div id="deployIdle" class="deploy-section">
         <div class="deploy-header">
           <h2 class="section-title">Deploy K3s Cluster</h2>
-          <p class="section-subtitle">Launch the installation playbook on all configured nodes</p>
+          <p class="section-subtitle">Configure options and launch the installation on all nodes</p>
         </div>
+
+        <!-- Deploy Options -->
+        <section class="deploy-options-section">
+          <h3 class="deploy-options-title">Options</h3>
+          <div class="deploy-option-row">
+            <label class="deploy-option-label" for="k3sToken">Cluster Token</label>
+            <input type="text" id="k3sToken" placeholder="Shared secret for all nodes"
+                   class="deploy-option-input" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="deploy-option-row">
+            <span class="deploy-option-label">Container Runtime</span>
+            <div class="runtime-toggle-group">
+              <span class="runtime-label active" id="runtimeLabelContainerd">Containerd</span>
+              <label class="switch">
+                <input type="checkbox" id="dockerToggle">
+                <span class="slider"></span>
+              </label>
+              <span class="runtime-label" id="runtimeLabelDocker">Docker</span>
+            </div>
+          </div>
+        </section>
+
         <div class="deploy-actions-top">
           <button id="startDeploy" class="primary deploy-btn">🚀 Deploy Cluster</button>
         </div>

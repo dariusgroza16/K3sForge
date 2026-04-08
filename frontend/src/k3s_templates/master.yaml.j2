@@ -1,0 +1,15 @@
+{% if cluster_init -%}
+cluster-init: true
+{%- else %}
+server: "https://{{ primordial_ip }}:6443"
+{%- endif %}
+token: "{{ token }}"
+write-kubeconfig-mode: "0644"
+tls-san:
+  - "{{ server_ip }}"
+disable:
+  - servicelb
+  - traefik
+{% if docker -%}
+docker: true
+{%- endif %}

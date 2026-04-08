@@ -14,6 +14,28 @@ function _getSSHCreds() {
   };
 }
 
+function _getDeployOptions() {
+  return {
+    token:  document.getElementById('k3sToken')?.value.trim()  || '',
+    docker: document.getElementById('dockerToggle')?.checked   || false,
+  };
+}
+
+// ── Runtime toggle label highlight ───────────────────────────────────────
+(function _initRuntimeToggle() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle     = document.getElementById('dockerToggle');
+    const lblDefault = document.getElementById('runtimeLabelContainerd');
+    const lblDocker  = document.getElementById('runtimeLabelDocker');
+    if (!toggle) return;
+    toggle.addEventListener('change', () => {
+      const useDocker = toggle.checked;
+      lblDefault?.classList.toggle('active', !useDocker);
+      lblDocker?.classList.toggle('active',  useDocker);
+    });
+  });
+}());
+
 function _renderStepCards(container, steps) {
   container.innerHTML = '';
   steps.forEach(s => {
@@ -52,7 +74,7 @@ function _showDeployRunning() {
   document.getElementById('uninstallCluster').style.display = 'none';
   document.getElementById('redeployCluster').style.display  = 'none';
   document.getElementById('deployTitle').textContent    = 'Deploying…';
-  document.getElementById('deploySubtitle').textContent = 'Running the k3s-install playbook';
+  document.getElementById('deploySubtitle').textContent = 'Installing K3s on all nodes via SSH';
 }
 
 function _showUninstallRunning() {
@@ -70,11 +92,16 @@ function startDeploy() {
     showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
     return;
   }
+  const { token, docker } = _getDeployOptions();
+  if (!token) {
+    showToast('⚠️ A cluster token is required in the deploy options.', 4000);
+    return;
+  }
   _showDeployRunning();
   const container = document.getElementById('deploySteps');
   container.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;">Connecting…</div>';
 
-  const params = new URLSearchParams({ username, ssh_key: sshKey });
+  const params = new URLSearchParams({ username, ssh_key: sshKey, token, docker });
   const es = new EventSource(`/deploy?${params.toString()}`);
   _eventSource = es;
 
@@ -84,6 +111,7 @@ function startDeploy() {
     if (data.type === 'step_start')   { _setCardState(data.step, 'active', ''); return; }
     if (data.type === 'step_done')    { _setCardState(data.step, 'done'); return; }
     if (data.type === 'task')         { _setCardState(data.step, 'active', data.task); return; }
+    if (data.type === 'log')          { if (data.step) _setCardState(data.step, 'active', (data.msg || '').slice(0, 80)); return; }
     if (data.type === 'task_warning') { _setCardState(data.step, 'active', '⚠ ' + (data.msg || '').slice(0, 80)); return; }
     if (data.type === 'step_failed')  { _setCardState(data.step, 'failed', 'Failed'); return; }
 
@@ -93,7 +121,7 @@ function startDeploy() {
       if (data.success) {
         clusterDeployed = true;
         document.getElementById('deployTitle').textContent    = '✅ Cluster Deployed';
-        document.getElementById('deploySubtitle').textContent = 'All roles completed successfully';
+        document.getElementById('deploySubtitle').textContent = 'All steps completed successfully';
         document.getElementById('uninstallCluster').style.display = '';
         showToast('🎉 K3s cluster deployed successfully!', 5000);
       } else if (data.aborted) {

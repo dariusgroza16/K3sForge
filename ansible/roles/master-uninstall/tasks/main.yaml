@@ -1,5 +1,0 @@
----
-
-- name: Uninstall K3s Master
-  shell: k3s-uninstall.sh
-  

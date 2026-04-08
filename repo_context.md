@@ -188,3 +188,60 @@ frontend/src/
 | POST | `/kubectl-pods` | Runs `kubectl get pods -A` with provided kubeconfig; returns table data |
 | POST | `/kubectl-services` | Runs `kubectl get services -A` with provided kubeconfig; returns table data |
 | POST | `/kubectl-node-resources` | Runs `kubectl get nodes -o json` + optional `kubectl top nodes`; returns per-node CPU/memory/pod metrics |
+
+2026-04-09 — Assistant — Replaced Ansible-based install/uninstall with a pure Python/Paramiko/Jinja2 SSH engine. Split monolithic `main.py` into modules. Added Docker container cleanup on uninstall.
+
+### Backend modularisation (`frontend/src/`)
+
+`main.py` was fully refactored from a ~1 150-line monolith into 7 focused modules:
+
+| File | Responsibility |
+|------|---------------|
+| `main.py` | Thin app factory: imports and registers Blueprints, serves `index.html`. 22 lines. |
+| `config.py` | Path constants (`WORKSPACE_ROOT`, `HOST_VARS_DIR`, `K3S_TEMPLATES_DIR`, `K3S_INVENTORY_DIR`), shared `deploy_state` instance, `proc_lock`, `abort_flag`. |
+| `ssh.py` | `_write_temp_key`, `_open_ssh_client` (tries Ed25519 → RSA → ECDSA → DSS), `_ssh_run_live` (non-blocking generator; checks `abort_flag` every iteration). |
+| `inventory.py` | `inventory_bp` Blueprint + `_load_inventory` helper. Routes: `POST /generate`, `GET /detect-inventory`, `POST /delete-host`, `POST /test-ssh`. |
+| `installer.py` | `installer_bp` Blueprint + all K3s install sub-generators (`_gen_docker_on_node`, `_gen_k3s_on_node`, `_stream_k3s_install`). Routes: `GET /deploy`, `POST /deploy-abort`, `GET /deploy-status`. |
+| `uninstaller.py` | `uninstaller_bp` Blueprint + uninstall sub-generators (`_gen_uninstall_node`, `_stream_k3s_uninstall`). Route: `GET /uninstall`. |
+| `kubectl.py` | `kubectl_bp` Blueprint + `_kubectl_get` helper. Routes: `POST /kubectl-nodes`, `POST /kubectl-pods`, `POST /kubectl-services`, `POST /kubectl-node-resources`. |
+
+Import hierarchy (no circular deps): `config ← ssh ← installer / uninstaller`, `config ← inventory ← installer / uninstaller`, `kubectl` standalone.
+
+### Ansible → Python/SSH replacement
+
+- Ansible playbooks are **no longer invoked** by the backend. Install and uninstall run entirely over Paramiko SSH.
+- **Install**: renders `k3s_templates/master.yaml.j2` / `worker.yaml.j2` (Jinja2) → uploads to `/etc/rancher/k3s/config.yaml` via `sudo tee` → runs `curl -sfL https://get.k3s.io | sudo sh -s - server|agent`.
+- **Uninstall**: runs `sudo /usr/local/bin/k3s-uninstall.sh` (servers) or `sudo /usr/local/bin/k3s-agent-uninstall.sh` (agents), then kills and removes all Docker containers on each node (see below).
+- Deployment order: Docker (optional) → primordial master → wait for API → kubeconfig fetch → joining masters → workers.
+- Uninstall order: workers → joining masters → primordial → local `~/.kube/k3s.yaml` cleanup.
+- Live output is streamed to the frontend via SSE (`text/event-stream`) with JSON event types: `steps`, `step_start`, `step_done`, `step_failed`, `task`, `log`, `task_warning`, `finished`, `error`.
+
+### Inventory schema change
+
+Clean per-node YAML files are now written to `inventory/<name>.yaml` with the schema `{name, ip, role: master|worker, primordial: true}` (Ansible-compat fallback still written to `ansible/inv/host_vars/`). `inventory/` contents are git-ignored (`/inventory/*.yaml`, `/inventory/*.yml`).
+
+### Docker container cleanup on uninstall
+
+After the K3s uninstall script completes on each node, `_gen_uninstall_node` now runs two additional SSH commands:
+1. `docker kill $(docker ps -q)` — stops all running containers.
+2. `docker rm -f $(docker ps -aq)` — force-removes all containers (running or stopped).
+
+Both commands are guarded with `|| true` so they succeed silently when Docker is not installed or no containers exist. The K3s uninstall RC still determines step success/failure.
+
+### Flask endpoints summary (current)
+
+| Method | Route | Module | Purpose |
+|--------|-------|--------|---------|
+| GET | `/` | `main.py` | Serves `index.html` |
+| POST | `/generate` | `inventory.py` | Write per-node YAML to `inventory/` and Ansible `host_vars/` |
+| GET | `/detect-inventory` | `inventory.py` | Scan `inventory/` dir and return node list |
+| POST | `/delete-host` | `inventory.py` | Remove a node's YAML from `inventory/` and `host_vars/` |
+| POST | `/test-ssh` | `inventory.py` | Test Paramiko SSH connectivity to a single host |
+| GET | `/deploy` | `installer.py` | SSE stream — Python/SSH K3s install across all nodes |
+| POST | `/deploy-abort` | `installer.py` | Set `abort_flag`; terminates SSH install mid-flight |
+| GET | `/deploy-status` | `installer.py` | Returns current process state (idle/running/success/failed/aborted) |
+| GET | `/uninstall` | `uninstaller.py` | SSE stream — Python/SSH K3s uninstall + Docker cleanup |
+| POST | `/kubectl-nodes` | `kubectl.py` | `kubectl get nodes -o wide`; returns table data |
+| POST | `/kubectl-pods` | `kubectl.py` | `kubectl get pods -A -o wide`; returns table data |
+| POST | `/kubectl-services` | `kubectl.py` | `kubectl get services -A`; returns table data |
+| POST | `/kubectl-node-resources` | `kubectl.py` | `kubectl get nodes -o json` + optional `kubectl top nodes`; per-node CPU/memory/pod metrics |

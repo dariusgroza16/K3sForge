@@ -3,8 +3,6 @@ all:
     masters:
       hosts:
         master1: null
-        master2: null
-        master3: null
     workers:
       hosts:
         worker1: null

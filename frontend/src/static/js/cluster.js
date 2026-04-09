@@ -17,6 +17,12 @@ function initWelcomeScreen() {
       document.getElementById('welcomeScreen').style.display   = 'none';
       document.getElementById('mainContainer').style.display   = '';
       document.getElementById('btnHomeFixed').style.display    = '';
+      // Re-position bubble now that the nav is visible and has layout
+      const navList = document.getElementById('navList');
+      if (navList) {
+        const activeLi = navList.querySelectorAll('li')[activeTabIndex];
+        if (activeLi) requestAnimationFrame(() => updateBubblePosition(activeLi));
+      }
     });
   }
 

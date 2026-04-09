@@ -23,8 +23,7 @@ function setupHandlers() {
         updateBubblePosition(item);
       });
     });
-    const activeLi = tabItems[activeTabIndex];
-    if (activeLi) setTimeout(() => updateBubblePosition(activeLi), 50);
+    // Bubble positioning is deferred to when the container becomes visible (cluster.js).
     updateTabStates();
     window.addEventListener('resize', () => {
       const cur = navList.querySelectorAll('li')[activeTabIndex];

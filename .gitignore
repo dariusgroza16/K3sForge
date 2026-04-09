@@ -1,3 +1,6 @@
 # Ignore generated node inventory files but keep the directory tracked
 /inventory/*.yaml
 /inventory/*.yml
+
+# Python cache
+frontend/src/__pycache__/

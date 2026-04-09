@@ -8,5 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch(e) {
     console.error('init error', e);
     showToast('Frontend initialization error');
+  } finally {
+    const loader = document.getElementById('pageLoader');
+    if (loader) {
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 500);
+    }
   }
 });

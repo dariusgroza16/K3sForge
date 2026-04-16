@@ -261,6 +261,28 @@ function setupHandlers(){
     });
   });
 
+  const copyKubeconfigBtn = document.getElementById('copyKubeconfig');
+  if (copyKubeconfigBtn) copyKubeconfigBtn.addEventListener('click', async () => {
+    const content = document.getElementById('kubeconfigContent');
+    if (!content || !content.textContent) {
+      showToast('⚠️ No kubeconfig to copy', 2000);
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(content.textContent);
+      const label = document.getElementById('copyKubeconfigLabel');
+      if (label) {
+        const originalText = label.textContent;
+        label.textContent = 'Copied!';
+        setTimeout(() => { label.textContent = originalText; }, 2000);
+      }
+      showToast('✅ Kubeconfig copied to clipboard', 2000);
+    } catch(e) {
+      showToast('❌ Failed to copy to clipboard', 2000);
+      console.error('Copy failed:', e);
+    }
+  });
+
   const dl = document.getElementById('downloadTopo');
   if (dl) dl.addEventListener('click', ()=>{
     const container = document.getElementById('topology'); if (!container) { showToast('Nothing to download'); return; }
@@ -473,6 +495,8 @@ function _showDeployIdle() {
   document.getElementById('deployIdle').style.display = '';
   document.getElementById('deployRunning').style.display = 'none';
   document.getElementById('uninstallRunning').style.display = 'none';
+  const kubeconfigPanel = document.getElementById('kubeconfigPanel');
+  if (kubeconfigPanel) kubeconfigPanel.style.display = 'none';
 }
 
 function _showDeployRunning() {
@@ -484,6 +508,8 @@ function _showDeployRunning() {
   document.getElementById('redeployCluster').style.display = 'none';
   document.getElementById('deployTitle').textContent = 'Deploying…';
   document.getElementById('deploySubtitle').textContent = 'Running the k3s-install playbook';
+  const kubeconfigPanel = document.getElementById('kubeconfigPanel');
+  if (kubeconfigPanel) kubeconfigPanel.style.display = 'none';
 }
 
 function _showUninstallRunning() {
@@ -554,6 +580,17 @@ function startDeploy() {
         document.getElementById('deployTitle').textContent = '✅ Cluster Deployed';
         document.getElementById('deploySubtitle').textContent = 'All roles completed successfully';
         document.getElementById('uninstallCluster').style.display = '';
+        
+        // Display kubeconfig if present
+        if (data.kubeconfig) {
+          const kubeconfigPanel = document.getElementById('kubeconfigPanel');
+          const kubeconfigContent = document.getElementById('kubeconfigContent');
+          if (kubeconfigPanel && kubeconfigContent) {
+            kubeconfigContent.textContent = data.kubeconfig;
+            kubeconfigPanel.style.display = '';
+          }
+        }
+        
         showToast('🎉 K3s cluster deployed successfully!', 5000);
       } else if (data.aborted) {
         document.getElementById('deployTitle').textContent = '⛔ Deployment Aborted';

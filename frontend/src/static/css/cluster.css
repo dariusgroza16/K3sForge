@@ -9,6 +9,51 @@
 
 .nodes-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 
+/* ── Existing cluster uninstall section ───────────────────────────── */
+.existing-uninstall-section {
+  margin-top: 32px;
+  padding-top: 24px;
+}
+
+.existing-uninstall-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: rgba(255,255,255,0.25);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.existing-uninstall-divider::before,
+.existing-uninstall-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.existing-uninstall-title {
+  color: rgba(255,255,255,0.75);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+}
+
+.existing-uninstall-subtitle {
+  color: rgba(255,255,255,0.4);
+  font-size: 0.85rem;
+  font-weight: 400;
+  margin: 0 0 18px 0;
+}
+
+.existing-uninstall-progress-title {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 14px 0;
+  text-align: center;
+}
+
 .nodes-table th {
   color: rgba(255,255,255,0.6);
   font-weight: 600;

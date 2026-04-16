@@ -33,10 +33,12 @@ const updateTabStates = () => {
       connectionsTab.classList.remove('disabled');
       connectionsTab.style.pointerEvents = 'auto';
       connectionsTab.style.opacity = '1';
+      connectionsTab.removeAttribute('title');
     } else {
       connectionsTab.classList.add('disabled');
       connectionsTab.style.pointerEvents = 'none';
       connectionsTab.style.opacity = '0.4';
+      connectionsTab.title = 'Generate or detect an inventory first';
     }
   }
 
@@ -46,15 +48,21 @@ const updateTabStates = () => {
       deployTab.classList.remove('disabled');
       deployTab.style.pointerEvents = 'auto';
       deployTab.style.opacity = '1';
+      deployTab.removeAttribute('title');
     } else {
       deployTab.classList.add('disabled');
       deployTab.style.pointerEvents = 'none';
       deployTab.style.opacity = '0.4';
+      deployTab.title = 'Complete connection tests successfully first';
     }
   }
 };
 
 function switchTab(tabName) {
+  const stepLabels = { inventory: 'Step 1 of 3 — Inventory', connections: 'Step 2 of 3 — Test Connections', deploy: 'Step 3 of 3 — Deploy' };
+  const progress = document.getElementById('stepProgress');
+  if (progress && stepLabels[tabName]) progress.textContent = stepLabels[tabName];
+
   document.querySelectorAll('.tab-button').forEach(btn => {
     btn.classList.toggle('active', btn.getAttribute('data-tab') === tabName);
   });

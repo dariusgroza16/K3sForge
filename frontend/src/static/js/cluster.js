@@ -62,6 +62,22 @@ function initWelcomeScreen() {
     btnProceed.addEventListener('click', () => enterClusterDashboard());
   }
 
+  // ── Existing cluster uninstall ─────────────────────────────────────
+  const btnExistingUninstall = document.getElementById('btnExistingUninstall');
+  if (btnExistingUninstall) {
+    btnExistingUninstall.addEventListener('click', () => startExistingUninstall());
+  }
+  const btnAbortExistingUninstall = document.getElementById('btnAbortExistingUninstall');
+  if (btnAbortExistingUninstall) {
+    btnAbortExistingUninstall.addEventListener('click', () => {
+      showConfirmToast('Abort the running uninstall?', async () => {
+        try { await fetch('/deploy-abort', { method: 'POST' }); }
+        catch(e) { showToast('Failed to send abort signal'); }
+      });
+    });
+  }
+  wireSecretToggle('toggleExistingSSHKey', 'existingSSHKey');
+
   const btnBackToKubeconfig = document.getElementById('btnBackToKubeconfig');
   if (btnBackToKubeconfig) {
     btnBackToKubeconfig.addEventListener('click', () => {
@@ -438,4 +454,81 @@ function initClusterNavBubble() {
   if (!navList) return;
   const activeLi = navList.querySelector('li.active');
   if (activeLi) setTimeout(() => updateClusterNavBubble(activeLi), 40);
+}
+
+// ── Existing cluster uninstall ───────────────────────────────────────
+function startExistingUninstall() {
+  const username = document.getElementById('existingSSHUser')?.value.trim();
+  const sshKey   = document.getElementById('existingSSHKey')?.value.trim();
+  if (!username || !sshKey) {
+    showToast('SSH username and private key are required to uninstall.');
+    return;
+  }
+  showConfirmToast('Uninstall K3s from all nodes in this cluster?', () => {
+    const runningEl = document.getElementById('existingUninstallRunning');
+    const stepsEl   = document.getElementById('existingUninstallSteps');
+    const titleEl   = document.getElementById('existingUninstallTitle');
+    const abortBtn  = document.getElementById('btnAbortExistingUninstall');
+    const startBtn  = document.getElementById('btnExistingUninstall');
+    if (runningEl) runningEl.style.display = '';
+    if (startBtn)  startBtn.style.display  = 'none';
+    if (stepsEl)   stepsEl.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;">Connecting…</div>';
+
+    const params = new URLSearchParams({ username, ssh_key: sshKey });
+    const es = new EventSource(`/uninstall?${params.toString()}`);
+    _eventSource = es;
+
+    const DONE_ICON = '✓';
+    const FAIL_ICON = '✕';
+
+    es.onmessage = (ev) => {
+      let data; try { data = JSON.parse(ev.data); } catch { return; }
+      if (data.type === 'steps') {
+        stepsEl.innerHTML = '';
+        data.steps.forEach(s => {
+          const card = document.createElement('div');
+          card.className = 'step-card pending';
+          card.id = `ex-step-${s.id}`;
+          card.innerHTML = `<div class="step-icon"></div><div class="step-label">${escapeHtml(s.label)}</div><div class="step-task"></div>`;
+          stepsEl.appendChild(card);
+        });
+        return;
+      }
+      const setCard = (id, state, taskText) => {
+        const card = document.getElementById(`ex-step-${id}`);
+        if (!card) return;
+        card.className = `step-card ${state}`;
+        const icon = card.querySelector('.step-icon');
+        if (state === 'done'   && icon) icon.textContent = DONE_ICON;
+        if (state === 'failed' && icon) icon.textContent = FAIL_ICON;
+        if (taskText !== undefined) { const t = card.querySelector('.step-task'); if (t) t.textContent = taskText; }
+      };
+      if (data.type === 'step_start')   { setCard(data.step, 'active', ''); return; }
+      if (data.type === 'step_done')    { setCard(data.step, 'done'); return; }
+      if (data.type === 'task')         { setCard(data.step, 'active', data.task); return; }
+      if (data.type === 'task_warning') { setCard(data.step, 'active', '⚠ ' + (data.msg || '').slice(0, 80)); return; }
+      if (data.type === 'step_failed')  { setCard(data.step, 'failed', 'Failed'); return; }
+      if (data.type === 'finished') {
+        es.close(); _eventSource = null;
+        if (abortBtn) abortBtn.style.display = 'none';
+        if (data.success) {
+          if (titleEl) titleEl.textContent = 'Cluster uninstalled successfully';
+          showToast('Cluster uninstalled successfully.', 5000);
+        } else if (data.aborted) {
+          if (titleEl) titleEl.textContent = 'Uninstall aborted';
+          if (startBtn) startBtn.style.display = '';
+        } else {
+          if (titleEl) titleEl.textContent = 'Uninstall failed — check steps above';
+          if (startBtn) startBtn.style.display = '';
+        }
+        return;
+      }
+    };
+    es.onerror = () => {
+      es.close(); _eventSource = null;
+      if (abortBtn) abortBtn.style.display = 'none';
+      if (titleEl) titleEl.textContent = 'Connection lost';
+      if (startBtn) startBtn.style.display = '';
+    };
+  });
 }

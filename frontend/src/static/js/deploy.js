@@ -64,6 +64,8 @@ function _showDeployIdle() {
   document.getElementById('deployIdle').style.display      = '';
   document.getElementById('deployRunning').style.display   = 'none';
   document.getElementById('uninstallRunning').style.display = 'none';
+  const panel = document.getElementById('kubeconfigPanel');
+  if (panel) panel.style.display = 'none';
 }
 
 function _showDeployRunning() {
@@ -73,6 +75,8 @@ function _showDeployRunning() {
   document.getElementById('abortDeploy').style.display      = '';
   document.getElementById('uninstallCluster').style.display = 'none';
   document.getElementById('redeployCluster').style.display  = 'none';
+  const panel = document.getElementById('kubeconfigPanel');
+  if (panel) panel.style.display = 'none';
   document.getElementById('deployTitle').textContent    = 'Deploying…';
   document.getElementById('deploySubtitle').textContent = 'Installing K3s on all nodes via SSH';
 }
@@ -120,17 +124,34 @@ function startDeploy() {
       document.getElementById('abortDeploy').style.display = 'none';
       if (data.success) {
         clusterDeployed = true;
-        document.getElementById('deployTitle').textContent    = '✅ Cluster Deployed';
+        document.getElementById('deployTitle').textContent    = 'Cluster Deployed';
         document.getElementById('deploySubtitle').textContent = 'All steps completed successfully';
         document.getElementById('uninstallCluster').style.display = '';
-        showToast('🎉 K3s cluster deployed successfully!', 5000);
+        showToast('K3s cluster deployed successfully!', 5000);
+
+        // Show kubeconfig panel if content was returned
+        if (data.kubeconfig) {
+          const panel   = document.getElementById('kubeconfigPanel');
+          const pre     = document.getElementById('kubeconfigContent');
+          const copyBtn = document.getElementById('copyKubeconfig');
+          const label   = document.getElementById('copyKubeconfigLabel');
+          if (pre) pre.textContent = data.kubeconfig;
+          if (panel) panel.style.display = '';
+          if (copyBtn) {
+            copyBtn.onclick = () => {
+              navigator.clipboard.writeText(data.kubeconfig).then(() => {
+                if (label) { label.textContent = 'Copied!'; setTimeout(() => { label.textContent = 'Copy'; }, 2000); }
+              }).catch(() => showToast('Copy failed — select and copy manually.'));
+            };
+          }
+        }
       } else if (data.aborted) {
-        document.getElementById('deployTitle').textContent    = '⛔ Deployment Aborted';
+        document.getElementById('deployTitle').textContent    = 'Deployment Aborted';
         document.getElementById('deploySubtitle').textContent = 'The process was cancelled by the user';
         document.getElementById('redeployCluster').style.display = '';
         container.querySelectorAll('.step-card.active, .step-card.pending').forEach(c => c.className = 'step-card aborted');
       } else {
-        document.getElementById('deployTitle').textContent    = '❌ Deployment Failed';
+        document.getElementById('deployTitle').textContent    = 'Deployment Failed';
         document.getElementById('deploySubtitle').textContent = 'Check the step that failed for details';
         document.getElementById('redeployCluster').style.display = '';
         container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
@@ -140,10 +161,10 @@ function startDeploy() {
 
     if (data.type === 'error') {
       es.close(); _eventSource = null;
-      showToast('❌ ' + (data.msg || 'Unknown error'), 5000);
+      showToast((data.msg || 'Unknown error'), 5000);
       document.getElementById('abortDeploy').style.display     = 'none';
       document.getElementById('redeployCluster').style.display = '';
-      document.getElementById('deployTitle').textContent    = '❌ Error';
+      document.getElementById('deployTitle').textContent    = 'Error';
       document.getElementById('deploySubtitle').textContent = data.msg || '';
     }
   };

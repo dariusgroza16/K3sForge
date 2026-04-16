@@ -78,3 +78,13 @@
 .actions { display: flex; justify-content: space-between; align-items: center; }
 .actions-left  { display: flex; gap: 12px; }
 .actions-right { display: flex; gap: 12px; }
+
+/* Step progress label */
+.step-progress {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.04em;
+  margin: -8px 0 18px 0;
+}

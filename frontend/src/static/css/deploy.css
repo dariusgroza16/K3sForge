@@ -4,6 +4,94 @@
 .empty-state-title { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px 0; color: #fff; }
 .empty-state-text  { font-size: 1rem; color: rgba(255,255,255,0.7); margin: 0; }
 
+/* ── Kubeconfig panel ─────────────────────────────────────────────── */
+.kubeconfig-panel {
+  margin-top: 28px;
+  background: rgba(0,0,0,0.45);
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 14px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  animation: popIn .3s ease;
+  box-shadow: 0 0 32px rgba(99,102,241,0.1);
+}
+
+.kubeconfig-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: rgba(99,102,241,0.07);
+  gap: 12px;
+}
+
+.kubeconfig-panel-title {
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.kubeconfig-panel-subtitle {
+  color: rgba(255,255,255,0.45);
+  font-size: 0.78rem;
+  font-weight: 400;
+  margin: 3px 0 0 0;
+}
+
+.kubeconfig-panel-subtitle code {
+  font-family: 'Courier New', monospace;
+  background: rgba(255,255,255,0.08);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}
+
+.kubeconfig-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+  background: rgba(99,102,241,0.18);
+  border: 1px solid rgba(99,102,241,0.4);
+  color: #c7d2fe;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+.kubeconfig-copy-btn:hover {
+  background: rgba(99,102,241,0.32);
+  border-color: rgba(99,102,241,0.65);
+  color: #fff;
+}
+.kubeconfig-copy-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.kubeconfig-pre {
+  margin: 0;
+  padding: 16px 18px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: #c4cfff;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99,102,241,0.3) transparent;
+}
+.kubeconfig-pre::-webkit-scrollbar { width: 6px; height: 6px; }
+.kubeconfig-pre::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+
 /* Deploy view */
 .deploy-section      { animation: popIn .25s ease; }
 .deploy-header       { text-align: center; margin-bottom: 28px; }
@@ -115,6 +203,20 @@
 }
 .deploy-option-row:last-child { margin-bottom: 0; }
 
+/* Token row: label on top, input full-width below */
+.deploy-option-row--full {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.deploy-option-row--full .secret-field-wrapper {
+  width: 100%;
+}
+.deploy-option-row--full .deploy-option-input {
+  width: 100%;
+  padding-right: 40px;
+}
+
 .deploy-option-label {
   color: rgba(255,255,255,0.85);
   font-size: 0.9rem;
@@ -135,7 +237,7 @@
   outline: none;
   transition: border-color 0.2s;
 }
-.deploy-option-input:focus { border-color: var(--accent); }
+.deploy-option-input:focus { border-color: var(--accent); outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .runtime-toggle-group {
   display: flex;

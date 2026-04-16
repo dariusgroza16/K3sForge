@@ -115,6 +115,7 @@
         </li>
       </ul>
     </nav>
+    <p class="step-progress" id="stepProgress">Step 1 of 3 — Inventory</p>
 
     <!-- Tab Content -->
     <main class="main-card" id="inventoryView" data-tab-content="inventory">
@@ -173,7 +174,13 @@
         </div>
         <div class="input-group">
           <label for="sshKey">SSH Private Key</label>
-          <textarea id="sshKey" placeholder="Paste your SSH private key here (RSA or Ed25519)..." aria-label="SSH Private Key" rows="12"></textarea>
+          <div class="secret-field-wrapper">
+            <textarea id="sshKey" placeholder="Paste your SSH private key here (RSA or Ed25519)..." aria-label="SSH Private Key" rows="12"></textarea>
+            <button type="button" class="secret-toggle-btn" id="toggleSshKey" aria-label="Show/hide SSH key" title="Show / Hide key">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
         </div>
         <div class="actions">
           <button id="backToInventory" class="secondary">Back to Inventory</button>
@@ -201,10 +208,16 @@
         <!-- Deploy Options -->
         <section class="deploy-options-section">
           <h3 class="deploy-options-title">Options</h3>
-          <div class="deploy-option-row">
+          <div class="deploy-option-row deploy-option-row--full">
             <label class="deploy-option-label" for="k3sToken">Cluster Token</label>
-            <input type="text" id="k3sToken" placeholder="Shared secret for all nodes"
-                   class="deploy-option-input" autocomplete="off" spellcheck="false">
+            <div class="secret-field-wrapper">
+              <input type="password" id="k3sToken" placeholder="Shared secret for all nodes"
+                     class="deploy-option-input" autocomplete="off" spellcheck="false">
+              <button type="button" class="secret-toggle-btn" id="toggleK3sToken" aria-label="Show/hide token" title="Show / Hide token">
+                <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              </button>
+            </div>
           </div>
           <div class="deploy-option-row">
             <span class="deploy-option-label">Container Runtime</span>
@@ -237,8 +250,26 @@
 
         <div class="deploy-actions-bottom">
           <button id="abortDeploy" class="secondary abort-btn">✕ Abort</button>
-          <button id="uninstallCluster" class="secondary uninstall-btn" style="display:none;">🗑 Uninstall Cluster</button>
-          <button id="redeployCluster" class="primary" style="display:none;">🔄 Redeploy</button>
+          <button id="uninstallCluster" class="secondary uninstall-btn" style="display:none;">Uninstall Cluster</button>
+          <button id="redeployCluster" class="primary" style="display:none;">Redeploy</button>
+        </div>
+
+        <!-- Kubeconfig panel — shown after successful deploy -->
+        <div id="kubeconfigPanel" class="kubeconfig-panel" style="display:none;">
+          <div class="kubeconfig-panel-header">
+            <div>
+              <h3 class="kubeconfig-panel-title">Kubeconfig</h3>
+              <p class="kubeconfig-panel-subtitle">Paste this into your local <code>~/.kube/config</code> to access the cluster</p>
+            </div>
+            <button id="copyKubeconfig" class="kubeconfig-copy-btn" title="Copy to clipboard">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span id="copyKubeconfigLabel">Copy</span>
+            </button>
+          </div>
+          <pre id="kubeconfigContent" class="kubeconfig-pre"></pre>
         </div>
       </div>
 
@@ -283,6 +314,39 @@
       <div class="actions" style="margin-top: 16px;">
         <button id="btnBackToWelcome" class="secondary">&#8592; Back</button>
         <button id="btnProceedKubeconfig" class="primary">Proceed</button>
+      </div>
+
+      <!-- Uninstall existing cluster -->
+      <div class="existing-uninstall-section">
+        <div class="existing-uninstall-divider"><span>OR</span></div>
+        <h3 class="existing-uninstall-title">Uninstall Cluster</h3>
+        <p class="existing-uninstall-subtitle">Provide SSH credentials to remove K3s from all nodes in this cluster</p>
+        <div class="input-group">
+          <label for="existingSSHUser">SSH Username</label>
+          <input type="text" id="existingSSHUser" placeholder="root" aria-label="SSH Username">
+        </div>
+        <div class="input-group">
+          <label for="existingSSHKey">SSH Private Key</label>
+          <div class="secret-field-wrapper">
+            <textarea id="existingSSHKey" placeholder="Paste your SSH private key here…" rows="6"></textarea>
+            <button type="button" class="secret-toggle-btn" id="toggleExistingSSHKey" aria-label="Show/hide SSH key" title="Show / Hide key">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;">
+          <button id="btnExistingUninstall" class="secondary uninstall-btn">Uninstall Cluster</button>
+        </div>
+
+        <!-- Uninstall progress (hidden until started) -->
+        <div id="existingUninstallRunning" style="display:none;margin-top:20px;">
+          <h4 class="existing-uninstall-progress-title" id="existingUninstallTitle">Uninstalling…</h4>
+          <div id="existingUninstallSteps" class="deploy-steps"></div>
+          <div style="display:flex;justify-content:center;margin-top:16px;">
+            <button id="btnAbortExistingUninstall" class="secondary abort-btn">Abort</button>
+          </div>
+        </div>
       </div>
     </main>
 

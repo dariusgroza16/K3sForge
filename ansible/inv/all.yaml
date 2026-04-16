@@ -1,0 +1,12 @@
+all:
+  children:
+    masters:
+      hosts:
+        master1: null
+        master2: null
+        master3: null
+    workers:
+      hosts:
+        worker1: null
+        worker2: null
+        worker3: null

@@ -1,6 +1,6 @@
 .connection-header   { text-align: center; margin-bottom: 24px; }
 .section-title       { color: #fff; margin: 0; font-size: 1.6rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.6); }
-.section-subtitle    { color: var(--card); margin: 8px 0 0 0; font-size: 1.05rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.6); }
+.section-subtitle    { color: rgba(255,255,255,0.65); margin: 8px 0 0 0; font-size: 0.95rem; font-weight: 400; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
 
 .ssh-config-section  { margin-bottom: 24px; }
 .input-group         { margin-bottom: 16px; }
@@ -13,14 +13,62 @@
   font-size: 0.85rem; resize: vertical; min-height: 200px;
   backdrop-filter: blur(8px); transition: box-shadow .15s, border-color .15s;
 }
-.input-group textarea:focus { box-shadow: 0 4px 18px rgba(99,102,241,0.3); border-color: rgba(255,255,255,0.3); }
+.input-group textarea:focus { box-shadow: 0 4px 18px rgba(99,102,241,0.3); border-color: rgba(255,255,255,0.3); outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Secret field wrapper (SSH key, cluster token) */
+.secret-field-wrapper {
+  position: relative;
+}
+.secret-field-wrapper textarea,
+.secret-field-wrapper input {
+  width: 100%;
+  padding-right: 44px;
+}
+.secret-toggle-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.2s;
+  line-height: 1;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  color: #fff;
+}
+.secret-toggle-btn:hover { opacity: 0.9; }
+.secret-toggle-btn svg.eye-icon,
+.secret-toggle-btn svg.eye-off-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.input-group textarea.input-error,
+.input-group input[type="text"].input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239,68,68,0.25) !important;
+  outline: 2px solid #ef4444 !important;
+  outline-offset: 2px;
+}
+
+.field-error-msg {
+  display: block;
+  color: #f87171;
+  font-size: 0.78rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
 .input-group input[type="text"] {
   width: 100%; padding: 10px 12px; border-radius: 8px;
   border: 1px solid rgba(255,255,255,0.15);
   background: rgba(0,0,0,0.5); color: var(--card);
   outline: none; transition: box-shadow .15s, transform .08s; backdrop-filter: blur(8px);
 }
-.input-group input[type="text"]:focus { box-shadow: 0 4px 18px rgba(99,102,241,0.3); transform: translateY(-2px); border-color: rgba(255,255,255,0.3); }
+.input-group input[type="text"]:focus { box-shadow: 0 4px 18px rgba(99,102,241,0.3); transform: translateY(-2px); border-color: rgba(255,255,255,0.3); outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .connection-results  { margin-top: 24px; }
 .results-title       { color: #fff; font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; }

@@ -167,6 +167,7 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
         env         = _get_jinja_env()
         master_tmpl = env.get_template('master.yaml.j2')
         worker_tmpl = env.get_template('worker.yaml.j2')
+        _fetched_kubeconfig = None  # populated during kubeconfig phase
 
         # ── Phase 1: Docker ───────────────────────────────────────────────
         if use_docker:
@@ -264,6 +265,7 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
                     lambda m: f'https://{primordial_ip}{m.group(1) or ""}',
                     raw_kube,
                 )
+                _fetched_kubeconfig = kubeconfig
                 kube_dir  = os.path.expanduser('~/.kube')
                 os.makedirs(kube_dir, exist_ok=True)
                 kube_path = os.path.join(kube_dir, 'k3s.yaml')
@@ -349,7 +351,8 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
                 return
 
         deploy_state.status = 'success'
-        yield _sse({'type': 'finished', 'success': True})
+        yield _sse({'type': 'finished', 'success': True,
+                    'kubeconfig': _fetched_kubeconfig or ''})
 
     except Exception as exc:
         deploy_state.status = 'failed'

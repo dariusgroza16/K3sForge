@@ -48,7 +48,25 @@ function setupHandlers() {
       const name = nameEl.value.trim();
       const ip   = ipEl.value.trim();
       const role = document.getElementById('roleSwitch')?.checked ? 'master' : 'worker';
-      if (!name || !ip) { showToast('Please fill out both VM name and IP.'); return; }
+
+      // Inline validation
+      let valid = true;
+      const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
+      nameEl.classList.remove('input-error'); setFieldError(nameEl, '');
+      ipEl.classList.remove('input-error');   setFieldError(ipEl, '');
+      if (!name) {
+        nameEl.classList.add('input-error'); setFieldError(nameEl, 'VM name is required');
+        valid = false;
+      }
+      if (!ip) {
+        ipEl.classList.add('input-error'); setFieldError(ipEl, 'IP address is required');
+        valid = false;
+      } else if (!ipPattern.test(ip)) {
+        ipEl.classList.add('input-error'); setFieldError(ipEl, 'Enter a valid IPv4 address');
+        valid = false;
+      }
+      if (!valid) return;
+
       const existingMasters = vms.filter(x => x.role === 'master').length;
       vms.push({ name, ip, role });
       if (role === 'master' && existingMasters === 0) primordialMaster = name;
@@ -157,4 +175,8 @@ function setupHandlers() {
     img.onerror = () => { showToast('Failed to render image'); URL.revokeObjectURL(url); };
     img.src = url;
   });
+
+  // ── Secret visibility toggles ──────────────────────────────────────
+  wireSecretToggle('toggleSshKey', 'sshKey');
+  wireSecretToggle('toggleK3sToken', 'k3sToken');
 }

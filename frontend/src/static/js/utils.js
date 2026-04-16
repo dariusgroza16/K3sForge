@@ -7,6 +7,43 @@ function escapeHtml(str) {
   });
 }
 
+function setFieldError(inputEl, message) {
+  const existing = inputEl.parentElement.querySelector('.field-error-msg');
+  if (existing) existing.remove();
+  if (message) {
+    const msg = document.createElement('span');
+    msg.className = 'field-error-msg';
+    msg.textContent = message;
+    inputEl.parentElement.appendChild(msg);
+    inputEl.addEventListener('input', () => {
+      inputEl.classList.remove('input-error');
+      const m = inputEl.parentElement.querySelector('.field-error-msg');
+      if (m) m.remove();
+    }, { once: true });
+  }
+}
+
+function wireSecretToggle(btnId, fieldId) {
+  const btn   = document.getElementById(btnId);
+  const field = document.getElementById(fieldId);
+  if (!btn || !field) return;
+  btn.addEventListener('click', () => {
+    const isHidden = field.tagName === 'TEXTAREA'
+      ? field.dataset.hidden === '1'
+      : field.type === 'password';
+    if (field.tagName === 'TEXTAREA') {
+      field.dataset.hidden = isHidden ? '0' : '1';
+      field.style.webkitTextSecurity = isHidden ? '' : 'disc';
+    } else {
+      field.type = isHidden ? 'text' : 'password';
+    }
+    const eyeOn  = btn.querySelector('.eye-icon');
+    const eyeOff = btn.querySelector('.eye-off-icon');
+    if (eyeOn)  eyeOn.style.display  = isHidden ? 'block' : 'none';
+    if (eyeOff) eyeOff.style.display = isHidden ? 'none'  : 'block';
+  });
+}
+
 function showToast(message, timeout = 3000) {
   const t = document.getElementById('toast');
   if (!t) return console.warn('toast element missing');

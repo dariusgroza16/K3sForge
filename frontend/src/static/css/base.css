@@ -37,7 +37,7 @@ body {
 .logo-image { max-width: 220px; height: auto; display:block; margin: 0 auto 12px; filter: drop-shadow(0 6px 18px rgba(99,102,241,0.25)); border-radius: 8px; }
 
 .app-title { color: var(--card); margin: 0; font-size: 1.6rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.6); }
-.subtitle { color: var(--card); margin: 6px 0 0 0; font-size: 1.05rem; font-weight: 700; text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.6); }
+.subtitle { color: var(--card); margin: 6px 0 0 0; font-size: 1.05rem; font-weight: 400; opacity: 0.75; text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 4px 24px rgba(0,0,0,0.6); }
 
 .main-card {
   background: transparent;

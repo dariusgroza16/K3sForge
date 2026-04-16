@@ -6,7 +6,7 @@ import paramiko
 import yaml
 from flask import Blueprint, jsonify, request
 
-from config import HOST_VARS_DIR, K3S_INVENTORY_DIR, inv_location
+from config import K3S_INVENTORY_DIR
 
 inventory_bp = Blueprint('inventory', __name__)
 
@@ -57,34 +57,20 @@ def generate():
     if not primordial_master or primordial_master not in master_names:
         primordial_master = master_names[0]
 
-    all_data = {'all': {'children': {'masters': {'hosts': {}}, 'workers': {'hosts': {}}}}}
-
     for vm in vms:
         name = vm['name']
         ip   = vm['ip']
         role = vm['role']
 
         if role == 'master':
-            all_data['all']['children']['masters']['hosts'][name] = None
-            inv_data     = {'name': name, 'ip': ip, 'role': 'master'}
+            inv_data = {'name': name, 'ip': ip, 'role': 'master'}
             if primordial_master == name:
                 inv_data['primordial'] = True
-            ansible_data = {'server_name': name, 'server_ip': ip, 'var_master': True}
-            if primordial_master == name:
-                ansible_data['var_primordial_master'] = True
         else:
-            all_data['all']['children']['workers']['hosts'][name] = None
-            inv_data     = {'name': name, 'ip': ip, 'role': 'worker'}
-            ansible_data = {'server_name': name, 'server_ip': ip, 'var_worker': True}
+            inv_data = {'name': name, 'ip': ip, 'role': 'worker'}
 
         with open(os.path.join(K3S_INVENTORY_DIR, f'{name}.yaml'), 'w') as f:
             yaml.dump(inv_data, f)
-
-        with open(os.path.join(HOST_VARS_DIR, f'{name}.yaml'), 'w') as f:
-            yaml.dump(ansible_data, f)
-
-    with open(os.path.join(inv_location, 'all.yaml'), 'w') as f:
-        yaml.dump(all_data, f)
 
     return jsonify({'status': 'success', 'primordial_master': primordial_master})
 
@@ -133,16 +119,11 @@ def delete_host():
     if not name:
         return jsonify({'status': 'error', 'message': 'Missing host name.'}), 400
 
-    inv_file      = os.path.join(K3S_INVENTORY_DIR, f'{name}.yaml')
-    host_var_file = os.path.join(HOST_VARS_DIR,     f'{name}.yaml')
+    inv_file = os.path.join(K3S_INVENTORY_DIR, f'{name}.yaml')
 
     try:
-        deleted = False
-        for path in (inv_file, host_var_file):
-            if os.path.exists(path):
-                os.remove(path)
-                deleted = True
-        if deleted:
+        if os.path.exists(inv_file):
+            os.remove(inv_file)
             return jsonify({'status': 'success', 'message': f'Host {name} deleted.'})
         return jsonify({'status': 'success', 'message': f'Host {name} not found in inventory.'})
     except Exception as exc:

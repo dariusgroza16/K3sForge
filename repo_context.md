@@ -102,6 +102,16 @@ If you'd like different naming, file location, or an alternate structured format
   - Added `.node-resources-grid`, `.node-resource-card`, `.nrc-*` family of classes.
   - Bar fill states: `.bar-ok` (green), `.bar-warn` (amber), `.bar-critical` (red).
 
+2026-04-16 — Assistant — Removed Ansible-related directory structure.
+- **Backend (`frontend/src/config.py`)**:
+  - Removed `ANSIBLE_DIR`, `inv_location`, and `HOST_VARS_DIR` constants.
+  - Only `K3S_INVENTORY_DIR` (pointing to `inventory/` at workspace root) is used for inventory files.
+- **Backend (`frontend/src/inventory.py`)**:
+  - Removed generation of Ansible-specific files (`all.yaml`, host_vars files).
+  - Inventory generation now only writes node YAML files to `inventory/` directory.
+  - Simplified delete-host route to only remove files from `inventory/`.
+  - Files are no longer written to `ansible/inv/host_vars/` or `ansible/inv/all.yaml`.
+
 2026-03-07 — Assistant — Added a persistent "Home" button available from both cluster flows.
 - **HTML**: Added `<button id="btnHomeFixed" class="home-fixed-btn" style="display:none;">⌂ Home</button>` as a fixed-position overlay before `#toast`.
 - **JS**: Added `_goHome()` (hides both containers, resets `_clusterData`, hides button). `initWelcomeScreen()` now shows the button when entering any flow and wires a click handler on `btnHomeFixed`. A running-process guard shows a confirmation toast before navigating away if `_eventSource` is active.
@@ -181,7 +191,7 @@ frontend/src/
 | File | Responsibility |
 |------|---------------|
 | `main.py` | Thin app factory: imports and registers Blueprints, serves `index.html`. 22 lines. |
-| `config.py` | Path constants (`WORKSPACE_ROOT`, `HOST_VARS_DIR`, `K3S_TEMPLATES_DIR`, `K3S_INVENTORY_DIR`), shared `deploy_state` instance, `proc_lock`, `abort_flag`. |
+| `config.py` | Path constants (`WORKSPACE_ROOT`, `K3S_TEMPLATES_DIR`, `K3S_INVENTORY_DIR`), shared `deploy_state` instance, `proc_lock`, `abort_flag`. |
 | `ssh.py` | `_write_temp_key`, `_open_ssh_client` (tries Ed25519 → RSA → ECDSA → DSS), `_ssh_run_live` (non-blocking generator; checks `abort_flag` every iteration). |
 | `inventory.py` | `inventory_bp` Blueprint + `_load_inventory` helper. Routes: `POST /generate`, `GET /detect-inventory`, `POST /delete-host`, `POST /test-ssh`. |
 | `installer.py` | `installer_bp` Blueprint + all K3s install sub-generators (`_gen_docker_on_node`, `_gen_k3s_on_node`, `_stream_k3s_install`). Routes: `GET /deploy`, `POST /deploy-abort`, `GET /deploy-status`. |

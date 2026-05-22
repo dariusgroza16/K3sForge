@@ -7,8 +7,6 @@
 \usepackage[romanian]{babel}
 \usepackage{setspace}         % single line spacing
 \usepackage{url}              % proper URL formatting in bibliography
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc}
 %\usepackage{...insert other packages here...}
 \newtheorem{thm}{Teorema}[section]
 \newtheorem{lem}[thm]{Lema}
@@ -83,18 +81,18 @@ Facultatea de Calculatoare și Informatică Aplicată}}
 
 
 
-\noindent În contextul actual al dezvoltării infrastructurilor IT, în care containerizarea și orchestrarea aplicațiilor distribuite joacă un rol central, gestionarea eficientă a clusterelor Kubernetes devine o necesitate tot mai prezentă, datorită numeroaselore beneficii ce vin cu acestea. Deși tehnologiile de tip Kubernetes sunt preponderente in lumea enterprise a companiilor, așa cum a fost confirmat și de un studiu realizat de Edge Delta, care arată cum, in ultimi ani, peste 60\% din companiile IT au adoptat această tehnologie [3], utilizarea ei necesita un nivel crescut de cunoștiințe, alăturat de multe skill-uri din diferite arii, cum ar fi: Networking, Automatizare, Linux, Securitate, Container-ing, Orchestrare etc. 
+\noindent În contextul actual al dezvoltării infrastructurilor IT, în care containerizarea și orchestrarea aplicațiilor distribuite joacă un rol central, gestionarea eficientă a clusterelor Kubernetes devine o necesitate tot mai prezentă, datorită numeroaselor beneficii ce vin cu acestea. Deși tehnologiile de tip Kubernetes sunt preponderente în lumea enterprise a companiilor, așa cum a fost confirmat și de un studiu realizat de Edge Delta, care arată că, în ultimii ani, peste 60\% din companiile IT au adoptat această tehnologie [2], utilizarea ei necesită un nivel crescut de cunoștințe, alăturat de multe abilități din domenii diferite, cum ar fi: Networking, Automatizare, Linux, Securitate, Containerizare, Orchestrare etc.
 
-Astfel apare urmatoarea situatie: nevoia clara de tot mai multe clustere Kubernetes, problema: dificultatea operării acestora. InfraMind a fost creat ca un instrument dedicat automatizării și simplificării procesului de instalare și configurare a unui cluster Kubernetes, servind ca o soluție ce are ca scop ușurarea procesului de instalare și configurare a unuia sau mai multor clustere. Aceasta soluție are la baza tehnologii moderne: K3s, Ansible, Flask, Bash, Docker, dar și concepte moderne precum: IaC (Infrastructure as Code) și infrastructura hibridă.
+Astfel apare următoarea situație: nevoia clară de tot mai multe clustere Kubernetes, dar și problema: dificultatea operării acestora. InfraMind a fost creat ca un instrument dedicat automatizării și simplificării procesului de instalare și configurare a unui cluster Kubernetes, servind ca o soluție ce are ca scop ușurarea acestui proces pentru unul sau mai multe clustere. Soluția are la bază tehnologii moderne — K3s, Python/Paramiko, Flask, Bash, Docker — și nu depinde de niciun tool extern de tip configuration management.
 
-Scopul principal al acestei aplicații este de a oferi o soluție completă și scalabilă pentru implementarea unui cluster K3s (o variantă lightweight a Kubernetes) pe infrastructuri variate. InfraMind automatizează atât procesul inițial de instalare, cât și configurările ulterioare necesare pentru gestionarea unui mediu containerizat.
+Scopul principal al acestei aplicații este de a oferi o soluție completă și scalabilă pentru implementarea unui cluster K3s (o variantă lightweight a Kubernetes) pe infrastructuri variate. InfraMind automatizează atât procesul inițial de instalare, cât și configurările ulterioare necesare pentru gestionarea unui mediu containerizat, folosind exclusiv conexiuni SSH directe orchestrate prin Python.
 
 Aplicația are la bază următoarele tehnologii principale:
 
 \begin{itemize}
   \item \textbf{K3s} — distribuție Kubernetes lightweight, utilizată ca motor de orchestrare al clusterului.
-  \item \textbf{Ansible} — unealtă de automatizare folosită pentru provizionarea și configurarea nodurilor prin SSH.
-  \item \textbf{Bash} — shell scripting utilizat pentru execuția scripturilor de instalare și dezinstalare K3s pe fiecare nod.
+  \item \textbf{Paramiko} — librărie Python pentru comunicare SSH, utilizată pentru orchestrarea instalării directe pe noduri.
+  \item \textbf{Jinja2} — motor de template-uri Python folosit pentru generarea configurațiilor K3s per nod.
   \item \textbf{Flask} — micro-framework web Python folosit atât ca backend REST, cât și ca server al interfeței utilizatorului.
   \item \textbf{Docker} — platformă de containerizare utilizată pentru rularea portabilă a aplicației InfraMind.
 \end{itemize}
@@ -121,7 +119,7 @@ OpenShift este o platformă enterprise pentru dezvoltarea și livrarea aplicați
 
 \subsection{Microsoft Azure Kubernetes Service (AKS)}
 
-AKS este un serviciu complet gestionat de Kubernetes în Azure, care permite dezvoltatorilor să implementeze și să administreze ușor clustere Kubernetes [10]. Microsoft se ocupă de gestionarea infrastructurii, iar utilizatorii se pot concentra pe aplicațiile lor.
+AKS este un serviciu complet gestionat de Kubernetes în Azure, care permite dezvoltatorilor să implementeze și să administreze ușor clustere Kubernetes [9]. Microsoft se ocupă de gestionarea infrastructurii, iar utilizatorii se pot concentra pe aplicațiile lor.
 
 \begin{itemize}
   \item Gestionare completă a clusterului Kubernetes, inclusiv patch-uri și actualizări.
@@ -132,7 +130,7 @@ AKS este un serviciu complet gestionat de Kubernetes în Azure, care permite dez
 
 \subsection{Rancher}
 
-Rancher este o soluție open-source care oferă o platformă de gestionare a clusterelor Kubernetes pentru multiple infrastructuri (on-premise, AWS, Azure etc.) [15]. Este ideală pentru organizațiile care doresc un control mai mare asupra modului în care își gestionează infrastructura Kubernetes.
+Rancher este o soluție open-source care oferă o platformă de gestionare a clusterelor Kubernetes pentru multiple infrastructuri (on-premise, AWS, Azure etc.) [14]. Este ideală pentru organizațiile care doresc un control mai mare asupra modului în care își gestionează infrastructura Kubernetes.
 
 \begin{itemize}
   \item Gestionare unificată a mai multor clustere Kubernetes.
@@ -143,7 +141,7 @@ Rancher este o soluție open-source care oferă o platformă de gestionare a clu
 
 \subsection{Google Kubernetes Engine (GKE)}
 
-GKE este un serviciu complet gestionat de Google pentru implementarea și gestionarea clusterelor Kubernetes [5]. Google, fiind creatorul Kubernetes, oferă un serviciu extrem de scalabil și bine integrat cu celelalte servicii Google Cloud.
+GKE este un serviciu complet gestionat de Google pentru implementarea și gestionarea clusterelor Kubernetes [4]. Google, fiind creatorul Kubernetes, oferă un serviciu extrem de scalabil și bine integrat cu celelalte servicii Google Cloud.
 
 \begin{itemize}
   \item Management complet al clusterelor Kubernetes cu upgrade-uri automate și patch-uri.
@@ -171,7 +169,7 @@ Aceste soluții se aseamănă mult cu aplicația InfraMind, folosind abordări m
 
 \subsection{Kubeadm}
 
-Kubeadm este o unealtă open-source creată de Kubernetes pentru a ajuta la instalarea și gestionarea unui cluster Kubernetes [8]. Este o soluție flexibilă care oferă un mod simplu de utilizat pentru a configura un cluster Kubernetes de la zero.
+Kubeadm este o unealtă open-source creată de Kubernetes pentru a ajuta la instalarea și gestionarea unui cluster Kubernetes [7]. Este o soluție flexibilă care oferă un mod simplu de utilizat pentru a configura un cluster Kubernetes de la zero.
 
 \begin{itemize}
   \item Configurare rapidă a unui cluster Kubernetes.
@@ -181,7 +179,7 @@ Kubeadm este o unealtă open-source creată de Kubernetes pentru a ajuta la inst
 
 \subsection{Minikube}
 
-Minikube este o soluție open-source care permite crearea unui cluster Kubernetes local pe o singură mașină, fiind ideală pentru dezvoltatori și testare în medii de dezvoltare [11].
+Minikube este o soluție open-source care permite crearea unui cluster Kubernetes local pe o singură mașină, fiind ideală pentru dezvoltatori și testare în medii de dezvoltare [10].
 
 \begin{itemize}
   \item Instalare rapidă a unui cluster Kubernetes local pe mașini Windows și Linux.
@@ -191,7 +189,7 @@ Minikube este o soluție open-source care permite crearea unui cluster Kubernete
 
 \subsection{Kind}
 
-Kind este o unealtă care permite crearea de clustere Kubernetes folosind containere Docker [7]. Este ideală pentru dezvoltatori care doresc să testeze Kubernetes într-un mediu izolat pe mașinile lor locale.
+Kind este o unealtă care permite crearea de clustere Kubernetes folosind containere Docker [6]. Este ideală pentru dezvoltatori care doresc să testeze Kubernetes într-un mediu izolat pe mașinile lor locale.
 
 \begin{itemize}
   \item Permite rularea de clustere Kubernetes complete în containere Docker.
@@ -216,47 +214,62 @@ Deși aceste aplicații au reprezentat, într-o oarecare măsură, o sursă de i
 \chapter{Tehnologii Utilizate}
 \label{cap:tehnologii}
 
-Această secțiune prezintă principalele tehnologii și instrumente pe care se bazează InfraMind, motivând alegerea fiecăreia și descrizând rolul ei în cadrul arhitecturii globale a soluției.
+Această secțiune prezintă principalele tehnologii și instrumente pe care se bazează InfraMind, motivând alegerea fiecăreia și descriind rolul ei în cadrul arhitecturii globale a soluției.
 
 \section{K3s}
 
-K3s este o distribuție Kubernetes certificată, creată de Rancher Labs (acum parte din SUSE), concepută special pentru medii cu resurse limitate, dispozitive IoT și scenarii edge [6]. Spre deosebire de Kubernetes clasic [9], K3s este ambalat ca un singur binar de mai puțin de 100 MB, eliminând dependențele externe și componentele considerate opționale în contextul unui deployment ușor.
+K3s este o distribuție Kubernetes certificată, creată de Rancher Labs (acum parte din SUSE), concepută special pentru medii cu resurse limitate, dispozitive IoT și scenarii edge [5]. Spre deosebire de Kubernetes clasic [8], K3s este ambalat ca un singur binar de mai puțin de 100 MB, eliminând dependențele externe și componentele considerate opționale în contextul unui deployment ușor.
 
 Principalele caracteristici care au motivat alegerea K3s în cadrul InfraMind sunt:
 
 \begin{itemize}
   \item \textbf{Consum redus de resurse} — K3s necesită semnificativ mai puțin RAM și CPU față de Kubernetes standard, ceea ce îl face potrivit atât pentru hardware fizic de capacitate medie, cât și pentru mașini virtuale cu resurse limitate.
-  \item \textbf{Instalare simplificată} — Întregul proces de bootstrap al unui nod master sau worker se realizează printr-un singur script, ușurând automatizarea cu Ansible.
+  \item \textbf{Instalare simplificată} — Întregul proces de bootstrap al unui nod master sau worker se realizează printr-un singur script shell descărcat de la \texttt{get.k3s.io}, ușurând automatizarea prin SSH.
   \item \textbf{Compatibilitate completă cu ecosistemul Kubernetes} — K3s respectă API-ul standard Kubernetes, ceea ce înseamnă că orice manifest YAML sau unealtă (kubectl, Helm, Prometheus etc.) funcționează neschimbat.
-  \item \textbf{Suport pentru clustere HA} — Prin utilizarea unui datastore extern sau a mecanismului de embedded etcd, K3s suportă configurații cu mai mulți masteri, așa cum este cazul topologiei implementate de InfraMind.
+  \item \textbf{Suport pentru clustere HA} — Prin utilizarea mecanismului de embedded etcd, K3s suportă configurații cu mai mulți masteri, așa cum este cazul topologiei implementate de InfraMind.
 \end{itemize}
 
-\section{Ansible}
+\section{Paramiko și orchestrarea SSH}
 
-Ansible este o platformă open-source de automatizare IT dezvoltată de Red Hat, folosită pentru provizionarea infrastructurii, gestionarea configurației și orchestrarea aplicațiilor [1]. Funcționează fără agent (\textit{agentless}), comunicând cu nodurile țintă exclusiv prin SSH, ceea ce elimină necesitatea instalării unor componente suplimentare pe mașinile gestionate.
+Paramiko este o librărie Python matură pentru comunicare SSH2, care oferă atât funcționalități client cât și server, bazată pe biblioteca criptografică \textit{cryptography} [11]. Spre deosebire de soluțiile tradiționale de tip configuration management (Ansible, Chef, Puppet), Paramiko permite integrarea directă a orchestrării SSH în codul Python al aplicației, fără dependențe externe de instalat pe mașina de control sau pe nodurile țintă.
 
-Conceptele centrale ale Ansible utilizate în InfraMind sunt:
+În InfraMind, Paramiko constituie nucleul motorului de orchestrare și îndeplinește toate sarcinile de comunicare cu nodurile clusterului:
 
 \begin{itemize}
-  \item \textbf{Playbook-uri} — Fișiere YAML care definesc o secvență ordonată de sarcini ce vor fi executate pe grupuri de hosturi. InfraMind dispune de playbook-uri dedicate pentru instalarea și dezinstalarea clusterului K3s.
-  \item \textbf{Roluri} — Unități reutilizabile de automatizare care grupează task-uri, handlere și fișiere de configurare. Proiectul definește roluri separate pentru: instalarea nodului master primordial, alăturarea nodurilor master adiționale, înrolarea nodurilor worker, instalarea Docker și dezinstalarea componentelor.
-  \item \textbf{Inventar dinamic} — Fișierele de inventar (în format YAML) sunt generate automat de backend-ul Flask pe baza datelor introduse de utilizator, eliminând necesitatea editării manuale a configurațiilor.
-  \item \textbf{Variabile per-host} — Fiecare nod poate fi configurat individual prin fișiere \texttt{host\_vars}, permițând personalizarea adreselor IP, rolurilor și altor parametri specifici.
+  \item \textbf{Testarea conectivității SSH} — Înainte de orice instalare, fiecare nod este testat individual prin deschiderea unei sesiuni SSH cu cheia privată furnizată de utilizator.
+  \item \textbf{Executarea comenzilor la distanță} — Comenzile de instalare și dezinstalare K3s, de instalare Docker și de gestionare a containerelor sunt executate pe noduri prin canale SSH non-blocante, cu citire în timp real a output-ului.
+  \item \textbf{Transferul de fișiere} — Fișierele de configurare K3s generate prin Jinja2 sunt transferate pe noduri via \texttt{sudo tee}, fără a necesita un protocol suplimentar (SFTP/SCP).
+  \item \textbf{Suport pentru mai multe formate de chei} — La deschiderea fiecărei conexiuni se încearcă succesiv formatele Ed25519, RSA, ECDSA și DSS, asigurând compatibilitatea cu orice infrastructură existentă.
 \end{itemize}
 
-Alegerea Ansible față de alte unelte de tip IaC (Terraform, Chef, Puppet) a fost motivată de simplicitatea modelului push bazat pe SSH, de curba de învățare redusă și de faptul că nu necesită infrastructură de control dedicată.
+Un aspect important al implementării este mecanismul de output non-blocant: conexiunile SSH folosesc canale fără blocare (\textit{non-blocking}), astfel încât liniile de output sunt yield-uite progresiv către frontend prin Server-Sent Events, fără a bloca procesul Flask.
+
+Alegerea Paramiko față de un tool extern de tip configuration management a fost motivată de eliminarea oricărei dependențe externe pe mașina host, de integrarea nativă în codul Python și de controlul granular asupra comportamentului SSH (timeout-uri, abort, streaming de output).
+
+\section{Jinja2}
+
+Jinja2 este un motor de template-uri Python rapid și expresiv, creat de același echipă ca și Flask (Pallets Projects) [12]. Este utilizat extensiv în aplicații web pentru generarea de HTML, dar și pentru orice format text structurat (YAML, JSON, configurații).
+
+În InfraMind, Jinja2 este utilizat pentru generarea fișierelor de configurare K3s (\texttt{config.yaml}) care sunt încărcate pe fiecare nod înainte de lansarea instalatorului. Există două template-uri:
+
+\begin{itemize}
+  \item \textbf{\texttt{master.yaml.j2}} — Template pentru nodurile master; conține logică condițională pentru nodul primordial (\texttt{cluster-init: true}) față de masterii secundari care se alătură clusterului existent (\texttt{server: "https://\{\{ primordial\_ip \}\}:6443"}). Include și configurații pentru TLS SAN, token, permisiuni kubeconfig și dezactivarea componentelor opționale (servicelb, traefik).
+  \item \textbf{\texttt{worker.yaml.j2}} — Template pentru nodurile worker; conține adresa masterului primordial și token-ul de autentificare.
+\end{itemize}
+
+Prin separarea configurației într-un template Jinja2, InfraMind poate genera fișiere de configurare corecte și consistente pentru orice topologie de cluster, indiferent de numărul de noduri sau adresele IP ale acestora.
 
 \section{Flask}
 
-Flask este un micro-framework web scris în Python, conceput pentru a fi minimal și ușor extensibil [4]. Spre deosebire de framework-uri mai grele precum Django, Flask nu impune o structură rigidă, oferind flexibilitate maximă în organizarea aplicației.
+Flask este un micro-framework web scris în Python, conceput pentru a fi minimal și ușor extensibil [3]. Spre deosebire de framework-uri mai grele precum Django, Flask nu impune o structură rigidă, oferind flexibilitate maximă în organizarea aplicației.
 
 În InfraMind, Flask îndeplinește simultan funcțiile de backend și de server pentru interfața web:
 
 \begin{itemize}
-  \item \textbf{Servirea interfetei utilizatorului} — Flask servește fișierul \texttt{index.html} și resursele statice (CSS, JavaScript), funcționând ca un server web simplu pentru aplicația single-page.
-  \item \textbf{Endpoint-uri REST} — Backend-ul expune un set de rute HTTP pentru generarea inventarului Ansible, testarea conexiunilor SSH, lansarea și monitorizarea playbook-urilor, precum și interogarea clusterului prin \texttt{kubectl}.
-  \item \textbf{Server-Sent Events (SSE)} — Pentru streaming-ul în timp real al progresului de instalare, Flask utilizează SSE, permițând frontend-ului să primească actualizări fără polling activ.
-  \item \textbf{Execuție de procese externe} — Prin modulul \texttt{subprocess}, Flask pornește și monitorizează procesele Ansible, capturând output-ul și transmițând-ul clientului în timp real.
+  \item \textbf{Servirea interfeței utilizatorului} — Flask servește fișierul \texttt{index.html} și resursele statice (CSS, JavaScript), funcționând ca un server web simplu pentru aplicația single-page.
+  \item \textbf{Endpoint-uri REST} — Backend-ul expune un set de rute HTTP pentru generarea inventarului, testarea conexiunilor SSH, lansarea și monitorizarea instalării, precum și interogarea clusterului prin \texttt{kubectl}.
+  \item \textbf{Server-Sent Events (SSE)} — Pentru streaming-ul în timp real al progresului de instalare, Flask utilizează SSE (\texttt{text/event-stream}), permițând frontend-ului să primească actualizări fără polling activ.
+  \item \textbf{Arhitectură Blueprint} — Aplicația este structurată în Blueprint-uri independente (\texttt{inventory\_bp}, \texttt{installer\_bp}, \texttt{uninstaller\_bp}, \texttt{kubectl\_bp}), fiecare responsabil de un domeniu funcțional separat. Fișierul \texttt{main.py} rămâne un app factory de 22 de linii.
 \end{itemize}
 
 \section{Python și librării asociate}
@@ -264,9 +277,10 @@ Flask este un micro-framework web scris în Python, conceput pentru a fi minimal
 Întregul backend al InfraMind este implementat în Python 3 [14], beneficiind de ecosistemul bogat de librării disponibile:
 
 \begin{itemize}
-  \item \textbf{Paramiko} [12] — Librărie Python pentru comunicare SSH, utilizată în endpoint-ul de testare a conexiunilor. Permite verificarea accesibilității și autentificarea pe nodurile infrastructurii înainte de a lansa instalarea.
-  \item \textbf{PyYAML} [13] — Utilizat pentru generarea și parsarea fișierelor de inventar și configurare Ansible în format YAML.
-  \item \textbf{subprocess / os / signal} — Module standard Python folosite pentru lansarea proceselor Ansible, trimiterea semnalelor de terminare și gestionarea căilor de fișiere.
+  \item \textbf{Paramiko} [11] — Librărie Python pentru comunicare SSH, utilizată ca motor principal de orchestrare. Permite executarea de comenzi la distanță, transferul de fișiere și testarea conectivității pe nodurile infrastructurii.
+  \item \textbf{PyYAML} [13] — Utilizat pentru generarea și parsarea fișierelor de inventar în format YAML. Fiecare nod al clusterului este stocat ca un fișier YAML independent în directorul \texttt{inventory/}.
+  \item \textbf{Jinja2} [12] — Utilizat pentru renderizarea template-urilor de configurare K3s (\texttt{master.yaml.j2}, \texttt{worker.yaml.j2}) cu parametrii specifici fiecărui nod.
+  \item \textbf{threading / os / signal} — Module standard Python folosite pentru gestionarea stării proceselor de instalare, a flag-ului de anulare (\texttt{abort\_flag}) și a căilor de fișiere.
 \end{itemize}
 
 \section{JavaScript, HTML și CSS}
@@ -274,9 +288,9 @@ Flask este un micro-framework web scris în Python, conceput pentru a fi minimal
 Interfața grafică a InfraMind este o aplicație web single-page (SPA) construită cu tehnologii web standard, fără a folosi un framework front-end complex:
 
 \begin{itemize}
-  \item \textbf{JavaScript vanilla (ES6+)} — Codul front-end este organizat în module independente (\texttt{state.js}, \texttt{inventory.js}, \texttt{topology.js}, \texttt{connections.js}, \texttt{deploy.js}, \texttt{cluster.js} etc.), fiecare responsabil de o secțiune specifică a aplicației. Comunicarea cu backend-ul se face prin \texttt{fetch()} și \texttt{EventSource}.
+  \item \textbf{JavaScript vanilla (ES6+)} — Codul front-end este organizat în 10 module independente (\texttt{state.js}, \texttt{utils.js}, \texttt{navigation.js}, \texttt{inventory.js}, \texttt{topology.js}, \texttt{connections.js}, \texttt{deploy.js}, \texttt{cluster.js}, \texttt{handlers.js}, \texttt{main.js}), fiecare responsabil de o secțiune specifică a aplicației. Comunicarea cu backend-ul se face prin \texttt{fetch()} și \texttt{EventSource}.
   \item \textbf{HTML5} — Structura paginii este definită într-un singur fișier \texttt{index.html}, cu secțiuni ascunse/afișate dinamic prin JavaScript.
-  \item \textbf{CSS3} — Stilizarea este împărțită în fișiere CSS modulare (\texttt{base.css}, \texttt{buttons.css}, \texttt{navigation.css} etc.), folosind variabile CSS custom (\texttt{:root vars}), animații (\texttt{@keyframes}) și layout flexibil.
+  \item \textbf{CSS3} — Stilizarea este împărțită în 9 fișiere CSS modulare (\texttt{base.css}, \texttt{buttons.css}, \texttt{navigation.css}, \texttt{inventory.css}, \texttt{topology.css}, \texttt{connections.css}, \texttt{deploy.css}, \texttt{welcome.css}, \texttt{cluster.css}), folosind variabile CSS custom (\texttt{:root vars}), animații (\texttt{@keyframes}) și layout flexibil.
   \item \textbf{Three.js / WebGL} [17] — Efectul vizual de fundal (\textit{light pillar}) este implementat cu Three.js, adăugând un element estetic modern interfeței.
 \end{itemize}
 
@@ -285,21 +299,21 @@ Interfața grafică a InfraMind este o aplicație web single-page (SPA) construi
 Bash (\textit{Bourne Again Shell}) este shell-ul implicit al majorității distribuțiilor Linux și reprezintă limbajul de scripting utilizat de scripturile oficiale de instalare și dezinstalare ale K3s [18]. În contextul InfraMind, Bash intervine în două moduri principale:
 
 \begin{itemize}
-  \item \textbf{Scripturi de instalare K3s} — Fiecare nod master și worker rulează scriptul oficial \texttt{get.k3s.io} prin intermediul \texttt{curl | sh}, care descarcă și configurează K3s cu parametrii transmiși de Ansible (token, adresă IP, rolul nodului).
-  \item \textbf{Scripturi de dezinstalare} — K3s furnizează scripturile \texttt{k3s-uninstall.sh} și \texttt{k3s-agent-uninstall.sh} care curăță complet instalarea de pe nodurile master, respectiv worker. Aceste scripturi sunt invocate din playbook-urile Ansible de dezinstalare.
+  \item \textbf{Scripturi de instalare K3s} — Fiecare nod master și worker rulează scriptul oficial \texttt{get.k3s.io} prin intermediul comenzii \texttt{curl -sfL https://get.k3s.io | sudo sh -s - server|agent}, lansată via SSH din Python. Scriptul descarcă și configurează K3s cu parametrii predefiniți în fișierul \texttt{/etc/rancher/k3s/config.yaml} generat anterior.
+  \item \textbf{Scripturi de dezinstalare} — K3s furnizează scripturile \texttt{k3s-uninstall.sh} și \texttt{k3s-agent-uninstall.sh} care curăță complet instalarea de pe nodurile master, respectiv worker. Aceste scripturi sunt invocate din Python prin comenzi SSH executate cu Paramiko.
 \end{itemize}
 
-Deși nu este un limbaj de programare cu scop general, Bash este indispensabil în ecosistemul Linux pentru automatizarea sarcinilor de nivel sistem — un rol pe care îl îndeplinește eficient în tandem cu Ansible în cadrul InfraMind.
+Deși nu este un limbaj de programare cu scop general, Bash este indispensabil în ecosistemul Linux pentru automatizarea sarcinilor de nivel sistem — un rol pe care îl îndeplinește eficient în tandem cu orchestrarea Python/SSH în cadrul InfraMind.
 
 \section{Docker și Docker Compose}
 
-Docker este platforma standard de containerizare care permite ambalarea unei aplicații împreună cu toate dependențele sale într-un container portabil [2]. InfraMind include un \texttt{Dockerfile} și un fișier \texttt{docker-compose.yml} pentru a simplifica rularea aplicației în orice mediu fără configurare manuală a dependențelor Python sau a serviciilor adiacente.
+Docker este platforma standard de containerizare care permite ambalarea unei aplicații împreună cu toate dependențele sale într-un container portabil [1]. InfraMind include un \texttt{Dockerfile} și un fișier \texttt{docker-compose.yml} pentru a simplifica rularea aplicației în orice mediu fără configurare manuală a dependențelor Python sau a serviciilor adiacente.
 
 Utilizarea Docker în contextul InfraMind oferă:
 
 \begin{itemize}
   \item \textbf{Portabilitate} — Aplicația rulează identic indiferent de sistemul de operare al gazdei.
-  \item \textbf{Izolare} — Dependențele Python (Flask, Paramiko, PyYAML) sunt izolate în container, evitând conflictele cu pachetele sistemului.
+  \item \textbf{Izolare} — Dependențele Python (Flask, Paramiko, PyYAML, Jinja2) sunt izolate în container, evitând conflictele cu pachetele sistemului.
   \item \textbf{Deployment simplificat} — O singură comandă (\texttt{docker compose up}) pornește întreaga aplicație.
 \end{itemize}
 
@@ -388,7 +402,7 @@ Pe lângă instalare, InfraMind se axează și pe menținerea eficienței în ti
 
 \begin{itemize}
   \item Compatibilitate extinsă, suportând diverse tipuri de infrastructură și configurări personalizate.
-  \item Integrare cu unelte DevOps standard (Ansible, Docker), permițând extinderea și personalizarea fluxurilor de lucru.
+  \item Integrare cu Docker și cu uneltele standard ale ecosistemului Python, permițând extinderea și personalizarea fluxurilor de lucru.
   \item Posibilitatea de a refolosi inventarele și configurațiile generate pentru noi instalări.
 \end{itemize}
 
@@ -398,170 +412,200 @@ Astfel, aplicația nu doar că optimizează implementarea inițială, ci asigur�
 \label{cap:structura}
 \section{Overview}
 
-InfraMind este împărțită în 2 mari componente, care împreună alcătuiesc întregul proces de lucru.
+InfraMind este o aplicație web Python/Flask care reunește în același proces atât frontend-ul (interfața utilizatorului) cât și backend-ul (orchestrarea instalării). Spre deosebire de arhitecturile tradiționale care delegă instalarea unui tool extern de tip configuration management, InfraMind implementează propriul motor de orchestrare SSH direct în Python, fără dependențe la runtime în afara celor din \texttt{requirements.txt}.
 
-\subsection{Frontend și Backend — Colectarea și conversia datelor în Infrastructure as Code}
+Arhitectura aplicației urmărește principiul separării responsabilităților: fiecare modul Python gestionează un domeniu bine definit, iar comunicarea între frontend și backend se realizează prin apeluri HTTP REST și prin fluxuri SSE pentru actualizări în timp real. Această relație se poate observa în \hyperref[fig01.png]{Figura~\ref{fig01.png}}.
 
-\subsubsection{Frontend — Interfața Utilizatorului}
-
-Frontend-ul este o aplicație web care permite utilizatorilor să definească arhitectura clusterului printr-un proces ghidat și intuitiv. Utilizatorul poate introduce informații esențiale, precum:
-
-\begin{itemize}
-  \item Numărul de noduri dorite (Master / Worker).
-  \item Tipul infrastructurii (fizică sau virtuală, on-premise sau cloud).
-  \item Specificații de rețea (adrese IP, acreditări SSH).
-  \item Configurații privind rolul fiecărui nod în cluster.
-\end{itemize}
-
-Pe lângă introducerea manuală, aplicația oferă vizualizarea topologiei clusterului în timp real, permițând utilizatorilor să valideze configurația înainte de a lansa instalarea.
-
-\subsubsection{Backend — Generarea IaC și Pregătirea pentru Instalare}
-
-După colectarea datelor, backend-ul preia aceste informații și le transformă automat în Infrastructure as Code (IaC). Acest proces este crucial deoarece permite:
-
-\begin{itemize}
-  \item \textbf{Automatizare completă} — elimină pașii manuali și erorile umane.
-  \item \textbf{Reproductibilitate} — asigură că fiecare instalare este identică și coerentă.
-  \item \textbf{Flexibilitate} — oferă posibilitatea de a reutiliza configurațiile pentru noi instalări.
-\end{itemize}
-
-Backend-ul generează fișiere de inventar Ansible în format YAML, pe baza datelor introduse de utilizator. Aceste fișiere descriu nodurile clusterului, adresele IP, token-urile de acces și rolurile fiecărui nod.
-
-\subsubsection{Fluxul de Lucru}
-
-\begin{itemize}
-  \item Utilizatorul introduce detaliile arhitecturii în interfața web.
-  \item Backend-ul validează și generează inventarul Ansible corespunzător.
-  \item Configurația este transmisă către componenta Agent, care va executa instalarea.
-\end{itemize}
-
-Această relație se poate observa în \hyperref[fig01.png]{Figura~\ref{fig01.png}}.
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{fig01.png}
-    \caption{Overview general}
+    \caption{Overview general al aplicației InfraMind}
     \label{fig01.png}
 \end{figure}
 
-\subsection{Agentul — Instalarea efectivă a clusterului K3s}
+\section{Fluxul de lucru al aplicației}
 
-Agentul este a doua componentă majoră a InfraMind și are rolul de a executa efectiv instalarea clusterului K3s pe nodurile definite de utilizator.
+Utilizatorul parcurge un proces ghidat în patru pași prin intermediul interfeței web:
 
-\subsubsection{Rolul Agentului}
+\begin{enumerate}
+  \item \textbf{Definirea inventarului} — Utilizatorul adaugă nodurile clusterului (adresă IP, rol master/worker) și desemnează nodul master primordial. Backend-ul scrie câte un fișier YAML per nod în directorul \texttt{inventory/}.
+  \item \textbf{Validarea topologiei} — Tab-ul Topology afișează vizual structura clusterului, permițând utilizatorului să verifice configurația înainte de continuare.
+  \item \textbf{Testarea conexiunilor SSH} — Tab-ul Connections permite testarea accesibilității SSH pentru fiecare nod individual, utilizând cheia privată SSH furnizată de utilizator.
+  \item \textbf{Instalarea clusterului} — Tab-ul Deploy primește acreditările SSH (username și cheie privată), lansează procesul de instalare și afișează progresul în timp real prin Server-Sent Events.
+\end{enumerate}
 
-\begin{itemize}
-  \item Primește fișierele de inventar generate de backend și le interpretează.
-  \item Instalează și configurează K3s pe nodurile master și worker.
-  \item Se ocupă de setările de rețea și de autentificarea SSH.
-  \item Monitorizează procesul de instalare și trimite feedback în timp real către utilizator.
-\end{itemize}
-
-\subsubsection{Cum funcționează?}
-
-După ce backend-ul generează fișierele de inventar, agentul (implementat ca set de playbook-uri Ansible) începe faza de implementare parcurgând următorii pași:
-
-\begin{itemize}
-  \item \textbf{Verificarea conectivității} — Agentul testează conexiunile SSH către toate nodurile înainte de a lansa instalarea.
-  \item \textbf{Instalarea K3s pe nodul master primordial} — Se descarcă și instalează K3s cu parametrii de inițializare a clusterului (token, TLS SAN, embedded etcd).
-  \item \textbf{Adăugarea nodurilor master adiționale} — Nodurile master secundare se alătură clusterului existent, formând o topologie HA.
-  \item \textbf{Înrolarea nodurilor worker} — Nodurile worker sunt configurate și alăturate clusterului folosind token-ul generat de master.
-  \item \textbf{Raportarea progresului} — În timp real, output-ul Ansible este capturat de Flask și transmis frontend-ului prin Server-Sent Events.
-\end{itemize}
-
-\subsection{Sinergia dintre cele două componente}
-
-Frontend-ul și Backend-ul transformă datele utilizatorului într-o configurație precisă și reproductibilă. Agentul preia această configurație și o transformă într-un cluster K3s funcțional, gata de utilizare.
+Pe lângă fluxul de instalare, aplicația oferă și o secțiune separată pentru gestionarea unui cluster existent, accesibilă prin încărcarea unui fișier kubeconfig.
 
 \section{Structuri interne}
 
-\subsection{Frontend}
+\subsection{Frontend — Interfața utilizatorului}
 
-Atât Frontend-ul aplicației, cât și Backend-ul rulează într-o singură aplicație Flask. Frontend-ul are 2 sarcini: să servească interfața de operare a utilizatorului cu scopul de a colecta datele introduse, iar a doua sarcină este să paseze aceste date backend-ului folosind un POST request, așa cum este ilustrat în \hyperref[frontend.png]{Figura~\ref{frontend.png}}.
+Frontend-ul este o aplicație Single-Page construită cu JavaScript vanilla (ES6+), servită direct de Flask din directorul \texttt{frontend/src/templates/}. Interfața este organizată în două fluxuri principale: fluxul de instalare cluster nou și panoul de gestionare cluster existent.
+
+Fluxul de instalare este structurat în patru tab-uri cu navigare pas cu pas:
+
+\begin{itemize}
+  \item \textbf{Inventory} — formular pentru adăugarea și editarea nodurilor; include un selector de rol (master/worker), câmp pentru adresa IP și selector de nod primordial.
+  \item \textbf{Topology} — vizualizare SVG a topologiei clusterului cu editare inline; nodurile sunt reprezentate grafic împreună cu conexiunile dintre ele.
+  \item \textbf{Connections} — panou de testare SSH cu indicatori vizuali per nod (verde/roșu/în progres) și câmp pentru introducerea cheii SSH private.
+  \item \textbf{Deploy} — panoul de instalare cu carduri de progres animate, buton de anulare și panoul de afișare a kubeconfig-ului după instalare reușită.
+\end{itemize}
+
+Codul JavaScript este organizat în 10 module independente, fiecare responsabil de o zonă funcțională, conform tabelului următor:
+
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Modul} & \textbf{Responsabilitate} \\
+\hline
+\texttt{state.js}      & Toate variabilele globale partajate \\
+\texttt{utils.js}      & \texttt{escapeHtml}, \texttt{showToast}, \texttt{showConfirmToast} \\
+\texttt{navigation.js} & Comutarea tab-urilor, animație bubble indicator \\
+\texttt{inventory.js}  & Gestionarea listei de noduri, \texttt{renderVMList}, \texttt{detectInventory} \\
+\texttt{topology.js}   & Vizualizarea topologiei, editorul SVG inline \\
+\texttt{connections.js}& Testarea conexiunilor SSH per nod \\
+\texttt{deploy.js}     & Step cards animate, \texttt{startDeploy}, \texttt{abortDeploy}, \texttt{startUninstall} \\
+\texttt{cluster.js}    & Welcome screen, dashboard cluster, carduri de resurse per nod \\
+\texttt{handlers.js}   & \texttt{setupHandlers()} — toate legăturile de eveniment \\
+\texttt{main.js}       & Blocul \texttt{DOMContentLoaded} de inițializare \\
+\hline
+\end{tabular}
+\end{center}
+
+Stilizarea este împărțită în 9 fișiere CSS modulare: \texttt{base.css}, \texttt{buttons.css}, \texttt{navigation.css}, \texttt{inventory.css}, \texttt{topology.css}, \texttt{connections.css}, \texttt{deploy.css}, \texttt{welcome.css}, \texttt{cluster.css}. Fiecare fișier gestionează exclusiv stilurile componentei sale, folosind variabile CSS custom definite în \texttt{:root} din \texttt{base.css}.
+
+Comunicarea cu backend-ul se realizează prin două mecanisme:
+\begin{itemize}
+  \item \texttt{fetch()} — pentru toate apelurile REST sincrone (generate inventar, testare SSH, kubectl).
+  \item \texttt{EventSource} — pentru fluxurile SSE de progres în timp real (instalare, dezinstalare).
+\end{itemize}
+
+Aspectul general al frontend-ului este ilustrat în \hyperref[frontend.png]{Figura~\ref{frontend.png}}.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{frontend.png}
-    \caption{Frontend general}
+    \caption{Interfața web a aplicației InfraMind}
     \label{frontend.png}
 \end{figure}
 
-\subsection{Backend}
+\subsection{Backend — Arhitectura modulară}
 
-Backend-ul are 3 sarcini esențiale:
+Backend-ul Flask este implementat ca un app factory thin (\texttt{main.py}, 22 de linii) care importă și înregistrează patru Blueprint-uri. Structura modulară a fost aleasă pentru a menține o separare clară a responsabilităților și pentru a facilita extinderea ulterioară a aplicației.
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Fișier} & \textbf{Blueprint} & \textbf{Responsabilitate} \\
+\hline
+\texttt{main.py}        & —                  & App factory; înregistrare Blueprint-uri \\
+\texttt{config.py}      & —                  & Constante de cale, stare partajată, \texttt{abort\_flag} \\
+\texttt{ssh.py}         & —                  & Funcții auxiliare SSH (Paramiko) \\
+\texttt{inventory.py}   & \texttt{inventory\_bp}  & CRUD inventar, testare SSH \\
+\texttt{installer.py}   & \texttt{installer\_bp}  & Instalare K3s via SSH \\
+\texttt{uninstaller.py} & \texttt{uninstaller\_bp}& Dezinstalare K3s via SSH \\
+\texttt{kubectl.py}     & \texttt{kubectl\_bp}    & Operații kubectl pe cluster existent \\
+\hline
+\end{tabular}
+\end{center}
+
+Modulul \texttt{config.py} definește starea partajată a aplicației: un obiect \texttt{\_DeployState} cu câmpul \texttt{status} (valorile posibile: \texttt{idle}, \texttt{running}, \texttt{success}, \texttt{failed}, \texttt{aborted}), un \texttt{threading.Lock} (\texttt{proc\_lock}) pentru accesul exclusiv la procesele de instalare/dezinstalare și un \texttt{threading.Event} (\texttt{abort\_flag}) pentru semnalarea anulării.
+
+Lista completă a endpoint-urilor HTTP expuse de aplicație este prezentată în tabelul următor:
+
+\begin{center}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Metodă} & \textbf{Rută} & \textbf{Scop} \\
+\hline
+GET  & \texttt{/}                      & Servire \texttt{index.html} \\
+POST & \texttt{/generate}              & Scriere fișiere YAML inventar \\
+GET  & \texttt{/detect-inventory}      & Scanare director \texttt{inventory/} \\
+POST & \texttt{/delete-host}           & Ștergere YAML nod \\
+POST & \texttt{/test-ssh}              & Testare conectivitate SSH per nod \\
+GET  & \texttt{/deploy}                & SSE stream — instalare K3s \\
+POST & \texttt{/deploy-abort}          & Setare \texttt{abort\_flag} \\
+GET  & \texttt{/deploy-status}         & Stare curentă (idle/running/…) \\
+GET  & \texttt{/uninstall}             & SSE stream — dezinstalare K3s \\
+POST & \texttt{/kubectl-nodes}         & \texttt{kubectl get nodes -o wide} \\
+POST & \texttt{/kubectl-pods}          & \texttt{kubectl get pods -A -o wide} \\
+POST & \texttt{/kubectl-services}      & \texttt{kubectl get services -A} \\
+POST & \texttt{/kubectl-node-resources}& Metrici CPU/memorie per nod \\
+\hline
+\end{tabular}
+\end{center}
+
+\subsection{Motorul de orchestrare SSH}
+
+Modulul \texttt{ssh.py} constituie fundația motorului de orchestrare și expune trei funcții utilizate de \texttt{installer.py} și \texttt{uninstaller.py}:
 
 \begin{itemize}
-  \item Primește POST request-uri de la Frontend cu datele introduse de utilizator.
-  \item Prelucrează datele primite, validându-le și convertindu-le în fișiere YAML.
-  \item Transmite noile fișiere YAML spre Agent.
+  \item \textbf{\texttt{\_write\_temp\_key(ssh\_key\_text)}} — Scrie cheia SSH privată furnizată de utilizator într-un fișier temporar cu permisiuni stricte (\texttt{0600}) și returnează calea acestuia. Fișierul este șters automat după finalizarea operației.
+  \item \textbf{\texttt{\_open\_ssh\_client(ip, username, key\_path)}} — Creează și conectează un client SSH Paramiko. Încearcă succesiv formatele de cheie Ed25519, RSA, ECDSA și DSS, asigurând compatibilitatea cu orice infrastructură existentă.
+  \item \textbf{\texttt{\_ssh\_run\_live(client, cmd)}} — Generator non-blocant care yield-uiește \texttt{(linie, None)} pentru fiecare linie de output a comenzii și \texttt{(None, exit\_code)} la finalizare. Canalul SSH operează fără blocare, iar \texttt{abort\_flag} este verificat la fiecare iterație pentru a permite anularea imediată a instalării.
 \end{itemize}
 
-Aceste 3 sarcini se regăsesc în workflow-ul din \hyperref[fig:backend-flow]{Figura~\ref{fig:backend-flow}}.
-\begin{figure}[H]
-    \centering
-    \begin{tikzpicture}[
-        node distance=0.7cm,
-        every node/.style={text width=7cm, minimum height=1cm, align=center,
-                           rounded corners=4pt, font=\small},
-        frontend/.style={fill=blue!15, draw=blue!50!black},
-        backend/.style={fill=yellow!20, draw=yellow!60!black},
-        ansible/.style={fill=violet!15, draw=violet!50!black},
-        success/.style={fill=green!15, draw=green!50!black, font=\small\bfseries},
-        arr/.style={-{Stealth[length=3mm]}, thick},
-        dasharr/.style={-{Stealth[length=3mm]}, thick, dashed, gray},
-        seclabel/.style={font=\small\itshape, text width=2cm, align=left, draw=none, fill=none, minimum height=0pt}
-    ]
-        % Nodes
-        \node[frontend, font=\small\bfseries] (n1)
-            {User creates inventory\\in Web UI};
-        \node[backend, below=of n1] (n2)
-            {Flask API receives data\\(POST /generate)};
-        \node[backend, below=of n2] (n3)
-            {Ansible inventory files\\written to disk\\(all.yaml + host\_vars/)};
-        \node[frontend, below=of n3] (n4)
-            {User triggers deploy\\(GET /deploy + SSH credentials)};
-        \node[backend, below=of n4, font=\small\bfseries] (n5)
-            {ansible-playbook\\subprocess spawned};
-        \node[ansible, below=of n5] (n6)
-            {Role: docker-install\\(all nodes)};
-        \node[ansible, below=of n6] (n7)
-            {Role: master-primordial-install\\(initialize K3s cluster)};
-        \node[ansible, below=of n7] (n8)
-            {Role: retrieve-kubeconfig\\(fetch k3s.yaml)};
-        \node[ansible, below=of n8] (n9)
-            {Role: master-install\\(join additional masters)};
-        \node[ansible, below=of n9] (n10)
-            {Role: worker-install\\(join worker nodes)};
-        \node[success, below=of n10] (n11)
-            {K3s Cluster Ready};
+\subsection{Gestionarea inventarului}
 
-        % Arrows
-        \foreach \i/\j in {n1/n2, n2/n3, n3/n4, n4/n5, n5/n6, n6/n7, n7/n8, n8/n9, n9/n10, n10/n11}
-            \draw[arr] (\i) -- (\j);
+Fiecare nod al clusterului este reprezentat printr-un fișier YAML independent stocat în directorul \texttt{inventory/} din rădăcina workspace-ului. Schema unui fișier de inventar este minimală:
 
-        % SSE feedback dashed arrow
-        \draw[dasharr] (n5.east) -- ++(1.2,0) |- (n1.east)
-            node[pos=0.25, right, font=\scriptsize\itshape, text width=2.5cm, fill=none, draw=none, minimum height=0pt]
-            {SSE stream\\(real-time progress)};
+\begin{verbatim}
+name: master1
+ip: 192.168.1.10
+role: master
+primordial: true   # prezent doar la nodul master primordial
+\end{verbatim}
 
-        % Section labels
-        \node[seclabel, left=0.6cm of n1, text=blue!50!black]  {Frontend};
-        \node[seclabel, left=0.6cm of n2, text=yellow!60!black] {Backend};
-        \node[seclabel, left=0.6cm of n6, text=violet!50!black] {Ansible};
-    \end{tikzpicture}
-    \caption{Backend general}
-    \label{fig:backend-flow}
-\end{figure}
+Separarea fiecărui nod într-un fișier distinct permite operații granulare (adăugare/ștergere individuală) și evită conflictele de concurență la scriere. La detectarea inventarului existent, backend-ul scanează directorul și reconstituie lista de noduri în ordinea alfabetică a numelor de fișiere, identificând automat nodul primordial.
 
-\subsection{Agent}
+\subsection{Instalarea clusterului K3s prin SSH}
 
-Agentul intervine doar când este declanșat de Backend, în momentul în care Backend-ul a terminat de procesat datele și a creat cu succes fișierele YAML. Agentul execută o serie de sarcini predefinite bazate pe fișierele YAML primite, precum în \hyperref[agent.png]{Figura~\ref{agent.png}}.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=1\textwidth]{agent.png}
-    \caption{Agent general}
-    \label{agent.png}
-\end{figure}
+Procesul de instalare este implementat în \texttt{installer.py} ca un generator Python (\texttt{\_stream\_k3s\_install}) care yield-uiește evenimente SSE pe măsură ce fiecare pas avansează. Ordinea de execuție este strictă și motivată de dependențele tehnice ale K3s:
 
-Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura realizarea sarcinii cu succes și a oferi feedback pe parcurs, ca în diagrama din \hyperref[overalluml.png]{Figura~\ref{overalluml.png}}.
+\begin{enumerate}
+  \item \textbf{Instalarea Docker (opțional)} — Pe fiecare nod se verifică prezența Docker (\texttt{docker --version}). Dacă Docker nu este instalat și utilizatorul a bifat opțiunea corespunzătoare, se rulează scriptul oficial \texttt{https://get.docker.com} prin \texttt{curl | sudo sh}.
+  \item \textbf{Inițializarea masterului primordial} — Se renderizează template-ul Jinja2 \texttt{master.yaml.j2} cu parametrii \texttt{cluster\_init: true}, token-ul K3s, adresa IP și flag-ul Docker. Fișierul rezultat este încărcat pe nod la \texttt{/etc/rancher/k3s/config.yaml} prin \texttt{sudo tee}, după care se rulează \texttt{curl -sfL https://get.k3s.io | sudo sh -s - server}.
+  \item \textbf{Extragerea kubeconfig} — Backend-ul descarcă \texttt{/etc/rancher/k3s/k3s.yaml} de pe nodul primordial, înlocuiește adresa \texttt{127.0.0.1} cu IP-ul extern al masterului și salvează fișierul local la \texttt{\textasciitilde/.kube/k3s.yaml}.
+  \item \textbf{Alăturarea masterilor adicionali} — Pentru fiecare master secundar, se renderizează \texttt{master.yaml.j2} cu \texttt{cluster\_init: false} și adresa primordialului, după care se execută același script de instalare K3s.
+  \item \textbf{Înrolarea nodurilor worker} — Se renderizează \texttt{worker.yaml.j2} cu adresa masterului și token-ul, iar scriptul de instalare K3s este rulat cu argumentul \texttt{agent}.
+\end{enumerate}
+
+La finalizarea cu succes a tuturor pașilor, evenimentul SSE \texttt{finished} include și conținutul complet al kubeconfig-ului, permițând frontend-ului să îl afișeze imediat utilizatorului.
+
+\subsection{Dezinstalarea clusterului}
+
+Dezinstalarea este implementată simetric față de instalare, în ordine inversă: mai întâi workerii, apoi masterii adicionali, în final masterul primordial. Pe fiecare nod se execută secvențial:
+
+\begin{itemize}
+  \item \texttt{sudo /usr/local/bin/k3s-agent-uninstall.sh} (pe workeri) sau \texttt{sudo /usr/local/bin/k3s-uninstall.sh} (pe masteri).
+  \item \texttt{docker kill \$(docker ps -q) || true} și \texttt{docker rm -f \$(docker ps -aq) || true} pentru curățarea tuturor containerelor Docker rulate de K3s. Comenzile sunt sufixate cu \texttt{|| true} pentru a nu eșua în absența Docker sau a containerelor.
+\end{itemize}
+
+La final, fișierul local de kubeconfig \texttt{\textasciitilde/.kube/k3s.yaml} este șters. Întregul proces este transmis frontend-ului în timp real prin același mecanism SSE folosit la instalare.
+
+\subsection{Mecanismul de anulare (abort)}
+
+Utilizatorul poate anula o instalare sau dezinstalare aflată în desfășurare prin butonul Abort din interfață. La apăsare, frontend-ul trimite un \texttt{POST /deploy-abort}, care setează \texttt{abort\_flag} (un \texttt{threading.Event} Python). La iterația următoare a generatorului SSH (\texttt{\_ssh\_run\_live}), flag-ul este detectat, canalul SSH curent este închis, iar generatorul returnează fără a mai executa pașii următori. Starea se actualizează la \texttt{aborted} și frontend-ul afișează butonul de reluare.
+
+\subsection{Dashboard-ul de cluster și monitorizarea resurselor}
+
+Secțiunea \textit{Existing Cluster} permite utilizatorilor să monitorizeze un cluster K3s existent prin încărcarea unui kubeconfig. Frontend-ul trimite kubeconfig-ul ca parte din payload-ul fiecărui apel kubectl. Backend-ul (\texttt{kubectl.py}) execută comanda kubectl corespunzătoare printr-un subprocess Python și returnează datele parsate.
+
+Sunt disponibile patru vizualizări:
+
+\begin{itemize}
+  \item \textbf{Nodes} — tabelul nodurilor cu roluri, versiunea K3s și statusul fiecăruia.
+  \item \textbf{Pods} — tabelul pod-urilor din toate namespace-urile, cu starea și nodul pe care rulează.
+  \item \textbf{Services} — tabelul serviciilor cu tipul, porturile expuse și clusterIP.
+  \item \textbf{Resources} — carduri per nod cu bare de progres pentru CPU, memorie și număr de pod-uri. Datele de bază provin din \texttt{kubectl get nodes -o json} (capacitate alocabilă), iar datele de utilizare în timp real provin din \texttt{kubectl top nodes} (disponibile dacă metrics-server este instalat). Culoarea barelor indică gradul de utilizare: verde sub 70\%, galben sub 90\%, roșu la 90\% și peste.
+\end{itemize}
+
+\subsection{Afișarea kubeconfig după instalare}
+
+La finalizarea cu succes a unui deployment, evenimentul SSE \texttt{finished} include câmpul \texttt{kubeconfig} cu conținutul complet al fișierului \texttt{k3s.yaml}, cu adresa IP a masterului primordial deja introdusă. Frontend-ul afișează automat un panou colaibil cu kubeconfig-ul, formatat monospaciat pe fundal întunecat. Un buton de copiere în clipboard permite utilizatorului să preia imediat kubeconfig-ul pentru utilizare cu \texttt{kubectl} local.
+
+Interacțiunea generală dintre componentele aplicației este ilustrată în \hyperref[overalluml.png]{Figura~\ref{overalluml.png}}.
+
 \begin{figure}[H]
     \centering
     \includegraphics[height=0.5\textwidth]{overalluml.png}
@@ -569,14 +613,87 @@ Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura
     \label{overalluml.png}
 \end{figure}
 
+\chapter*{Concluzii}
+\addcontentsline{toc}{chapter}{Concluzii}
+
+InfraMind a fost conceput ca răspuns la o problemă concretă: deși Kubernetes a devenit standardul de facto pentru orchestrarea aplicațiilor containerizate, procesul de instalare și configurare a unui cluster rămâne complex și necesită cunoștințe tehnice avansate din domenii multiple. Lucrarea de față a documentat proiectarea și implementarea unei soluții care adresează această problemă printr-o interfață web intuitivă și un motor de orchestrare SSH implementat integral în Python.
+
+\section*{Ce s-a realizat}
+
+InfraMind oferă un flux complet de la zero la cluster funcțional, fără nicio dependență externă de tip configuration management pe mașina de control. Utilizatorul definește inventarul nodurilor, testează conexiunile SSH, lansează instalarea și primește kubeconfig-ul gata de utilizat — totul din browser, fără a scrie niciun fișier de configurare manual.
+
+Principalele realizări tehnice ale proiectului sunt:
+
+\begin{itemize}
+  \item \textbf{Motor de orchestrare SSH pur Python} — Folosind Paramiko și generatoare Python, aplicația execută secvențe complexe de comenzi SSH pe mai multe noduri simultan, cu streaming live al output-ului și suport pentru anulare imediată.
+  \item \textbf{Arhitectură modulară Flask cu Blueprint-uri} — Backend-ul este structurat în șapte module cu responsabilități clare, fără dependențe circulare, facilitând mentenanța și extinderea.
+  \item \textbf{Frontend SPA modular} — Zece module JavaScript și nouă fișiere CSS independente formează o interfață single-page fluidă, cu animații, feedback vizual în timp real și navigare pas cu pas.
+  \item \textbf{Server-Sent Events pentru progres în timp real} — Utilizatorul vede fiecare pas al instalării pe măsură ce se execută, cu stări vizuale clare (în așteptare, activ, finalizat, eșuat, anulat).
+  \item \textbf{Dashboard de monitorizare cluster} — Secțiunea de cluster existent permite vizualizarea nodurilor, pod-urilor, serviciilor și metricilor de resurse (CPU, memorie, pod-uri) prin \texttt{kubectl}.
+  \item \textbf{Suport pentru clustere HA} — Topologia cu mai mulți masteri (embedded etcd) este suportată nativ, cu inițializare corectă a masterului primordial și alăturare automată a masterilor secundari.
+  \item \textbf{Containerizare Docker} — Aplicația este complet containerizată, putând fi lansată cu \texttt{docker compose up} în orice mediu fără configurare suplimentară.
+\end{itemize}
+
+\section*{Provocări întâlnite}
+
+Pe parcursul implementării au apărut mai multe provocări tehnice interesante. Gestionarea output-ului SSH în timp real pe canale non-blocante a necesitat o abordare atentă pentru a evita blocarea thread-ului Flask și pentru a menține compatibilitatea cu mecanismul SSE. Mecanismul de abort a trebuit să fie fiabil la nivel de thread, folosind un \texttt{threading.Event} verificat la fiecare iterație a generatorului SSH. Gestionarea erorilor parțiale de instalare (un nod eșuează, ceilalți continuă) a necesitat o logică de fallthrough atentă pentru a asigura că utilizatorul primește feedback complet indiferent de scenariul de eroare.
+
+O altă provocare a reprezentat-o tranziția arhitecturală de la o abordare bazată pe Ansible la orchestrare pură Python/SSH: toate abstractizările oferite de Ansible (inventar, roluri, handlere, idempotență) au trebuit reimplementate explicit în cod Python, ceea ce a condus la o arhitectură mai transparentă și mai ușor de înțeles, dar și mai verbosă.
+
+\section*{Limitări}
+
+Ca orice soluție orientată spre simplitate, InfraMind are și limitări față de soluțiile enterprise:
+
+\begin{itemize}
+  \item \textbf{O singură instalare activă simultan} — Mecanismul de stare partajat permite un singur proces de instalare/dezinstalare la un moment dat; suportul pentru instalări paralele ar necesita o arhitectură cu cozi de task-uri.
+  \item \textbf{Fără autentificare} — Interfața web nu implementează autentificare; se presupune că aplicația rulează într-un mediu privat (rețea locală sau container izolat).
+  \item \textbf{Fără persistență între sesiuni} — Starea deployment-ului (dacă clusterul este instalat sau nu) nu este persistată; la repornirea aplicației, utilizatorul trebuie să re-detecteze inventarul.
+  \item \textbf{Volum de lucru mic spre mediu} — InfraMind este optimizat pentru clustere de dimensiune redusă spre medie (tipic 1--9 noduri), similar K3s față de Kubernetes standard.
+\end{itemize}
+
+\section*{Direcții viitoare}
+
+Proiectul InfraMind poate fi extins în mai multe direcții naturale:
+
+\begin{itemize}
+  \item \textbf{Autentificare și autorizare} — Adăugarea unui sistem de login simplu (OAuth2 sau JWT) ar face aplicația sigur de expus pe internet.
+  \item \textbf{Gestionarea mai multor clustere} — Suportul pentru profiluri de cluster (multiple inventare salvate și comutabile) ar extinde utilitatea aplicației.
+  \item \textbf{Integrare Helm} — Un panou de deploy de chart-uri Helm direct din interfață ar completa ciclul de viață al clusterului.
+  \item \textbf{Monitorizare integrată} — Instalarea automată a unui stack de monitorizare (Prometheus + Grafana) ca pas opțional post-instalare ar oferi vizibilitate completă.
+  \item \textbf{Notificări} — Integrarea cu sisteme de notificare (email, Slack, webhook) la finalizarea/eșuarea instalărilor ar îmbunătăți experiența în medii de echipă.
+\end{itemize}
+
+În ansamblu, InfraMind demonstrează că automatizarea instalării Kubernetes nu necesită neapărat tooling enterprise complex — o aplicație Python bine structurată, cu orchestrare SSH directă și o interfață web modernă, poate oferi o experiență de utilizare superioară pentru segmentul de utilizatori vizat: administratori de infrastructură și dezvoltatori care doresc să implementeze rapid clustere K3s pe orice tip de hardware.
+
+\chapter*{Rezumat}
+\addcontentsline{toc}{chapter}{Rezumat}
+
+\section*{Rezumat în limba română}
+
+InfraMind este o aplicație web open-source pentru automatizarea instalării și gestionării clusterelor Kubernetes K3s. Implementată în Python cu Flask, aplicația oferă o interfață web intuitivă prin care utilizatorii pot defini arhitectura clusterului (noduri master și worker), testa conexiunile SSH, lansa instalarea și monitoriza progresul în timp real.
+
+Orchestrarea instalării se realizează direct prin SSH, folosind librăria Paramiko, fără dependențe externe de tip configuration management. Configurațiile K3s per nod sunt generate dinamic prin template-uri Jinja2, asigurând corectitudine și consistență indiferent de topologia aleasă. Progresul instalării este transmis frontend-ului în timp real prin Server-Sent Events, oferind utilizatorului feedback vizual detaliat la fiecare pas.
+
+Aplicația include și un dashboard pentru gestionarea clusterelor existente, cu vizualizare de noduri, pod-uri, servicii și metrici de resurse (CPU, memorie) obținute prin kubectl. La finalizarea cu succes a instalării, kubeconfig-ul este afișat automat și poate fi copiat cu un singur click.
+
+Aplicația este containerizată cu Docker și poate fi pornită cu o singură comandă. Codul sursă este organizat modular atât în backend (Blueprint-uri Flask) cât și în frontend (module JavaScript și CSS independente), facilitând mentenanța și extinderea.
+
+\section*{Abstract}
+
+InfraMind is an open-source web application for automating the installation and management of K3s Kubernetes clusters. Built in Python using the Flask framework, it provides an intuitive web interface for defining cluster architecture (master and worker nodes), testing SSH connectivity, launching installations, and monitoring progress in real time.
+
+The installation orchestration runs entirely over SSH using the Paramiko library, with no external configuration management dependencies such as Ansible. Per-node K3s configurations are generated dynamically from Jinja2 templates, ensuring correctness and consistency regardless of the chosen topology. Installation progress is streamed to the frontend in real time via Server-Sent Events, providing the user with detailed visual feedback at each step.
+
+The application also includes a cluster management dashboard for visualising nodes, pods, services, and resource metrics (CPU, memory) retrieved via kubectl. Upon successful deployment, the kubeconfig is automatically displayed and can be copied to the clipboard with a single click.
+
+InfraMind is fully containerised with Docker and can be started with a single \texttt{docker compose up} command. The codebase is organised modularly in both backend (Flask Blueprints) and frontend (independent JavaScript and CSS modules), facilitating maintenance and future extension.
+
 
 
 \chapter*{Bibliografie}
 \addcontentsline{toc}{chapter}{Bibliografie}
 
 \begin{enumerate}
-
-\item Ansible (Red Hat), \textit{Ansible Documentation}, disponibil la: \url{https://docs.ansible.com/}, accesat 30 martie 2026.
 
 \item Docker Inc., \textit{Docker Documentation}, disponibil la: \url{https://docs.docker.com/}, accesat 30 martie 2026.
 
@@ -600,6 +717,8 @@ Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura
 
 \item Paramiko, \textit{Paramiko Documentation — SSH2 for Python}, disponibil la: \url{https://www.paramiko.org/}, accesat 30 martie 2026.
 
+\item Pallets Projects, \textit{Jinja2 Documentation — Template Engine for Python}, disponibil la: \url{https://jinja.palletsprojects.com/}, accesat 30 martie 2026.
+
 \item PyYAML, \textit{PyYAML Documentation}, disponibil la: \url{https://pyyaml.org/wiki/PyYAMLDocumentation}, accesat 30 martie 2026.
 
 \item Python Software Foundation, \textit{Python 3 Documentation}, disponibil la: \url{https://docs.python.org/3/}, accesat 30 martie 2026.
@@ -614,4 +733,4 @@ Toate aceste componente comunică una cu alta la fiecare stagiu pentru a asigura
 
 \end{enumerate}
 
-\end{document} 
+\end{document}

@@ -1,22 +1,49 @@
 // ── Topology diagram ──────────────────────────────────────────────────
 
+// Returns SVG polygon points string for a pointy-top hexagon centered at (cx, cy) with radius r
+function hexPts(cx, cy, r) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const a = Math.PI / 180 * (60 * i - 90);
+    pts.push(`${Math.round(cx + r * Math.cos(a))},${Math.round(cy + r * Math.sin(a))}`);
+  }
+  return pts.join(' ');
+}
+
 function renderTopology() {
   const container = document.getElementById('topology');
   if (!container) return;
   container.innerHTML = '';
 
-  const baseWidth = container.clientWidth || 800;
-  const masters   = vms.filter(n => n.role === 'master');
-  const workers   = vms.filter(n => n.role === 'worker');
-  const mCount    = Math.max(1, masters.length);
-  const wCount    = Math.max(0, workers.length);
+  const baseWidth  = container.clientWidth || 800;
+  const masters    = vms.filter(n => n.role === 'master');
+  const workers    = vms.filter(n => n.role === 'worker');
+  const mCount     = masters.length;
+  const wCount     = workers.length;
 
-  const masterRectW = 220; const minMasterSpacing = 50;
-  const minWidthForMasters = mCount * (masterRectW + minMasterSpacing) + minMasterSpacing;
-  const workerRectW = 200; const minWorkerSpacing = 50;
-  const minWidthForWorkers = wCount > 0 ? wCount * (workerRectW + minWorkerSpacing) + minWorkerSpacing : 0;
-  const width  = Math.max(baseWidth, minWidthForMasters, minWidthForWorkers);
-  const height = Math.max(240, Math.floor((vms.length + 1) * 40));
+  const COLS       = 3;            // max nodes per row
+  const masterHexR = 58;
+  const workerHexR = 50;
+  const masterHexW = Math.ceil(masterHexR * Math.sqrt(3));  // ≈ 101
+  const workerHexW = Math.ceil(workerHexR * Math.sqrt(3));  // ≈ 87
+  const rowGap     = 28;           // gap between rows within a tier
+  const tierGap    = 64;           // gap between master tier and worker tier
+  const padTop     = 30;
+  const padBot     = 30;
+
+  const masterRows  = Math.max(1, Math.ceil(mCount / COLS));
+  const workerRows  = wCount > 0 ? Math.ceil(wCount / COLS) : 0;
+  const masterTierH = masterRows * (masterHexR * 2) + Math.max(0, masterRows - 1) * rowGap;
+  const workerTierH = workerRows > 0
+    ? workerRows * (workerHexR * 2) + Math.max(0, workerRows - 1) * rowGap : 0;
+
+  const minWidthM = Math.min(Math.max(1, mCount), COLS) * (masterHexW + 60) + 60;
+  const minWidthW = wCount > 0 ? Math.min(wCount, COLS) * (workerHexW + 50) + 50 : 0;
+  const width  = Math.max(baseWidth, minWidthM, minWidthW);
+  const height = Math.max(
+    padTop + masterTierH + (workerRows > 0 ? tierGap + workerTierH : 0) + padBot,
+    240
+  );
 
   const svgNS = 'http://www.w3.org/2000/svg';
   const svg   = document.createElementNS(svgNS, 'svg');
@@ -24,105 +51,123 @@ function renderTopology() {
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
   svg.setAttribute('xmlns', svgNS);
 
-  const topY = 60; const botY = height - 60;
-  function nodeX(i, count) { return Math.round((i + 1) * (width / (count + 1))); }
+  // x-center of column j within a row of rowCount nodes
+  function nodeX(j, rowCount) { return Math.round((j + 1) * (width / (rowCount + 1))); }
 
-  const defs   = document.createElementNS(svgNS, 'defs');
-  const marker = document.createElementNS(svgNS, 'marker');
-  marker.setAttribute('id', 'arrow'); marker.setAttribute('markerUnits', 'strokeWidth');
-  marker.setAttribute('markerWidth', '10'); marker.setAttribute('markerHeight', '10');
-  marker.setAttribute('refX', '8'); marker.setAttribute('refY', '4'); marker.setAttribute('orient', 'auto');
-  const mpath = document.createElementNS(svgNS, 'path');
-  mpath.setAttribute('d', 'M0,0 L0,8 L10,4 z'); mpath.setAttribute('fill', '#ffffff');
-  marker.appendChild(mpath); defs.appendChild(marker); svg.appendChild(defs);
+  // ── tier separator line ──────────────────────────────────────────────
+  if (workerRows > 0) {
+    const sepY = Math.round(padTop + masterTierH + tierGap / 2);
+    const sep  = document.createElementNS(svgNS, 'line');
+    sep.setAttribute('x1', 24); sep.setAttribute('y1', sepY);
+    sep.setAttribute('x2', width - 24); sep.setAttribute('y2', sepY);
+    sep.setAttribute('stroke', 'rgba(255,255,255,0.07)');
+    sep.setAttribute('stroke-width', '1');
+    sep.setAttribute('stroke-dasharray', '4 6');
+    svg.appendChild(sep);
+  }
 
+  // ── tier labels ──────────────────────────────────────────────────────
+  function makeTierLabel(text, y, color) {
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', 20); t.setAttribute('y', y);
+    t.setAttribute('fill', color); t.setAttribute('font-size', '9');
+    t.setAttribute('font-weight', '700'); t.setAttribute('letter-spacing', '1.8');
+    t.setAttribute('dominant-baseline', 'middle'); t.setAttribute('opacity', '0.55');
+    t.textContent = text;
+    return t;
+  }
+  if (mCount > 0) svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
+  if (workerRows > 0) {
+    svg.appendChild(makeTierLabel('WORKER NODES', padTop + masterTierH + tierGap + 8, '#7dd3fc'));
+  }
+
+  // ── master nodes ─────────────────────────────────────────────────────
   masters.forEach((m, i) => {
-    const x = nodeX(i, mCount);
+    const row      = Math.floor(i / COLS);
+    const col      = i % COLS;
+    const rowCount = Math.min(COLS, mCount - row * COLS);
+    const x        = nodeX(col, rowCount);
+    const cy       = padTop + masterHexR + row * (masterHexR * 2 + rowGap);
     const g = document.createElementNS(svgNS, 'g');
     g.setAttribute('data-name', m.name); g.setAttribute('data-ip', m.ip);
     g.setAttribute('data-role', 'master'); g.setAttribute('class', 'topo-node');
-    const rectW = masterRectW; const rectH = 58; const rxX = x - rectW / 2;
-    const rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttribute('x', rxX); rect.setAttribute('y', topY - rectH / 2);
-    rect.setAttribute('width', rectW); rect.setAttribute('height', rectH);
-    rect.setAttribute('fill', 'rgba(255,255,255,0.08)'); rect.setAttribute('stroke', '#6366f1');
-    rect.setAttribute('stroke-width', '2'); rect.setAttribute('rx', 8); rect.setAttribute('ry', 8);
-    g.appendChild(rect);
+    const hex = document.createElementNS(svgNS, 'polygon');
+    hex.setAttribute('points', hexPts(x, cy, masterHexR));
+    hex.setAttribute('fill', 'rgba(156,255,110,0.08)');
+    hex.setAttribute('stroke', '#9cff6e');
+    hex.setAttribute('stroke-width', '2');
+    g.appendChild(hex);
     const label = document.createElementNS(svgNS, 'text');
-    label.setAttribute('x', x); label.setAttribute('y', topY - 6);
-    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '16');
+    label.setAttribute('x', x); label.setAttribute('y', cy - 14);
+    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '14');
     label.setAttribute('font-weight', '700'); label.setAttribute('text-anchor', 'middle');
     label.setAttribute('dominant-baseline', 'middle'); label.textContent = m.name;
     g.appendChild(label);
-    const sub = document.createElementNS(svgNS, 'text');
-    sub.setAttribute('x', x); sub.setAttribute('y', topY + 12);
-    sub.setAttribute('fill', '#ddd'); sub.setAttribute('font-size', '13');
-    sub.setAttribute('text-anchor', 'middle'); sub.setAttribute('dominant-baseline', 'middle');
-    sub.textContent = `${m.ip} • MASTER`;
-    g.appendChild(sub);
-    g.addEventListener('click',      () => showTopoInfo(m.name, m.ip, 'master', x, topY - rectH / 2));
+    const roleT = document.createElementNS(svgNS, 'text');
+    roleT.setAttribute('x', x); roleT.setAttribute('y', cy + 1);
+    roleT.setAttribute('fill', '#9cff6e'); roleT.setAttribute('font-size', '10');
+    roleT.setAttribute('font-weight', '600'); roleT.setAttribute('text-anchor', 'middle');
+    roleT.setAttribute('dominant-baseline', 'middle'); roleT.setAttribute('opacity', '0.9');
+    roleT.textContent = 'MASTER';
+    g.appendChild(roleT);
+    const ipT = document.createElementNS(svgNS, 'text');
+    ipT.setAttribute('x', x); ipT.setAttribute('y', cy + 16);
+    ipT.setAttribute('fill', '#9cff6e'); ipT.setAttribute('font-size', '10');
+    ipT.setAttribute('text-anchor', 'middle'); ipT.setAttribute('dominant-baseline', 'middle');
+    ipT.setAttribute('opacity', '0.75');
+    ipT.textContent = m.ip;
+    g.appendChild(ipT);
+    g.addEventListener('click',      () => showTopoInfo(m.name, m.ip, 'master', x, cy - masterHexR));
     g.addEventListener('dblclick',   () => openTopoEditor(m.name));
     g.addEventListener('mouseenter', () => g.classList.add('highlight'));
     g.addEventListener('mouseleave', () => g.classList.remove('highlight'));
     svg.appendChild(g);
   });
 
+  // ── worker nodes ─────────────────────────────────────────────────────
+  const workerTierTopY = padTop + masterTierH + tierGap;
   workers.forEach((w, i) => {
-    const x = nodeX(i, Math.max(1, wCount));
+    const row      = Math.floor(i / COLS);
+    const col      = i % COLS;
+    const rowCount = Math.min(COLS, wCount - row * COLS);
+    const x        = nodeX(col, rowCount);
+    const cy       = workerTierTopY + workerHexR + row * (workerHexR * 2 + rowGap);
     const g = document.createElementNS(svgNS, 'g');
     g.setAttribute('class', 'topo-node'); g.setAttribute('data-name', w.name);
     g.setAttribute('data-ip', w.ip); g.setAttribute('data-role', 'worker');
-    const rectW = 200; const rectH = 46; const rxX = x - rectW / 2;
-    const rect = document.createElementNS(svgNS, 'rect');
-    rect.setAttribute('x', rxX); rect.setAttribute('y', botY - rectH / 2);
-    rect.setAttribute('width', rectW); rect.setAttribute('height', rectH);
-    rect.setAttribute('fill', 'rgba(255,255,255,0.08)'); rect.setAttribute('stroke', '#ffffff');
-    rect.setAttribute('stroke-width', '1.6'); rect.setAttribute('rx', 6); rect.setAttribute('ry', 6);
-    g.appendChild(rect);
+    const hex = document.createElementNS(svgNS, 'polygon');
+    hex.setAttribute('points', hexPts(x, cy, workerHexR));
+    hex.setAttribute('fill', 'rgba(125,211,252,0.07)');
+    hex.setAttribute('stroke', '#7dd3fc');
+    hex.setAttribute('stroke-width', '1.8');
+    g.appendChild(hex);
     const label = document.createElementNS(svgNS, 'text');
-    label.setAttribute('x', x); label.setAttribute('y', botY - 4);
-    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '14');
-    label.setAttribute('text-anchor', 'middle'); label.setAttribute('dominant-baseline', 'middle');
-    label.textContent = w.name;
+    label.setAttribute('x', x); label.setAttribute('y', cy - 12);
+    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '13');
+    label.setAttribute('font-weight', '600'); label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'middle'); label.textContent = w.name;
     g.appendChild(label);
-    const sub = document.createElementNS(svgNS, 'text');
-    sub.setAttribute('x', x); sub.setAttribute('y', botY + 12);
-    sub.setAttribute('fill', '#ddd'); sub.setAttribute('font-size', '12');
-    sub.setAttribute('text-anchor', 'middle'); sub.setAttribute('dominant-baseline', 'middle');
-    sub.textContent = `${w.ip} • WORKER`;
-    g.appendChild(sub);
-    g.addEventListener('click',      () => showTopoInfo(w.name, w.ip, 'worker', x, botY - rectH / 2));
+    const roleT = document.createElementNS(svgNS, 'text');
+    roleT.setAttribute('x', x); roleT.setAttribute('y', cy + 1);
+    roleT.setAttribute('fill', '#7dd3fc'); roleT.setAttribute('font-size', '9');
+    roleT.setAttribute('font-weight', '600'); roleT.setAttribute('text-anchor', 'middle');
+    roleT.setAttribute('dominant-baseline', 'middle'); roleT.setAttribute('opacity', '0.9');
+    roleT.textContent = 'WORKER';
+    g.appendChild(roleT);
+    const ipT = document.createElementNS(svgNS, 'text');
+    ipT.setAttribute('x', x); ipT.setAttribute('y', cy + 14);
+    ipT.setAttribute('fill', '#7dd3fc'); ipT.setAttribute('font-size', '9');
+    ipT.setAttribute('text-anchor', 'middle'); ipT.setAttribute('dominant-baseline', 'middle');
+    ipT.setAttribute('opacity', '0.75');
+    ipT.textContent = w.ip;
+    g.appendChild(ipT);
+    g.addEventListener('click',      () => showTopoInfo(w.name, w.ip, 'worker', x, cy - workerHexR));
     g.addEventListener('dblclick',   () => openTopoEditor(w.name));
     g.addEventListener('mouseenter', () => g.classList.add('highlight'));
     g.addEventListener('mouseleave', () => g.classList.remove('highlight'));
     svg.appendChild(g);
-
-    const primName  = primordialMaster;
-    const primIndex = masters.findIndex(mm => mm.name === primName);
-    const primX  = primIndex >= 0 ? nodeX(primIndex, mCount) : nodeX(0, mCount);
-    const startX = x; const startY = botY - rectH / 2;
-    const endX   = primX; const endY = topY + 20;
-    const midY   = (startY + endY) / 2;
-    const line   = document.createElementNS(svgNS, 'path');
-    const d      = `M ${startX} ${startY} C ${startX} ${midY} ${endX} ${midY} ${endX} ${endY}`;
-    line.setAttribute('d', d); line.setAttribute('fill', 'none');
-    line.setAttribute('stroke', '#ffffff'); line.setAttribute('stroke-width', '1.8');
-    line.setAttribute('stroke-linecap', 'round'); line.setAttribute('marker-end', 'url(#arrow)');
-    svg.appendChild(line);
   });
 
-  if (masters.length > 1) {
-    for (let i = 0; i < masters.length - 1; i++) {
-      const x1 = nodeX(i, mCount); const x2 = nodeX(i + 1, mCount);
-      const y  = topY + 30;
-      const link = document.createElementNS(svgNS, 'path');
-      const d    = `M ${x1} ${y} C ${x1} ${y + 36} ${x2} ${y + 36} ${x2} ${y}`;
-      link.setAttribute('d', d); link.setAttribute('stroke', '#6366f1');
-      link.setAttribute('stroke-width', '2'); link.setAttribute('fill', 'none');
-      link.setAttribute('class', 'topo-link master-link');
-      svg.appendChild(link);
-    }
-  }
   container.appendChild(svg);
 }
 

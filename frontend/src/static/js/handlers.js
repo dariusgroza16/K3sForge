@@ -143,39 +143,6 @@ function setupHandlers() {
     });
   });
 
-  // ── Download topology ──────────────────────────────────────────────
-  const dl = document.getElementById('downloadTopo');
-  if (dl) dl.addEventListener('click', () => {
-    const container = document.getElementById('topology'); if (!container) { showToast('Nothing to download'); return; }
-    const svg = container.querySelector('svg');            if (!svg)       { showToast('Nothing to download'); return; }
-    const clone = svg.cloneNode(true);
-    const masters = vms.filter(n => n.role === 'master');
-    const workers = vms.filter(n => n.role === 'worker');
-    const masterRectW = 220; const minMasterSpacing = 50;
-    const minWidthForMasters = masters.length * (masterRectW + minMasterSpacing) + minMasterSpacing;
-    const workerRectW = 200; const minWorkerSpacing = 50;
-    const minWidthForWorkers = workers.length > 0 ? workers.length * (workerRectW + minWorkerSpacing) + minWorkerSpacing : 0;
-    const w = Math.max(container.clientWidth || 900, minWidthForMasters, minWidthForWorkers);
-    const h = Math.max(240, Math.floor((vms.length + 1) * 40));
-    clone.setAttribute('width', w); clone.setAttribute('height', h); clone.setAttribute('viewBox', `0 0 ${w} ${h}`);
-    const s    = new XMLSerializer().serializeToString(clone);
-    const blob = new Blob([s], { type: 'image/svg+xml;charset=utf-8' });
-    const url  = URL.createObjectURL(blob);
-    const img  = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h); ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      const png = canvas.toDataURL('image/png');
-      const a   = document.createElement('a'); a.href = png; a.download = 'k3s-topology.png';
-      document.body.appendChild(a); a.click(); a.remove();
-    };
-    img.onerror = () => { showToast('Failed to render image'); URL.revokeObjectURL(url); };
-    img.src = url;
-  });
-
   // ── Secret visibility toggles ──────────────────────────────────────
   wireSecretToggle('toggleSshKey', 'sshKey');
   wireSecretToggle('toggleK3sToken', 'k3sToken');

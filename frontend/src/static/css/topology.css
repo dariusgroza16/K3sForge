@@ -17,12 +17,11 @@
 }
 .topology svg { width: 100%; height: 100%; }
 
-.topo-node  { font-family: Inter, system-ui, sans-serif; font-size: 0.9rem; cursor: pointer; }
-.topo-box   { fill: #2a2a2a; stroke-width: 2.5; rx: 8; ry: 8; transition: all 0.3s ease; }
-.topo-master { stroke: #6366f1; stroke-width: 3; }
-.topo-worker { stroke: rgba(255,255,255,0.3); stroke-width: 2.5; }
-.topo-label  { fill: #fff; font-weight: 700; font-size: 1rem; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.topo-sub    { fill: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.85rem; }
+.topo-node   { font-family: Inter, system-ui, sans-serif; font-size: 0.9rem; cursor: pointer; }
+.topo-master { stroke: #9cff6e; stroke-width: 2; }
+.topo-worker { stroke: #7dd3fc; stroke-width: 1.8; }
+.topo-label  { fill: #fff; font-weight: 700; font-size: 1rem; }
+.topo-sub    { fill: #9cff6e; font-weight: 500; font-size: 0.85rem; }
 
 .topo-info {
   position: absolute;
@@ -39,11 +38,10 @@
 }
 .topo-info.show { display: block; }
 
-.topo-node rect:hover     { stroke-width: 4;   filter: brightness(1.2); }
-.topo-node.highlight rect { stroke-width: 4.5; filter: brightness(1.3); }
-
-.topo-link        { stroke: rgba(255,255,255,0.25); stroke-width: 2;   fill: none; }
-.topo-link.master-link { stroke: rgba(99,102,241,0.6);    stroke-width: 2.5; }
+.topo-node[data-role="master"] polygon:hover          { stroke-width: 3.5; filter: brightness(1.25) drop-shadow(0 0 6px #9cff6e); }
+.topo-node[data-role="master"].highlight polygon     { stroke-width: 4;   filter: brightness(1.4) drop-shadow(0 0 10px #9cff6e); }
+.topo-node[data-role="worker"] polygon:hover          { stroke-width: 3;   filter: brightness(1.25) drop-shadow(0 0 6px #7dd3fc); }
+.topo-node[data-role="worker"].highlight polygon     { stroke-width: 3.5; filter: brightness(1.4) drop-shadow(0 0 10px #7dd3fc); }
 
 .topo-editor {
   position: absolute; right: 18px; bottom: 18px;

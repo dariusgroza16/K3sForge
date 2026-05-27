@@ -14,7 +14,7 @@ inventory_bp = Blueprint('inventory', __name__)
 # ── Shared helper (imported by installer / uninstaller) ───────────────────
 
 def _load_inventory() -> list:
-    """Read every node YAML file from the K3sForge inventory directory."""
+    """Read every node YAML file from the InfraMind inventory directory."""
     nodes = []
     try:
         for fname in sorted(os.listdir(K3S_INVENTORY_DIR)):

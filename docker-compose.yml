@@ -1,9 +1,8 @@
 
 services:
-  k3sforge:
-    image: k3sforge:latest
-    container_name: k3sforge
+  inframind:
+    image: inframind:latest
+    container_name: inframind
     network_mode: host
     restart: unless-stopped
-    volumes:
-      - ~/.ssh:/home/dariusmurk/.ssh:rw
+    

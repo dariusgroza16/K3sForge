@@ -1,9 +1,9 @@
 ---
-description: General coding standards and conventions for the K3sForge project. Always apply.
+description: General coding standards and conventions for the InfraMind project. Always apply.
 applyTo: "**"
 ---
 
-# K3sForge — Project Rules
+# InfraMind — Project Rules
 
 ## General
 

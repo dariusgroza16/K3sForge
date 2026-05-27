@@ -7,7 +7,7 @@ this_dir := justfile_directory()
 _default:
    just --list
 
-[doc("Start the frontend for K3SForge")]
+[doc("Start the frontend for InfraMind")]
 run:
   python3 $this_dir/frontend/src/main.py
 

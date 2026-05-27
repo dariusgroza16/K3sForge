@@ -1,10 +1,10 @@
-# Repository Context — K3sForge
+# Repository Context — InfraMind
 
 Last updated: 2026-04-16
 Maintainer (initial entry): GitHub Copilot (assistant)
 
 ## Short description
-K3sForge is a Python/Flask web application for deploying and managing lightweight Kubernetes (k3s) clusters via direct SSH orchestration using Paramiko. It provides a modern UI for inventory management, connection testing, cluster deployment, and resource monitoring.
+InfraMind is a Python/Flask web application for deploying and managing lightweight Kubernetes (k3s) clusters via direct SSH orchestration using Paramiko. It provides a modern UI for inventory management, connection testing, cluster deployment, and resource monitoring.
 
 ## Key areas of the repository
 - `frontend/` — Python/Flask backend (`src/`) with modular blueprints, static assets (CSS/JS), and HTML templates

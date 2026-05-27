@@ -9,7 +9,7 @@ from config import abort_flag
 
 def _write_temp_key(ssh_key_text: str) -> str:
     """Write an SSH private key to a temp file and return its path."""
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_k3sforge_key', mode='w')
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_inframind_key', mode='w')
     tmp.write(ssh_key_text.strip() + '\n')
     tmp.close()
     os.chmod(tmp.name, 0o600)

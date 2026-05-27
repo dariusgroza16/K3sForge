@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>K3sForge Inventory Generator</title>
-  <link rel="icon" href="{{ url_for('static', filename='k3sforgelogo.png') }}" />
+  <title>InfraMind</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/buttons.css') }}" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/navigation.css') }}" />
@@ -58,7 +60,7 @@
 <body>
   <!-- Page loader — rendered before any external CSS/JS ──────────────── -->
   <div id="pageLoader" aria-hidden="true">
-    <div class="loader-wordmark">K3sForge</div>
+    <div class="loader-wordmark">InfraMind</div>
     <div class="loader-bar-track">
       <div class="loader-bar-fill"></div>
     </div>
@@ -70,10 +72,18 @@
   <div id="welcomeScreen" class="welcome-screen">
     <div class="welcome-content">
       <div class="logo-wrapper">
-        <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
+        <div class="logo" aria-label="InfraMind logo">
+          <svg class="hex-mark" viewBox="0 0 42 108" role="img" aria-hidden="true">
+            <polygon points="21,4 33,11 33,25 21,32 9,25 9,11" />
+            <polygon points="21,40 33,47 33,61 21,68 9,61 9,47" />
+            <polygon points="21,76 33,83 33,97 21,104 9,97 9,83" />
+          </svg>
+          <span class="logo-text">
+            <span class="infra">INFRA</span>
+            <span class="mind">MIND</span>
+          </span>
+        </div>
       </div>
-      <h1 class="app-title">K3sForge</h1>
-      <p class="subtitle">Kubernetes cluster management made simple</p>
       <div class="welcome-buttons">
         <button id="btnExistingCluster" class="secondary welcome-btn">Existing Cluster</button>
         <button id="btnCreateCluster" class="primary welcome-btn">Create new Cluster</button>
@@ -85,10 +95,18 @@
   <div class="container" id="mainContainer" style="display: none;">
     <header class="header">
       <div class="logo-wrapper">
-        <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
+        <div class="logo" aria-label="InfraMind logo">
+          <svg class="hex-mark" viewBox="0 0 42 108" role="img" aria-hidden="true">
+            <polygon points="21,4 33,11 33,25 21,32 9,25 9,11" />
+            <polygon points="21,40 33,47 33,61 21,68 9,61 9,47" />
+            <polygon points="21,76 33,83 33,97 21,104 9,97 9,83" />
+          </svg>
+          <span class="logo-text">
+            <span class="infra">INFRA</span>
+            <span class="mind">MIND</span>
+          </span>
+        </div>
       </div>
-      <h1 class="app-title">K3sForge Inventory Generator</h1>
-      <p class="subtitle">Quickly compose Ansible inventories for your K3s clusters</p>
     </header>
 
     <!-- Tab Navigation -->
@@ -295,10 +313,18 @@
   <div id="existingContainer" class="container" style="display: none;">
     <header class="header">
       <div class="logo-wrapper">
-        <img src="{{ url_for('static', filename='k3sforgelogo.png') }}" alt="K3sForge Logo" class="logo-image">
+        <div class="logo" aria-label="InfraMind logo">
+          <svg class="hex-mark" viewBox="0 0 42 108" role="img" aria-hidden="true">
+            <polygon points="21,4 33,11 33,25 21,32 9,25 9,11" />
+            <polygon points="21,40 33,47 33,61 21,68 9,61 9,47" />
+            <polygon points="21,76 33,83 33,97 21,104 9,97 9,83" />
+          </svg>
+          <span class="logo-text">
+            <span class="infra">INFRA</span>
+            <span class="mind">MIND</span>
+          </span>
+        </div>
       </div>
-      <h1 class="app-title">K3sForge</h1>
-      <p class="subtitle">Existing Cluster</p>
     </header>
 
     <!-- Step 1: Paste Kubeconfig -->

@@ -17,7 +17,7 @@ def _kubectl_get(kubeconfig: str, args: list, timeout: int = 30):
     """
     tmp_path = None
     try:
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_k3sforge_kube', mode='w')
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_inframind_kube', mode='w')
         tmp.write(kubeconfig)
         tmp.close()
         tmp_path = tmp.name
@@ -117,7 +117,7 @@ def kubectl_node_resources():
 
     tmp_path = None
     try:
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_k3sforge_kube', mode='w')
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='_inframind_kube', mode='w')
         tmp.write(kubeconfig)
         tmp.close()
         tmp_path = tmp.name

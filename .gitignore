@@ -4,3 +4,5 @@
 
 # Python cache
 frontend/src/__pycache__/
+
+.github/prompts/*

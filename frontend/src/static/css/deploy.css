@@ -111,69 +111,179 @@
 .uninstall-btn { border-color: #f59e0b !important; color: #f59e0b !important; }
 .uninstall-btn:hover { background: rgba(245,158,11,0.15) !important; border-color: #fbbf24 !important; }
 
-/* Step cards grid */
-.deploy-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+/* ── Timeline ─────────────────────────────────────────────────────── */
+.deploy-steps { display: block; }
+
+.tl {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.tl-phase {
+  display: flex;
   gap: 16px;
 }
 
-.step-card {
-  position: relative;
-  background: rgba(0,0,0,0.45);
-  border: 2px solid rgba(255,255,255,0.12);
-  border-radius: 14px;
-  padding: 20px 16px 16px;
-  text-align: center;
-  transition: all 0.35s ease;
-  backdrop-filter: blur(8px);
-  overflow: hidden;
+.tl-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 20px;
 }
 
-.step-card .step-icon  { font-size: 28px; margin-bottom: 8px; transition: transform 0.3s ease; }
-.step-card .step-label { color: rgba(255,255,255,0.8); font-size: 0.92rem; font-weight: 600; }
-.step-card .step-task  { color: rgba(255,255,255,0.5); font-size: 0.78rem; margin-top: 6px; min-height: 1.2em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.05);
+  flex-shrink: 0;
+  margin-top: 5px;
+  transition: border-color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
 
-/* States */
-.step-card.pending { border-color: rgba(255,255,255,0.12); }
-.step-card.pending .step-icon { opacity: 0.35; }
+.tl-line {
+  flex: 1;
+  width: 2px;
+  background: rgba(255,255,255,0.08);
+  margin: 5px 0;
+  min-height: 20px;
+  transition: background 0.3s ease;
+}
 
-.step-card.active {
+.tl-body {
+  flex: 1;
+  padding-bottom: 22px;
+  min-width: 0;
+}
+
+.tl-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.tl-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: opacity 0.3s ease;
+  line-height: 1;
+}
+
+.tl-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tl-name {
+  display: block;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.tl-desc {
+  display: block;
+  color: rgba(255,255,255,0.38);
+  font-size: 0.76rem;
+  margin-top: 2px;
+}
+
+/* Phase states */
+.tl-phase[data-state="pending"] .tl-icon { opacity: 0.25; }
+.tl-phase[data-state="pending"] .tl-name { color: rgba(255,255,255,0.35); }
+
+.tl-phase[data-state="active"] .tl-dot {
   border-color: var(--accent);
-  box-shadow: 0 0 24px rgba(99,102,241,0.3), inset 0 0 30px rgba(99,102,241,0.06);
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(99,102,241,0.65);
+  animation: dotPulse 1.6s ease-in-out infinite;
 }
-.step-card.active .step-icon { animation: spinPulse 1.8s ease-in-out infinite; }
+.tl-phase[data-state="active"] .tl-name { color: #fff; }
+.tl-phase[data-state="active"] .tl-line  { background: rgba(99,102,241,0.35); }
 
-.step-card.done { border-color: #22c55e; box-shadow: 0 0 16px rgba(34,197,94,0.25); }
-.step-card.done .step-icon   { color: #22c55e; }
+.tl-phase[data-state="done"] .tl-dot {
+  border-color: #22c55e;
+  background: #22c55e;
+  box-shadow: 0 0 8px rgba(34,197,94,0.4);
+}
+.tl-phase[data-state="done"] .tl-name { color: rgba(255,255,255,0.6); }
+.tl-phase[data-state="done"] .tl-line  { background: rgba(34,197,94,0.3); }
 
-.step-card.failed { border-color: #ef4444; box-shadow: 0 0 16px rgba(239,68,68,0.3); }
-.step-card.failed .step-icon { color: #ef4444; }
+.tl-phase[data-state="failed"] .tl-dot {
+  border-color: #ef4444;
+  background: #ef4444;
+  box-shadow: 0 0 10px rgba(239,68,68,0.45);
+}
+.tl-phase[data-state="failed"] .tl-name { color: #fca5a5; }
 
-.step-card.aborted { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245,158,11,0.2); }
-.step-card.aborted .step-icon { opacity: 0.5; }
+.tl-phase[data-state="aborted"] .tl-dot {
+  border-color: #f59e0b;
+  background: rgba(245,158,11,0.25);
+}
+.tl-phase[data-state="aborted"] .tl-name { color: rgba(255,255,255,0.4); }
+.tl-phase[data-state="aborted"] .tl-icon { opacity: 0.35; }
 
-@keyframes spinPulse {
-  0%   { transform: scale(1)    rotate(0deg); }
-  50%  { transform: scale(1.15) rotate(8deg); }
-  100% { transform: scale(1)    rotate(0deg); }
+/* Badge */
+.tl-badge {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
-/* Progress bar shimmer on active card */
-.step-card.active::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  height: 3px;
-  width: 40%;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  animation: shimmer 1.8s ease-in-out infinite;
+.tl-badge-text { color: rgba(255,255,255,0.5); }
+.tl-badge-done    { color: #4ade80; }
+.tl-badge-failed  { color: #f87171; }
+.tl-badge-aborted { color: #fbbf24; }
+
+.tl-spinner {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(99,102,241,0.25);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: tlSpin 0.75s linear infinite;
+  flex-shrink: 0;
 }
 
-@keyframes shimmer {
-  0%   { left: -40%; }
-  100% { left: 100%; }
+/* Node chips */
+.tl-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
 }
+
+.tl-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid;
+  transition: all 0.25s ease;
+}
+
+.tl-chip--pending { border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.03); }
+.tl-chip--active  { border-color: rgba(99,102,241,0.45);  color: #c7d2fe;               background: rgba(99,102,241,0.1); }
+.tl-chip--done    { border-color: rgba(34,197,94,0.38);   color: #86efac;               background: rgba(34,197,94,0.07); }
+.tl-chip--failed  { border-color: rgba(239,68,68,0.38);   color: #fca5a5;               background: rgba(239,68,68,0.07); }
+.tl-chip--aborted { border-color: rgba(245,158,11,0.28);  color: rgba(251,191,36,0.7);  background: rgba(245,158,11,0.05); }
+
+@keyframes tlSpin   { to { transform: rotate(360deg); } }
+@keyframes dotPulse { 0%,100% { box-shadow: 0 0 14px rgba(99,102,241,0.65); } 50% { box-shadow: 0 0 22px rgba(99,102,241,0.95); } }
+
 
 /* ── Deploy options section ─────────────────────────────────────────── */
 .deploy-options-section {

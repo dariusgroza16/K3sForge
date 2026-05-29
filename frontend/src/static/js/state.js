@@ -8,6 +8,7 @@ let deletedVMs = [];
 let allConnectionsPass = false;
 let clusterDeployed = false;
 let _eventSource = null;
+let _nodeStatuses = {};
 
 // Cluster dashboard (existing cluster flow)
 let _clusterData = { nodes: null, pods: null, services: null, nodeResources: null };

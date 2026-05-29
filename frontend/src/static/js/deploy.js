@@ -7,6 +7,22 @@ const STEP_ICONS = {
 const DONE_ICON = '✓';
 const FAIL_ICON = '✕';
 
+const STEP_DESCRIPTIONS = {
+  pre_tasks:  'Preparing all nodes for installation',
+  docker:     'Installing container runtime on all nodes',
+  primordial: 'Bootstrapping the primary control plane',
+  kubeconfig: 'Retrieving cluster credentials',
+  masters:    'Joining additional control plane nodes',
+  workers:    'Joining worker nodes to the cluster',
+};
+
+const UNINSTALL_DESCRIPTIONS = {
+  workers:    'Removing K3s from worker nodes',
+  masters:    'Removing K3s from secondary control plane nodes',
+  primordial: 'Removing K3s from the primary master',
+  kubeconfig: 'Cleaning up local cluster credentials',
+};
+
 function _getSSHCreds() {
   return {
     username: document.getElementById('sshUsername')?.value.trim() || '',
@@ -36,28 +52,80 @@ function _getDeployOptions() {
   });
 }());
 
-function _renderStepCards(container, steps) {
+function _renderTimeline(container, steps, isUninstall) {
+  _nodeStatuses = {};
   container.innerHTML = '';
-  steps.forEach(s => {
-    const card = document.createElement('div');
-    card.className = 'step-card pending';
-    card.id = `step-${s.id}`;
-    card.innerHTML = `<div class="step-icon">${STEP_ICONS[s.id] || '📦'}</div><div class="step-label">${escapeHtml(s.label)}</div><div class="step-task"></div>`;
-    container.appendChild(card);
+  const descs = isUninstall ? UNINSTALL_DESCRIPTIONS : STEP_DESCRIPTIONS;
+  const tl = document.createElement('div');
+  tl.className = 'tl';
+  steps.forEach((s, idx) => {
+    _nodeStatuses[s.id] = {};
+    const isLast = idx === steps.length - 1;
+    const phase = document.createElement('div');
+    phase.className = 'tl-phase';
+    phase.id = `phase-${s.id}`;
+    phase.dataset.state = 'pending';
+    phase.innerHTML = `
+      <div class="tl-connector">
+        <div class="tl-dot"></div>
+        ${!isLast ? '<div class="tl-line"></div>' : ''}
+      </div>
+      <div class="tl-body">
+        <div class="tl-header">
+          <span class="tl-icon">${STEP_ICONS[s.id] || '📦'}</span>
+          <div class="tl-text">
+            <span class="tl-name">${escapeHtml(s.label)}</span>
+            <span class="tl-desc">${escapeHtml(descs[s.id] || '')}</span>
+          </div>
+          <span class="tl-badge"></span>
+        </div>
+        <div class="tl-nodes" id="nodes-${s.id}" style="display:none"></div>
+      </div>`;
+    tl.appendChild(phase);
   });
+  container.appendChild(tl);
 }
 
-function _setCardState(stepId, state, taskText) {
-  const card = document.getElementById(`step-${stepId}`);
-  if (!card) return;
-  card.className = `step-card ${state}`;
-  const icon = card.querySelector('.step-icon');
-  if (state === 'done'   && icon) icon.textContent = DONE_ICON;
-  if (state === 'failed' && icon) icon.textContent = FAIL_ICON;
-  if (taskText !== undefined) {
-    const taskEl = card.querySelector('.step-task');
-    if (taskEl) taskEl.textContent = taskText;
+function _setPhaseState(stepId, state) {
+  const phase = document.getElementById(`phase-${stepId}`);
+  if (!phase) return;
+  phase.dataset.state = state;
+  const badge = phase.querySelector('.tl-badge');
+  if (!badge) return;
+  if (state === 'active') {
+    badge.innerHTML = '<span class="tl-spinner"></span><span class="tl-badge-text">In progress</span>';
+  } else if (state === 'done') {
+    badge.innerHTML = '<span class="tl-badge-done">&#10003; Complete</span>';
+    const nodes = _nodeStatuses[stepId] || {};
+    Object.keys(nodes).forEach(n => { if (nodes[n] !== 'failed') _setNodeStatus(stepId, n, 'done'); });
+  } else if (state === 'failed') {
+    badge.innerHTML = '<span class="tl-badge-failed">&#10007; Failed</span>';
+    const nodes = _nodeStatuses[stepId] || {};
+    Object.keys(nodes).forEach(n => { if (nodes[n] === 'active' || nodes[n] === 'pending') _setNodeStatus(stepId, n, 'failed'); });
+  } else if (state === 'aborted') {
+    badge.innerHTML = '<span class="tl-badge-aborted">&#8856; Aborted</span>';
+    const nodes = _nodeStatuses[stepId] || {};
+    Object.keys(nodes).forEach(n => { if (nodes[n] !== 'done' && nodes[n] !== 'failed') _setNodeStatus(stepId, n, 'aborted'); });
+  } else {
+    badge.innerHTML = '';
   }
+}
+
+function _setNodeStatus(stepId, nodeName, status) {
+  if (!_nodeStatuses[stepId]) _nodeStatuses[stepId] = {};
+  _nodeStatuses[stepId][nodeName] = status;
+  const nodesContainer = document.getElementById(`nodes-${stepId}`);
+  if (!nodesContainer) return;
+  nodesContainer.style.display = '';
+  let chip = document.getElementById(`chip-${stepId}-${nodeName}`);
+  if (!chip) {
+    chip = document.createElement('div');
+    chip.id = `chip-${stepId}-${nodeName}`;
+    nodesContainer.appendChild(chip);
+  }
+  const icons = { active: '⟳', done: '✓', failed: '✕', aborted: '⊘', pending: '○' };
+  chip.className = `tl-chip tl-chip--${status}`;
+  chip.textContent = `${icons[status] || '○'} ${nodeName}`;
 }
 
 function _showDeployIdle() {
@@ -111,13 +179,31 @@ function startDeploy() {
 
   es.onmessage = (ev) => {
     let data; try { data = JSON.parse(ev.data); } catch { return; }
-    if (data.type === 'steps')        { _renderStepCards(container, data.steps); return; }
-    if (data.type === 'step_start')   { _setCardState(data.step, 'active', ''); return; }
-    if (data.type === 'step_done')    { _setCardState(data.step, 'done'); return; }
-    if (data.type === 'task')         { _setCardState(data.step, 'active', data.task); return; }
-    if (data.type === 'log')          { if (data.step) _setCardState(data.step, 'active', (data.msg || '').slice(0, 80)); return; }
-    if (data.type === 'task_warning') { _setCardState(data.step, 'active', '⚠ ' + (data.msg || '').slice(0, 80)); return; }
-    if (data.type === 'step_failed')  { _setCardState(data.step, 'failed', 'Failed'); return; }
+    if (data.type === 'steps')      { _renderTimeline(container, data.steps, false); return; }
+    if (data.type === 'step_start')  { _setPhaseState(data.step, 'active'); return; }
+    if (data.type === 'step_done')   { _setPhaseState(data.step, 'done'); return; }
+    if (data.type === 'step_failed') { _setPhaseState(data.step, 'failed'); return; }
+    if (data.type === 'task') {
+      if (data.step) {
+        const colonIdx = (data.task || '').indexOf(':');
+        if (colonIdx > 0) {
+          const possibleNode = data.task.slice(0, colonIdx).trim();
+          if (possibleNode && !possibleNode.includes(' ')) _setNodeStatus(data.step, possibleNode, 'active');
+        }
+      }
+      return;
+    }
+    if (data.type === 'log') {
+      if (data.node && data.step && !(_nodeStatuses[data.step] || {})[data.node]) _setNodeStatus(data.step, data.node, 'active');
+      return;
+    }
+    if (data.type === 'task_warning') {
+      if (data.step) {
+        const m = (data.msg || '').match(/^\[([^\]]+)\]/);
+        if (m) _setNodeStatus(data.step, m[1], 'failed');
+      }
+      return;
+    }
 
     if (data.type === 'finished') {
       es.close(); _eventSource = null;
@@ -149,12 +235,12 @@ function startDeploy() {
         document.getElementById('deployTitle').textContent    = 'Deployment Aborted';
         document.getElementById('deploySubtitle').textContent = 'The process was cancelled by the user';
         document.getElementById('redeployCluster').style.display = '';
-        container.querySelectorAll('.step-card.active, .step-card.pending').forEach(c => c.className = 'step-card aborted');
+        container.querySelectorAll('.tl-phase[data-state="active"], .tl-phase[data-state="pending"]').forEach(p => _setPhaseState(p.id.replace('phase-', ''), 'aborted'));
       } else {
         document.getElementById('deployTitle').textContent    = 'Deployment Failed';
         document.getElementById('deploySubtitle').textContent = 'Check the step that failed for details';
         document.getElementById('redeployCluster').style.display = '';
-        container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
+        container.querySelectorAll('.tl-phase[data-state="pending"]').forEach(p => _setPhaseState(p.id.replace('phase-', ''), 'aborted'));
       }
       return;
     }
@@ -205,12 +291,31 @@ function startUninstall() {
 
     es.onmessage = (ev) => {
       let data; try { data = JSON.parse(ev.data); } catch { return; }
-      if (data.type === 'steps')        { _renderStepCards(container, data.steps); return; }
-      if (data.type === 'step_start')   { _setCardState(data.step, 'active', ''); return; }
-      if (data.type === 'step_done')    { _setCardState(data.step, 'done'); return; }
-      if (data.type === 'task')         { _setCardState(data.step, 'active', data.task); return; }
-      if (data.type === 'task_warning') { _setCardState(data.step, 'active', '⚠ ' + (data.msg || '').slice(0, 80)); return; }
-      if (data.type === 'step_failed')  { _setCardState(data.step, 'failed', 'Failed'); return; }
+      if (data.type === 'steps')      { _renderTimeline(container, data.steps, true); return; }
+      if (data.type === 'step_start')  { _setPhaseState(data.step, 'active'); return; }
+      if (data.type === 'step_done')   { _setPhaseState(data.step, 'done'); return; }
+      if (data.type === 'step_failed') { _setPhaseState(data.step, 'failed'); return; }
+      if (data.type === 'task') {
+        if (data.step) {
+          const colonIdx = (data.task || '').indexOf(':');
+          if (colonIdx > 0) {
+            const possibleNode = data.task.slice(0, colonIdx).trim();
+            if (possibleNode && !possibleNode.includes(' ')) _setNodeStatus(data.step, possibleNode, 'active');
+          }
+        }
+        return;
+      }
+      if (data.type === 'log') {
+        if (data.node && data.step && !(_nodeStatuses[data.step] || {})[data.node]) _setNodeStatus(data.step, data.node, 'active');
+        return;
+      }
+      if (data.type === 'task_warning') {
+        if (data.step) {
+          const m = (data.msg || '').match(/^\[([^\]]+)\]/);
+          if (m) _setNodeStatus(data.step, m[1], 'failed');
+        }
+        return;
+      }
 
       if (data.type === 'finished') {
         es.close(); _eventSource = null;
@@ -224,7 +329,7 @@ function startUninstall() {
         } else if (data.aborted) {
           document.getElementById('uninstallTitle').textContent    = '⛔ Uninstall Aborted';
           document.getElementById('uninstallSubtitle').textContent = 'Cancelled by user';
-          container.querySelectorAll('.step-card.active, .step-card.pending').forEach(c => c.className = 'step-card aborted');
+          container.querySelectorAll('.tl-phase[data-state="active"], .tl-phase[data-state="pending"]').forEach(p => _setPhaseState(p.id.replace('phase-', ''), 'aborted'));
           setTimeout(() => {
             document.getElementById('deployRunning').style.display    = '';
             document.getElementById('uninstallRunning').style.display = 'none';
@@ -232,7 +337,7 @@ function startUninstall() {
         } else {
           document.getElementById('uninstallTitle').textContent    = '❌ Uninstall Failed';
           document.getElementById('uninstallSubtitle').textContent = 'Check the step that failed';
-          container.querySelectorAll('.step-card.pending').forEach(c => c.className = 'step-card aborted');
+          container.querySelectorAll('.tl-phase[data-state="pending"]').forEach(p => _setPhaseState(p.id.replace('phase-', ''), 'aborted'));
         }
         return;
       }

@@ -76,7 +76,7 @@ function renderTopology() {
     t.textContent = text;
     return t;
   }
-  if (mCount > 0) svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
+  svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
   if (workerRows > 0) {
     svg.appendChild(makeTierLabel('WORKER NODES', padTop + masterTierH + tierGap + 8, '#7dd3fc'));
   }

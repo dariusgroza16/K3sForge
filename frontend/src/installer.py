@@ -30,6 +30,7 @@ def _gen_docker_on_node(ip: str, name: str, username: str, key_path: str):
     def _sse(d): return f"data: {json.dumps(d)}\n\n"
     client = None
     try:
+        yield _sse({'type': 'node_start', 'step': 'docker', 'node': name})
         client = _open_ssh_client(ip, username, key_path)
 
         rc = None
@@ -38,22 +39,17 @@ def _gen_docker_on_node(ip: str, name: str, username: str, key_path: str):
                 rc = code
 
         if rc == 0:
-            yield _sse({'type': 'log', 'step': 'docker', 'node': name,
-                        'msg': f'[{name}] Docker already installed — skipping.'})
+            yield _sse({'type': 'node_done', 'step': 'docker', 'node': name})
             return 0
 
-        yield _sse({'type': 'task', 'step': 'docker', 'task': f'{name}: Installing Docker…'})
         rc = None
-        for line, code in _ssh_run_live(
+        for _, code in _ssh_run_live(
                 client, 'curl -fsSL https://get.docker.com | sudo sh 2>&1', timeout=300):
-            if code is None:
-                yield _sse({'type': 'log', 'step': 'docker', 'node': name, 'msg': line})
-            else:
+            if code is not None:
                 rc = code
 
         if rc != 0:
-            yield _sse({'type': 'task_warning', 'step': 'docker',
-                        'msg': f'[{name}] Docker install script failed (rc={rc})'})
+            yield _sse({'type': 'node_failed', 'step': 'docker', 'node': name})
             return rc
 
         for _, _ in _ssh_run_live(
@@ -63,13 +59,11 @@ def _gen_docker_on_node(ip: str, name: str, username: str, key_path: str):
                 client, f'sudo usermod -aG docker {username} 2>&1', timeout=10):
             pass
 
-        yield _sse({'type': 'log', 'step': 'docker', 'node': name,
-                    'msg': f'[{name}] Docker installed successfully.'})
+        yield _sse({'type': 'node_done', 'step': 'docker', 'node': name})
         return 0
 
-    except Exception as exc:
-        yield _sse({'type': 'task_warning', 'step': 'docker',
-                    'msg': f'[{name}] Docker error: {exc}'})
+    except Exception:
+        yield _sse({'type': 'node_failed', 'step': 'docker', 'node': name})
         return -1
     finally:
         if client:
@@ -82,9 +76,9 @@ def _gen_k3s_on_node(ip: str, name: str, username: str, key_path: str,
     def _sse(d): return f"data: {json.dumps(d)}\n\n"
     client = None
     try:
+        yield _sse({'type': 'node_start', 'step': step_id, 'node': name})
         client = _open_ssh_client(ip, username, key_path)
 
-        yield _sse({'type': 'task', 'step': step_id, 'task': f'{name}: Uploading K3s config…'})
         stdin, stdout, _ = client.exec_command(
             'sudo mkdir -p /etc/rancher/k3s && sudo tee /etc/rancher/k3s/config.yaml',
             timeout=15,
@@ -94,34 +88,27 @@ def _gen_k3s_on_node(ip: str, name: str, username: str, key_path: str,
         stdout.read()
         tee_rc = stdout.channel.recv_exit_status()
         if tee_rc != 0:
-            yield _sse({'type': 'task_warning', 'step': step_id,
-                        'msg': f'[{name}] Failed to write config.yaml (rc={tee_rc})'})
+            yield _sse({'type': 'node_failed', 'step': step_id, 'node': name})
             return tee_rc
 
-        yield _sse({'type': 'task', 'step': step_id, 'task': f'{name}: Running K3s installer…'})
         install_cmd = f'curl -sfL https://get.k3s.io | sudo sh -s - {install_args} 2>&1'
         rc = None
-        for line, code in _ssh_run_live(client, install_cmd, timeout=600):
-            if code is None:
-                yield _sse({'type': 'log', 'step': step_id, 'node': name, 'msg': line})
-            else:
+        for _, code in _ssh_run_live(client, install_cmd, timeout=600):
+            if code is not None:
                 rc = code
 
         if abort_flag.is_set():
             return -1
 
         if rc != 0:
-            yield _sse({'type': 'task_warning', 'step': step_id,
-                        'msg': f'[{name}] K3s installer failed (rc={rc})'})
+            yield _sse({'type': 'node_failed', 'step': step_id, 'node': name})
             return rc
 
-        yield _sse({'type': 'log', 'step': step_id, 'node': name,
-                    'msg': f'[{name}] K3s installed successfully.'})
+        yield _sse({'type': 'node_done', 'step': step_id, 'node': name})
         return 0
 
-    except Exception as exc:
-        yield _sse({'type': 'task_warning', 'step': step_id,
-                    'msg': f'[{name}] Error: {exc}'})
+    except Exception:
+        yield _sse({'type': 'node_failed', 'step': step_id, 'node': name})
         return -1
     finally:
         if client:
@@ -154,13 +141,12 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
 
         steps = []
         if use_docker:
-            steps.append({'id': 'docker',     'label': 'Install Docker'})
-        steps.append(    {'id': 'primordial', 'label': 'Primordial Master'})
-        steps.append(    {'id': 'kubeconfig', 'label': 'Retrieve Kubeconfig'})
+            steps.append({'id': 'docker',     'label': 'Container Runtime'})
+        steps.append(    {'id': 'primordial', 'label': 'Initialize Control Plane'})
         if joining_masters:
-            steps.append({'id': 'masters',    'label': 'Join Masters'})
+            steps.append({'id': 'masters',    'label': 'Expand Control Plane'})
         if workers:
-            steps.append({'id': 'workers',    'label': 'Join Workers'})
+            steps.append({'id': 'workers',    'label': 'Register Workers'})
 
         yield _sse({'type': 'steps', 'steps': steps})
 
@@ -249,11 +235,7 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
             yield _sse({'type': 'finished', 'success': False})
             return
 
-        yield _sse({'type': 'step_done', 'step': 'primordial'})
-
-        # ── Phase 3: Retrieve Kubeconfig ──────────────────────────────────
-        yield _sse({'type': 'step_start', 'step': 'kubeconfig'})
-        yield _sse({'type': 'task', 'step': 'kubeconfig', 'task': 'Fetching kubeconfig…'})
+        # ── Retrieve kubeconfig (silently, as part of primordial phase) ───
         kube_client = _open_ssh_client(primordial_ip, username, key_path)
         try:
             _, stdout, _ = kube_client.exec_command(
@@ -272,19 +254,13 @@ def _stream_k3s_install(username: str, key_path: str, token: str, use_docker: bo
                 with open(kube_path, 'w') as f:
                     f.write(kubeconfig)
                 os.chmod(kube_path, 0o600)
-                yield _sse({'type': 'log', 'step': 'kubeconfig', 'node': 'local',
-                            'msg': f'Kubeconfig saved to {kube_path}'})
-            else:
-                yield _sse({'type': 'task_warning', 'step': 'kubeconfig',
-                            'msg': 'k3s.yaml was empty — kubeconfig not saved.'})
-        except Exception as exc:
-            yield _sse({'type': 'task_warning', 'step': 'kubeconfig',
-                        'msg': f'Could not retrieve kubeconfig: {exc}'})
+        except Exception:
+            pass  # Non-fatal — kubeconfig returned in finished event if available
         finally:
             kube_client.close()
-        yield _sse({'type': 'step_done', 'step': 'kubeconfig'})
+        yield _sse({'type': 'step_done', 'step': 'primordial'})
 
-        # ── Phase 4: Join Masters ─────────────────────────────────────────
+        # ── Phase 3: Join Masters ─────────────────────────────────────────
         if joining_masters:
             yield _sse({'type': 'step_start', 'step': 'masters'})
             step_ok = True

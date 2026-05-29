@@ -99,12 +99,11 @@ def _stream_k3s_uninstall(username: str, key_path: str):
 
         steps = []
         if workers:
-            steps.append({'id': 'workers',    'label': 'Uninstall Workers'})
+            steps.append({'id': 'workers',    'label': 'Remove Worker Nodes'})
         if joining_masters:
-            steps.append({'id': 'masters',    'label': 'Uninstall Masters'})
+            steps.append({'id': 'masters',    'label': 'Remove Control Plane'})
         if primordial:
-            steps.append({'id': 'primordial', 'label': 'Uninstall Primordial'})
-        steps.append(    {'id': 'kubeconfig', 'label': 'Clean Kubeconfig'})
+            steps.append({'id': 'primordial', 'label': 'Remove Primary Node'})
 
         yield _sse({'type': 'steps', 'steps': steps})
 
@@ -175,23 +174,14 @@ def _stream_k3s_uninstall(username: str, key_path: str):
                 yield _sse({'type': 'finished', 'success': False})
                 return
 
+            # ── Clean local kubeconfig (silently, as part of primordial phase) ──
+            kube_path = os.path.expanduser('~/.kube/k3s.yaml')
+            try:
+                if os.path.exists(kube_path):
+                    os.remove(kube_path)
+            except OSError:
+                pass  # Non-fatal
             yield _sse({'type': 'step_done', 'step': 'primordial'})
-
-        # ── Phase 4: Clean local kubeconfig ───────────────────────────────
-        yield _sse({'type': 'step_start', 'step': 'kubeconfig'})
-        kube_path = os.path.expanduser('~/.kube/k3s.yaml')
-        try:
-            if os.path.exists(kube_path):
-                os.remove(kube_path)
-                yield _sse({'type': 'log', 'step': 'kubeconfig', 'node': 'local',
-                            'msg': f'Removed {kube_path}'})
-            else:
-                yield _sse({'type': 'log', 'step': 'kubeconfig', 'node': 'local',
-                            'msg': 'No local kubeconfig to clean.'})
-        except OSError as exc:
-            yield _sse({'type': 'task_warning', 'step': 'kubeconfig',
-                        'msg': f'Could not remove kubeconfig: {exc}'})
-        yield _sse({'type': 'step_done', 'step': 'kubeconfig'})
 
         deploy_state.status = 'success'
         yield _sse({'type': 'finished', 'success': True})

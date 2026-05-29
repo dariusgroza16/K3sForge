@@ -273,6 +273,7 @@
   font-weight: 500;
   border: 1px solid;
   transition: all 0.25s ease;
+  animation: chipIn 0.2s ease-out both;
 }
 
 .tl-chip--pending { border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.03); }
@@ -283,6 +284,137 @@
 
 @keyframes tlSpin   { to { transform: rotate(360deg); } }
 @keyframes dotPulse { 0%,100% { box-shadow: 0 0 14px rgba(99,102,241,0.65); } 50% { box-shadow: 0 0 22px rgba(99,102,241,0.95); } }
+@keyframes chipIn   { from { opacity: 0; transform: translateY(5px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* ── Deploy Hex Canvas ─────────────────────────────────────────────── */
+.deploy-canvas { width: 100%; }
+
+.dhex-body {
+  transition: fill 0.45s ease, stroke 0.45s ease, stroke-width 0.3s ease;
+}
+.dhex-name, .dhex-status {
+  transition: fill 0.45s ease;
+}
+.dhex-ring {
+  transition: opacity 0.3s ease;
+}
+.dhex-edge {
+  animation: edgeDraw 0.5s ease-out both;
+}
+
+/* Active node: pulsing outer ring */
+.dhn-active .dhex-ring {
+  animation: hexRingPulse 1.6s ease-in-out infinite;
+}
+
+/* Done node: colour glow */
+.dhn-done .dhex-body {
+  filter: drop-shadow(0 0 7px currentColor);
+}
+.dhn-failed .dhex-body {
+  filter: drop-shadow(0 0 10px rgba(239,68,68,0.55));
+  animation: hexShake 0.35s ease both;
+}
+
+@keyframes hexRingPulse {
+  0%,100% { opacity: 0.18; transform-box: fill-box; transform-origin: center; transform: scale(1);    }
+  50%      { opacity: 0.75;                                                    transform: scale(1.06); }
+}
+@keyframes hexShake {
+  0%,100% { transform-box: fill-box; transform-origin: center; transform: translateX(0);    }
+  20%,60% {                                                                    transform: translateX(-3px); }
+  40%,80% {                                                                    transform: translateX(3px);  }
+}
+@keyframes edgeDraw {
+  from { opacity: 0; stroke-dashoffset: 80; }
+  to   { opacity: 1; stroke-dashoffset: 0;  }
+}
+
+/* ── Phase strip ───────────────────────────────────────────────────── */
+.deploy-phase-strip {
+  display: flex;
+  align-items: flex-start;
+  padding: 22px 6px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  gap: 0;
+}
+.deploy-phase-strip::-webkit-scrollbar { display: none; }
+
+.dps-connector {
+  flex: 1;
+  min-width: 10px;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin-top: 12px;
+  align-self: flex-start;
+  transition: background 0.4s ease;
+}
+.dps-connector--done { background: rgba(34,197,94,0.35); }
+
+.dps-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  min-width: 80px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.dps-icon {
+  font-size: 15px;
+  line-height: 1;
+  opacity: 0.25;
+  transition: opacity 0.35s ease;
+}
+.dps-step--active .dps-icon,
+.dps-step--done   .dps-icon { opacity: 1; }
+.dps-step--failed .dps-icon { opacity: 0.7; }
+
+.dps-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.16);
+  background: transparent;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+.dps-step--active  .dps-dot { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 12px rgba(99,102,241,0.7); animation: dotPulse 1.6s ease-in-out infinite; }
+.dps-step--done    .dps-dot { border-color: #22c55e; background: #22c55e; box-shadow: 0 0 8px rgba(34,197,94,0.45); }
+.dps-step--failed  .dps-dot { border-color: #ef4444; background: #ef4444; box-shadow: 0 0 10px rgba(239,68,68,0.5); }
+.dps-step--aborted .dps-dot { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.15); }
+
+.dps-info { display: flex; flex-direction: column; gap: 2px; }
+
+.dps-name {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.28);
+  transition: color 0.3s ease;
+  line-height: 1.3;
+}
+.dps-desc { display: none; }
+
+.dps-step--active  .dps-name { color: rgba(255,255,255,0.9); }
+.dps-step--done    .dps-name { color: rgba(255,255,255,0.5); }
+.dps-step--failed  .dps-name { color: #fca5a5; }
+.dps-step--aborted .dps-name { color: rgba(255,255,255,0.3); }
+
+.dps-badge {
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.dps-spinner     { display: inline-block; width: 9px; height: 9px; border: 1.5px solid rgba(99,102,241,0.25); border-top-color: var(--accent); border-radius: 50%; animation: tlSpin 0.75s linear infinite; }
+.dps-badge-text  { font-size: 0.65rem; color: rgba(255,255,255,0.4); }
+.dps-badge-done  { font-size: 0.65rem; color: #4ade80; }
+.dps-badge-failed  { font-size: 0.65rem; color: #f87171; }
+.dps-badge-aborted { font-size: 0.65rem; color: #fbbf24; }
 
 
 /* ── Deploy options section ─────────────────────────────────────────── */

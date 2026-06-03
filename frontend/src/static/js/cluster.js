@@ -51,16 +51,7 @@ function initWelcomeScreen() {
 
   const btnHomeFixed = document.getElementById('btnHomeFixed');
   if (btnHomeFixed) {
-    btnHomeFixed.addEventListener('click', () => {
-      if (_eventSource) {
-        showConfirmToast('A process is still running. Go home anyway?', () => {
-          if (_eventSource) { _eventSource.close(); _eventSource = null; }
-          _goHome();
-        });
-      } else {
-        _goHome();
-      }
-    });
+    btnHomeFixed.addEventListener('click', () => _goHome());
   }
 
   const btnProceed = document.getElementById('btnProceedKubeconfig');

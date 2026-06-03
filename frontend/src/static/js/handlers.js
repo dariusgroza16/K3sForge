@@ -131,7 +131,10 @@ function setupHandlers() {
   if (abortDeployBtn) abortDeployBtn.addEventListener('click', () => abortDeploy());
 
   const uninstallBtn = document.getElementById('uninstallCluster');
-  if (uninstallBtn) uninstallBtn.addEventListener('click', () => startUninstall());
+  if (uninstallBtn) uninstallBtn.addEventListener('click', () => {
+    if (!allConnectionsPass) { showToast('⚠️ All node connections must pass before you can uninstall.', 4000); return; }
+    startUninstall();
+  });
 
   const redeployBtn = document.getElementById('redeployCluster');
   if (redeployBtn) redeployBtn.addEventListener('click', () => { clusterDeployed = false; _showDeployIdle(); });

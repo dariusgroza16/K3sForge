@@ -309,6 +309,8 @@ function _showDeployRunning() {
   if (panel) panel.style.display = 'none';
   document.getElementById('deployTitle').textContent    = 'Deploying…';
   document.getElementById('deploySubtitle').textContent = 'Installing K3s on all nodes via SSH';
+  const homeBtn = document.getElementById('btnHomeFixed');
+  if (homeBtn) homeBtn.style.display = 'none';
 }
 
 function _showUninstallRunning() {
@@ -318,6 +320,8 @@ function _showUninstallRunning() {
   document.getElementById('abortUninstall').style.display   = '';
   document.getElementById('uninstallTitle').textContent    = 'Uninstalling…';
   document.getElementById('uninstallSubtitle').textContent = 'Running the k3s-uninstall playbook';
+  const homeBtn = document.getElementById('btnHomeFixed');
+  if (homeBtn) homeBtn.style.display = 'none';
 }
 
 function startDeploy() {
@@ -352,6 +356,8 @@ function startDeploy() {
     if (data.type === 'finished') {
       es.close(); _eventSource = null;
       document.getElementById('abortDeploy').style.display = 'none';
+      const homeBtn = document.getElementById('btnHomeFixed');
+      if (homeBtn) homeBtn.style.display = '';
       if (data.success) {
         clusterDeployed = true;
         document.getElementById('deployTitle').textContent    = 'Cluster Deployed';
@@ -396,6 +402,8 @@ function startDeploy() {
       document.getElementById('redeployCluster').style.display = '';
       document.getElementById('deployTitle').textContent    = 'Error';
       document.getElementById('deploySubtitle').textContent = data.msg || '';
+      const homeBtn = document.getElementById('btnHomeFixed');
+      if (homeBtn) homeBtn.style.display = '';
     }
   };
 
@@ -407,6 +415,8 @@ function startDeploy() {
       document.getElementById('redeployCluster').style.display = '';
       document.getElementById('deployTitle').textContent    = '❌ Connection Lost';
       document.getElementById('deploySubtitle').textContent = 'The SSE stream was interrupted';
+      const homeBtn = document.getElementById('btnHomeFixed');
+      if (homeBtn) homeBtn.style.display = '';
     }
   };
 }
@@ -419,6 +429,10 @@ function abortDeploy() {
 }
 
 function startUninstall() {
+  if (!allConnectionsPass) {
+    showToast('⚠️ All node connections must pass before you can uninstall.', 4000);
+    return;
+  }
   const { username, sshKey } = _getSSHCreds();
   if (!username || !sshKey) {
     showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
@@ -446,6 +460,8 @@ function startUninstall() {
       if (data.type === 'finished') {
         es.close(); _eventSource = null;
         document.getElementById('abortUninstall').style.display = 'none';
+        const homeBtn = document.getElementById('btnHomeFixed');
+        if (homeBtn) homeBtn.style.display = '';
         if (data.success) {
           clusterDeployed = false;
           document.getElementById('uninstallTitle').textContent    = '✅ Cluster Uninstalled';
@@ -474,6 +490,8 @@ function startUninstall() {
         document.getElementById('abortUninstall').style.display  = 'none';
         document.getElementById('uninstallTitle').textContent    = '❌ Error';
         document.getElementById('uninstallSubtitle').textContent = data.msg || '';
+        const homeBtn = document.getElementById('btnHomeFixed');
+        if (homeBtn) homeBtn.style.display = '';
       }
     };
 
@@ -484,6 +502,8 @@ function startUninstall() {
         document.getElementById('abortUninstall').style.display  = 'none';
         document.getElementById('uninstallTitle').textContent    = '❌ Connection Lost';
         document.getElementById('uninstallSubtitle').textContent = 'The SSE stream was interrupted';
+        const homeBtn = document.getElementById('btnHomeFixed');
+        if (homeBtn) homeBtn.style.display = '';
       }
     };
   });

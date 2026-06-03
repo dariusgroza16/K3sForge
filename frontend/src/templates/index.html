@@ -87,6 +87,7 @@
       <div class="welcome-buttons">
         <button id="btnExistingCluster" class="secondary welcome-btn">Existing Cluster</button>
         <button id="btnCreateCluster" class="primary welcome-btn">Create new Cluster</button>
+        <button id="btnUninstallCluster" class="secondary welcome-btn uninstall-btn">Uninstall Cluster</button>
       </div>
     </div>
   </div>
@@ -339,39 +340,6 @@
         <button id="btnBackToWelcome" class="secondary">&#8592; Back</button>
         <button id="btnProceedKubeconfig" class="primary">Proceed</button>
       </div>
-
-      <!-- Uninstall existing cluster -->
-      <div class="existing-uninstall-section">
-        <div class="existing-uninstall-divider"><span>OR</span></div>
-        <h3 class="existing-uninstall-title">Uninstall Cluster</h3>
-        <p class="existing-uninstall-subtitle">Provide SSH credentials to remove K3s from all nodes in this cluster</p>
-        <div class="input-group">
-          <label for="existingSSHUser">SSH Username</label>
-          <input type="text" id="existingSSHUser" placeholder="root" aria-label="SSH Username">
-        </div>
-        <div class="input-group">
-          <label for="existingSSHKey">SSH Private Key</label>
-          <div class="secret-field-wrapper">
-            <textarea id="existingSSHKey" placeholder="Paste your SSH private key here…" rows="6"></textarea>
-            <button type="button" class="secret-toggle-btn" id="toggleExistingSSHKey" aria-label="Show/hide SSH key" title="Show / Hide key">
-              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-            </button>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:flex-end;">
-          <button id="btnExistingUninstall" class="secondary uninstall-btn">Uninstall Cluster</button>
-        </div>
-
-        <!-- Uninstall progress (hidden until started) -->
-        <div id="existingUninstallRunning" style="display:none;margin-top:20px;">
-          <h4 class="existing-uninstall-progress-title" id="existingUninstallTitle">Uninstalling…</h4>
-          <div id="existingUninstallSteps" class="deploy-steps"></div>
-          <div style="display:flex;justify-content:center;margin-top:16px;">
-            <button id="btnAbortExistingUninstall" class="secondary abort-btn">Abort</button>
-          </div>
-        </div>
-      </div>
     </main>
 
     <!-- Step 2: Cluster dashboard (navbar + sections) -->
@@ -434,6 +402,92 @@
         </div>
       </section>
 
+    </main>
+  </div>
+
+  <!-- ═══ Uninstall Cluster flow ═══════════════════════════════════════ -->
+  <div id="uninstallContainer" class="container" style="display: none;">
+    <header class="header">
+      <div class="logo-wrapper">
+        <div class="logo" aria-label="InfraMind logo">
+          <svg class="hex-mark" viewBox="0 0 42 108" role="img" aria-hidden="true">
+            <polygon points="21,4 33,11 33,25 21,32 9,25 9,11" />
+            <polygon points="21,40 33,47 33,61 21,68 9,61 9,47" />
+            <polygon points="21,76 33,83 33,97 21,104 9,97 9,83" />
+          </svg>
+          <span class="logo-text">
+            <span class="infra">INFRA</span>
+            <span class="mind">MIND</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-card">
+      <!-- ── Idle: credentials + topology preview ─────────────────── -->
+      <div id="uninstallIdleView">
+        <div class="deploy-header">
+          <h2 class="section-title">Uninstall K3s Cluster</h2>
+          <p class="section-subtitle">Remove K3s from all nodes via SSH</p>
+        </div>
+        <div class="input-group">
+          <label for="uninstallSSHUser">SSH Username</label>
+          <input type="text" id="uninstallSSHUser" placeholder="root" autocomplete="off">
+        </div>
+        <div class="input-group">
+          <label for="uninstallSSHKey">SSH Private Key</label>
+          <div class="secret-field-wrapper">
+            <textarea id="uninstallSSHKey" rows="6" placeholder="Paste your SSH private key here…"></textarea>
+            <button type="button" class="secret-toggle-btn" id="toggleUninstallSSHKey" aria-label="Show/hide SSH key" title="Show / Hide key">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="uninstall-test-row">
+          <button id="btnTestUninstallConn" class="secondary">🔌 Test Connections</button>
+          <span id="uninstallTestStatus" class="uninstall-test-status"></span>
+        </div>
+        <div id="uninstallConnResults" class="connection-list" style="display:none;margin-bottom:16px;"></div>
+        <section class="topology-section">
+          <div class="topology-header">
+            <h2 class="topology-title">Cluster Topology</h2>
+          </div>
+          <div id="uninstallTopology" class="topology" style="position:relative;"></div>
+        </section>
+        <div style="display:flex;gap:14px;justify-content:flex-end;margin-top:20px;">
+          <button id="btnBackFromUninstall" class="secondary">&#8592; Back</button>
+          <button id="btnStartWelcomeUninstall" class="secondary uninstall-btn">🗑 Uninstall Cluster</button>
+        </div>
+      </div>
+
+      <!-- ── Running / finished ────────────────────────────────────── -->
+      <div id="uninstallProgressView" style="display:none;">
+        <div class="deploy-header">
+          <h2 class="section-title" id="uninstallProgressTitle">Uninstalling…</h2>
+          <p class="section-subtitle" id="uninstallProgressSubtitle">Running the k3s-uninstall script on all nodes</p>
+        </div>
+        <section class="topology-section">
+          <div class="topology-header">
+            <h2 class="topology-title">Cluster Topology</h2>
+          </div>
+          <div id="uninstallLiveTopology" class="topology" style="position:relative;"></div>
+        </section>
+        <div id="uninstallPhaseList" class="uninstall-phase-list"></div>
+        <div class="uninstall-terminal-wrap" style="margin-top:16px;">
+          <div class="uninstall-terminal-bar">
+            <span class="utm-dot utm-dot-red"></span>
+            <span class="utm-dot utm-dot-yellow"></span>
+            <span class="utm-dot utm-dot-green"></span>
+            <span class="utm-title">Output</span>
+          </div>
+          <div id="uninstallTerminal" class="uninstall-terminal"></div>
+        </div>
+        <div class="deploy-actions-bottom">
+          <button id="abortWelcomeUninstall" class="secondary abort-btn">✕ Abort</button>
+          <button id="btnBackAfterUninstall" class="secondary" style="display:none;">&#8592; Back</button>
+        </div>
+      </div>
     </main>
   </div>
 

@@ -78,7 +78,7 @@ function _renderDeployCanvas(container, steps, isUninstall) {
   svg.id = 'deployHexSvg';
   svg.setAttribute('viewBox', `0 0 ${cW} ${svgH}`);
   svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-  svg.style.cssText = 'width:100%;height:auto;overflow:visible;display:block;';
+  svg.style.cssText = 'width:100%;height:auto;overflow:visible;display:block;padding:8px 0;';
 
   function nodeX(j, rowCount) { return Math.round((j + 1) * (cW / (rowCount + 1))); }
 
@@ -162,7 +162,7 @@ function _renderDeployCanvas(container, steps, isUninstall) {
     statusT.setAttribute('font-weight', '700');
     statusT.setAttribute('letter-spacing', '1.2');
     statusT.classList.add('dhex-status');
-    statusT.textContent = 'IDLE';
+    statusT.textContent = 'READY';
     g.appendChild(statusT);
 
     svg.appendChild(g);
@@ -190,7 +190,6 @@ function _renderDeployCanvas(container, steps, isUninstall) {
     item.className = 'dps-step dps-step--pending';
     item.id = `dps-${s.id}`;
     item.innerHTML = `
-      <span class="dps-icon">${STEP_ICONS[s.id] || '📦'}</span>
       <div class="dps-dot"></div>
       <div class="dps-info">
         <span class="dps-name">${escapeHtml(s.label)}</span>
@@ -269,7 +268,7 @@ function _setNodeStatus(stepId, nodeName, status) {
     ring.style.opacity = '0';
     nameT.setAttribute('fill', '#fff');
     statusT.setAttribute('fill', color);
-    statusT.textContent = '✓ READY';
+    statusT.textContent = '✓ DONE';
   } else if (status === 'failed') {
     el.classList.add('dhn-failed');
     hex.setAttribute('fill', 'rgba(239,68,68,0.09)');

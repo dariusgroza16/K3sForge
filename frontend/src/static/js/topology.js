@@ -31,7 +31,7 @@ function renderTopology() {
   const padTop     = 30;
   const padBot     = 30;
 
-  const masterRows  = Math.max(1, Math.ceil(mCount / COLS));
+  const masterRows  = mCount > 0 ? Math.ceil(mCount / COLS) : 0;
   const workerRows  = wCount > 0 ? Math.ceil(wCount / COLS) : 0;
   const masterTierH = masterRows * (masterHexR * 2) + Math.max(0, masterRows - 1) * rowGap;
   const workerTierH = workerRows > 0
@@ -76,7 +76,9 @@ function renderTopology() {
     t.textContent = text;
     return t;
   }
-  svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
+  if (mCount > 0) {
+    svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
+  }
   if (workerRows > 0) {
     svg.appendChild(makeTierLabel('WORKER NODES', padTop + masterTierH + tierGap + 8, '#7dd3fc'));
   }
@@ -284,4 +286,193 @@ function openTopoEditor(name) {
   });
   cancelBtn.addEventListener('click', () => { cleanup(); });
   if (closeBtn) closeBtn.addEventListener('click', () => { cleanup(); });
+}
+
+// ── Render read-only topology into any container ──────────────────────────
+function renderTopologyTo(containerId, nodeList) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+
+  const nodes   = nodeList || [];
+  const masters = nodes.filter(n => n.role === 'master');
+  const workers = nodes.filter(n => n.role === 'worker');
+  const mCount  = masters.length;
+  const wCount  = workers.length;
+  if (mCount === 0 && wCount === 0) return;
+
+  const baseWidth  = container.clientWidth || 800;
+  const COLS       = 3;
+  const masterHexR = 58;
+  const workerHexR = 50;
+  const masterHexW = Math.ceil(masterHexR * Math.sqrt(3));
+  const workerHexW = Math.ceil(workerHexR * Math.sqrt(3));
+  const rowGap     = 28;
+  const tierGap    = 64;
+  const padTop     = 30;
+  const padBot     = 30;
+
+  const masterRows  = mCount > 0 ? Math.ceil(mCount / COLS) : 0;
+  const workerRows  = wCount > 0 ? Math.ceil(wCount / COLS) : 0;
+  const masterTierH = masterRows * (masterHexR * 2) + Math.max(0, masterRows - 1) * rowGap;
+  const workerTierH = workerRows > 0
+    ? workerRows * (workerHexR * 2) + Math.max(0, workerRows - 1) * rowGap : 0;
+
+  const minWidthM = Math.min(Math.max(1, mCount), COLS) * (masterHexW + 60) + 60;
+  const minWidthW = wCount > 0 ? Math.min(wCount, COLS) * (workerHexW + 50) + 50 : 0;
+  const width  = Math.max(baseWidth, minWidthM, minWidthW);
+  const height = Math.max(
+    padTop + masterTierH + (workerRows > 0 ? tierGap + workerTierH : 0) + padBot, 240
+  );
+
+  const svgNS = 'http://www.w3.org/2000/svg';
+  const svg   = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  svg.setAttribute('xmlns', svgNS);
+
+  function nodeX(j, rowCount) { return Math.round((j + 1) * (width / (rowCount + 1))); }
+
+  if (workerRows > 0) {
+    const sepY = Math.round(padTop + masterTierH + tierGap / 2);
+    const sep  = document.createElementNS(svgNS, 'line');
+    sep.setAttribute('x1', 24); sep.setAttribute('y1', sepY);
+    sep.setAttribute('x2', width - 24); sep.setAttribute('y2', sepY);
+    sep.setAttribute('stroke', 'rgba(255,255,255,0.07)');
+    sep.setAttribute('stroke-width', '1');
+    sep.setAttribute('stroke-dasharray', '4 6');
+    svg.appendChild(sep);
+  }
+
+  function makeTierLabel(text, y, color) {
+    const t = document.createElementNS(svgNS, 'text');
+    t.setAttribute('x', 20); t.setAttribute('y', y);
+    t.setAttribute('fill', color); t.setAttribute('font-size', '9');
+    t.setAttribute('font-weight', '700'); t.setAttribute('letter-spacing', '1.8');
+    t.setAttribute('dominant-baseline', 'middle'); t.setAttribute('opacity', '0.55');
+    t.textContent = text;
+    return t;
+  }
+  if (mCount > 0) svg.appendChild(makeTierLabel('CONTROL PLANE', padTop + 8, '#9cff6e'));
+  if (workerRows > 0) svg.appendChild(makeTierLabel('WORKER NODES', padTop + masterTierH + tierGap + 8, '#7dd3fc'));
+
+  masters.forEach((m, i) => {
+    const row      = Math.floor(i / COLS);
+    const col      = i % COLS;
+    const rowCount = Math.min(COLS, mCount - row * COLS);
+    const x        = nodeX(col, rowCount);
+    const cy       = padTop + masterHexR + row * (masterHexR * 2 + rowGap);
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('data-name', m.name); g.setAttribute('data-ip', m.ip);
+    g.setAttribute('data-role', 'master'); g.setAttribute('class', 'topo-node');
+    const hex = document.createElementNS(svgNS, 'polygon');
+    hex.setAttribute('points', hexPts(x, cy, masterHexR));
+    hex.setAttribute('fill', 'rgba(156,255,110,0.08)');
+    hex.setAttribute('stroke', '#9cff6e');
+    hex.setAttribute('stroke-width', '2');
+    g.appendChild(hex);
+    const label = document.createElementNS(svgNS, 'text');
+    label.setAttribute('x', x); label.setAttribute('y', cy - 14);
+    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '14');
+    label.setAttribute('font-weight', '700'); label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'middle'); label.textContent = m.name;
+    g.appendChild(label);
+    const roleT = document.createElementNS(svgNS, 'text');
+    roleT.setAttribute('x', x); roleT.setAttribute('y', cy + 1);
+    roleT.setAttribute('fill', '#9cff6e'); roleT.setAttribute('font-size', '10');
+    roleT.setAttribute('font-weight', '600'); roleT.setAttribute('text-anchor', 'middle');
+    roleT.setAttribute('dominant-baseline', 'middle'); roleT.setAttribute('opacity', '0.9');
+    roleT.textContent = 'MASTER';
+    g.appendChild(roleT);
+    const ipT = document.createElementNS(svgNS, 'text');
+    ipT.setAttribute('x', x); ipT.setAttribute('y', cy + 16);
+    ipT.setAttribute('fill', '#9cff6e'); ipT.setAttribute('font-size', '10');
+    ipT.setAttribute('text-anchor', 'middle'); ipT.setAttribute('dominant-baseline', 'middle');
+    ipT.setAttribute('opacity', '0.75');
+    ipT.textContent = m.ip;
+    g.appendChild(ipT);
+    g.addEventListener('mouseenter', () => g.classList.add('highlight'));
+    g.addEventListener('mouseleave', () => g.classList.remove('highlight'));
+    svg.appendChild(g);
+  });
+
+  const workerTierTopY = padTop + masterTierH + tierGap;
+  workers.forEach((w, i) => {
+    const row      = Math.floor(i / COLS);
+    const col      = i % COLS;
+    const rowCount = Math.min(COLS, wCount - row * COLS);
+    const x        = nodeX(col, rowCount);
+    const cy       = workerTierTopY + workerHexR + row * (workerHexR * 2 + rowGap);
+    const g = document.createElementNS(svgNS, 'g');
+    g.setAttribute('class', 'topo-node'); g.setAttribute('data-name', w.name);
+    g.setAttribute('data-ip', w.ip); g.setAttribute('data-role', 'worker');
+    const hex = document.createElementNS(svgNS, 'polygon');
+    hex.setAttribute('points', hexPts(x, cy, workerHexR));
+    hex.setAttribute('fill', 'rgba(125,211,252,0.07)');
+    hex.setAttribute('stroke', '#7dd3fc');
+    hex.setAttribute('stroke-width', '1.8');
+    g.appendChild(hex);
+    const label = document.createElementNS(svgNS, 'text');
+    label.setAttribute('x', x); label.setAttribute('y', cy - 12);
+    label.setAttribute('fill', '#ffffff'); label.setAttribute('font-size', '13');
+    label.setAttribute('font-weight', '600'); label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'middle'); label.textContent = w.name;
+    g.appendChild(label);
+    const roleT = document.createElementNS(svgNS, 'text');
+    roleT.setAttribute('x', x); roleT.setAttribute('y', cy + 1);
+    roleT.setAttribute('fill', '#7dd3fc'); roleT.setAttribute('font-size', '9');
+    roleT.setAttribute('font-weight', '600'); roleT.setAttribute('text-anchor', 'middle');
+    roleT.setAttribute('dominant-baseline', 'middle'); roleT.setAttribute('opacity', '0.9');
+    roleT.textContent = 'WORKER';
+    g.appendChild(roleT);
+    const ipT = document.createElementNS(svgNS, 'text');
+    ipT.setAttribute('x', x); ipT.setAttribute('y', cy + 14);
+    ipT.setAttribute('fill', '#7dd3fc'); ipT.setAttribute('font-size', '9');
+    ipT.setAttribute('text-anchor', 'middle'); ipT.setAttribute('dominant-baseline', 'middle');
+    ipT.setAttribute('opacity', '0.75');
+    ipT.textContent = w.ip;
+    g.appendChild(ipT);
+    g.addEventListener('mouseenter', () => g.classList.add('highlight'));
+    g.addEventListener('mouseleave', () => g.classList.remove('highlight'));
+    svg.appendChild(g);
+  });
+
+  container.appendChild(svg);
+}
+
+// ── Fade a node out of a topology container (called when uninstalled) ─────
+function fadeOutTopoNode(containerId, nodeName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const svg = container.querySelector('svg');
+  if (!svg) return;
+  const g = Array.from(svg.querySelectorAll('g'))
+    .find(el => el.getAttribute('data-name') === nodeName);
+  if (!g) return;
+  g.style.transformBox    = 'fill-box';
+  g.style.transformOrigin = 'center';
+  g.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+  requestAnimationFrame(() => {
+    g.style.opacity   = '0';
+    g.style.transform = 'scale(0.5)';
+  });
+  setTimeout(() => { if (g.parentNode) g.parentNode.removeChild(g); }, 750);
+}
+
+// ── Mark a node as failed in a topology container (turns it red) ──────────
+function markTopoNodeFailed(containerId, nodeName) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const svg = container.querySelector('svg');
+  if (!svg) return;
+  const g = Array.from(svg.querySelectorAll('g'))
+    .find(el => el.getAttribute('data-name') === nodeName);
+  if (!g) return;
+  const hex = g.querySelector('polygon');
+  if (hex) {
+    hex.setAttribute('fill', 'rgba(239,68,68,0.15)');
+    hex.setAttribute('stroke', '#ef4444');
+    hex.setAttribute('stroke-width', '2.5');
+  }
+  g.querySelectorAll('text').forEach(t => t.setAttribute('fill', '#fca5a5'));
 }

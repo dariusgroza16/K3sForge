@@ -1,9 +1,10 @@
 // ── Welcome screen, cluster dashboard & node resources ───────────────
 
 function _goHome() {
-  document.getElementById('mainContainer').style.display    = 'none';
-  document.getElementById('existingContainer').style.display = 'none';
-  document.getElementById('welcomeScreen').style.display   = '';
+  document.getElementById('mainContainer').style.display       = 'none';
+  document.getElementById('existingContainer').style.display   = 'none';
+  document.getElementById('uninstallContainer').style.display  = 'none';
+  document.getElementById('welcomeScreen').style.display       = '';
   _clusterData = { nodes: null, pods: null, services: null, nodeResources: null };
   document.getElementById('btnHomeFixed').style.display = 'none';
 }
@@ -32,6 +33,11 @@ function initWelcomeScreen() {
       document.getElementById('existingContainer').style.display = '';
       document.getElementById('btnHomeFixed').style.display     = '';
     });
+  }
+
+  const btnUninstall = document.getElementById('btnUninstallCluster');
+  if (btnUninstall) {
+    btnUninstall.addEventListener('click', () => showUninstallContainer());
   }
 
   const btnBackToWelcome = document.getElementById('btnBackToWelcome');
@@ -77,6 +83,45 @@ function initWelcomeScreen() {
     });
   }
   wireSecretToggle('toggleExistingSSHKey', 'existingSSHKey');
+  wireSecretToggle('toggleUninstallSSHKey', 'uninstallSSHKey');
+
+  const btnTestUninstallConn = document.getElementById('btnTestUninstallConn');
+  if (btnTestUninstallConn) {
+    btnTestUninstallConn.addEventListener('click', () => testUninstallConnections());
+  }
+
+  const btnBackFromUninstall = document.getElementById('btnBackFromUninstall');
+  if (btnBackFromUninstall) {
+    btnBackFromUninstall.addEventListener('click', () => {
+      document.getElementById('uninstallContainer').style.display = 'none';
+      document.getElementById('welcomeScreen').style.display      = '';
+      document.getElementById('btnHomeFixed').style.display       = 'none';
+    });
+  }
+
+  const btnStartWelcomeUninstall = document.getElementById('btnStartWelcomeUninstall');
+  if (btnStartWelcomeUninstall) {
+    btnStartWelcomeUninstall.addEventListener('click', () => startWelcomeUninstall());
+  }
+
+  const abortWelcomeUninstallBtn = document.getElementById('abortWelcomeUninstall');
+  if (abortWelcomeUninstallBtn) {
+    abortWelcomeUninstallBtn.addEventListener('click', () => {
+      showConfirmToast('Abort the running uninstall?', async () => {
+        try { await fetch('/deploy-abort', { method: 'POST' }); }
+        catch(e) { showToast('Failed to send abort signal'); }
+      });
+    });
+  }
+
+  const btnBackAfterUninstall = document.getElementById('btnBackAfterUninstall');
+  if (btnBackAfterUninstall) {
+    btnBackAfterUninstall.addEventListener('click', () => {
+      document.getElementById('uninstallContainer').style.display = 'none';
+      document.getElementById('welcomeScreen').style.display      = '';
+      document.getElementById('btnHomeFixed').style.display       = 'none';
+    });
+  }
 
   const btnBackToKubeconfig = document.getElementById('btnBackToKubeconfig');
   if (btnBackToKubeconfig) {
@@ -529,6 +574,238 @@ function startExistingUninstall() {
       if (abortBtn) abortBtn.style.display = 'none';
       if (titleEl) titleEl.textContent = 'Connection lost';
       if (startBtn) startBtn.style.display = '';
+    };
+  });
+}
+
+// ── Welcome-screen uninstall flow ────────────────────────────────────────
+
+async function showUninstallContainer() {
+  let nodes = [];
+  try {
+    const res  = await fetch('/detect-inventory');
+    const data = await res.json();
+    if (data.status === 'success' && Array.isArray(data.vms) && data.vms.length > 0) {
+      nodes = data.vms;
+    } else {
+      showToast('No inventory found. Create a new cluster first.', 3500);
+      return;
+    }
+  } catch(e) {
+    showToast('Failed to load inventory.', 3500);
+    return;
+  }
+
+  _uninstallNodes = nodes;
+
+  document.getElementById('welcomeScreen').style.display       = 'none';
+  document.getElementById('uninstallContainer').style.display  = '';
+  document.getElementById('btnHomeFixed').style.display        = '';
+
+  document.getElementById('uninstallIdleView').style.display     = '';
+  document.getElementById('uninstallProgressView').style.display = 'none';
+
+  // Reset test state
+  const resultsEl = document.getElementById('uninstallConnResults');
+  const statusEl  = document.getElementById('uninstallTestStatus');
+  if (resultsEl) { resultsEl.innerHTML = ''; resultsEl.style.display = 'none'; }
+  if (statusEl)  { statusEl.textContent = ''; statusEl.style.color = ''; }
+
+  renderTopologyTo('uninstallTopology', _uninstallNodes);
+}
+
+async function testUninstallConnections() {
+  const username = document.getElementById('uninstallSSHUser')?.value.trim();
+  const sshKey   = document.getElementById('uninstallSSHKey')?.value.trim();
+  if (!username || !sshKey) {
+    showToast('Enter SSH credentials first.', 3000);
+    return;
+  }
+  if (!_uninstallNodes || _uninstallNodes.length === 0) {
+    showToast('No nodes loaded — go back and re-enter this screen.', 3000);
+    return;
+  }
+
+  const resultsEl = document.getElementById('uninstallConnResults');
+  const statusEl  = document.getElementById('uninstallTestStatus');
+  if (!resultsEl) return;
+
+  resultsEl.style.display = '';
+  resultsEl.innerHTML = '';
+  if (statusEl) { statusEl.textContent = 'Testing…'; statusEl.style.color = 'rgba(255,255,255,0.5)'; }
+
+  for (const node of _uninstallNodes) {
+    const item = document.createElement('div');
+    item.className = 'connection-item';
+    item.id = `uconn-${node.name}`;
+    item.innerHTML = `<div class="connection-info"><div class="connection-status loading"></div><div class="connection-details"><div class="connection-name">${escapeHtml(node.name)}</div><div class="connection-ip">${escapeHtml(node.ip)}</div><div class="connection-message">Testing…</div></div></div>`;
+    resultsEl.appendChild(item);
+  }
+
+  let allPassed = true;
+  for (const node of _uninstallNodes) {
+    const item    = document.getElementById(`uconn-${node.name}`);
+    const statusD = item?.querySelector('.connection-status');
+    const msgEl   = item?.querySelector('.connection-message');
+    try {
+      const res  = await fetch('/test-ssh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: node.name, ip: node.ip, username, ssh_key: sshKey }),
+      });
+      const json = await res.json();
+      if (res.ok && json.status === 'success') {
+        if (statusD) { statusD.className = 'connection-status success'; statusD.textContent = '✓'; }
+        if (msgEl)   msgEl.textContent = json.message || 'Connected';
+      } else {
+        allPassed = false;
+        if (statusD) { statusD.className = 'connection-status failure'; statusD.textContent = '✕'; }
+        if (msgEl)   msgEl.textContent = json.message || 'Connection failed';
+      }
+    } catch {
+      allPassed = false;
+      if (statusD) { statusD.className = 'connection-status failure'; statusD.textContent = '✕'; }
+      if (msgEl)   msgEl.textContent = 'Network error';
+    }
+  }
+
+  if (statusEl) {
+    statusEl.textContent = allPassed ? '✓ All connections OK' : '✕ Some connections failed';
+    statusEl.style.color = allPassed ? '#86efac' : '#f87171';
+  }
+}
+
+function startWelcomeUninstall() {
+  const username = document.getElementById('uninstallSSHUser')?.value.trim();
+  const sshKey   = document.getElementById('uninstallSSHKey')?.value.trim();
+  if (!username || !sshKey) {
+    showToast('SSH username and private key are required to uninstall.', 4000);
+    return;
+  }
+
+  const ICONS = { workers: '⚙', masters: '🖥', primordial: '⚡' };
+
+  showConfirmToast('Uninstall K3s from all nodes in this cluster?', () => {
+    document.getElementById('uninstallIdleView').style.display     = 'none';
+    document.getElementById('uninstallProgressView').style.display = '';
+    document.getElementById('abortWelcomeUninstall').style.display = '';
+    document.getElementById('btnBackAfterUninstall').style.display = 'none';
+    document.getElementById('uninstallProgressTitle').textContent    = 'Uninstalling…';
+    document.getElementById('uninstallProgressSubtitle').textContent = 'Running the k3s-uninstall script on all nodes';
+
+    renderTopologyTo('uninstallLiveTopology', _uninstallNodes);
+
+    const phaseEl    = document.getElementById('uninstallPhaseList');
+    const terminalEl = document.getElementById('uninstallTerminal');
+    phaseEl.innerHTML    = '<div class="upl-connecting">Connecting to nodes…</div>';
+    if (terminalEl) terminalEl.innerHTML = '';
+
+    function appendLog(msg, cls) {
+      if (!terminalEl) return;
+      const line = document.createElement('span');
+      line.className = 'tlog-line' + (cls ? ' ' + cls : '');
+      line.textContent = msg;
+      terminalEl.appendChild(line);
+      terminalEl.appendChild(document.createElement('br'));
+      terminalEl.scrollTop = terminalEl.scrollHeight;
+    }
+
+    const params = new URLSearchParams({ username, ssh_key: sshKey });
+    const es = new EventSource(`/uninstall?${params.toString()}`);
+    _eventSource = es;
+
+    es.onmessage = (ev) => {
+      let data; try { data = JSON.parse(ev.data); } catch { return; }
+
+      if (data.type === 'steps') {
+        phaseEl.innerHTML = '';
+        data.steps.forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'upl-item upl-pending';
+          item.id = `upl-${s.id}`;
+          item.innerHTML =
+            `<span class="upl-dot"></span>` +
+            `<span class="upl-icon">${ICONS[s.id] || '●'}</span>` +
+            `<span class="upl-label">${escapeHtml(s.label)}</span>` +
+            `<span class="upl-badge upl-badge-pending">Pending</span>`;
+          phaseEl.appendChild(item);
+        });
+        return;
+      }
+
+      const setPhase = (id, state, badge) => {
+        const item = document.getElementById(`upl-${id}`);
+        if (!item) return;
+        item.className = `upl-item upl-${state}`;
+        const b = item.querySelector('.upl-badge');
+        if (b && badge !== undefined) { b.className = `upl-badge upl-badge-${state}`; b.textContent = badge; }
+      };
+
+      if (data.type === 'step_start')   { setPhase(data.step, 'active',  'Running…'); return; }
+      if (data.type === 'step_done')    { setPhase(data.step, 'done',    '✓ Done');   return; }
+      if (data.type === 'step_failed')  { setPhase(data.step, 'failed',  '✕ Failed'); return; }
+      if (data.type === 'task') {
+        const short = (data.task || '').replace(/^[^:]+:\s*/, '').slice(0, 48);
+        setPhase(data.step, 'active', short || 'Running…');
+        appendLog('  ' + (data.task || ''), 'tlog-node');
+        return;
+      }
+      if (data.type === 'log') {
+        appendLog((data.msg || '').trimEnd(), 'tlog-node');
+        return;
+      }
+      if (data.type === 'task_warning') {
+        appendLog('⚠  ' + (data.msg || ''), 'tlog-warn');
+        setPhase(data.step, 'active', '⚠ Warning');
+        return;
+      }
+
+      if (data.type === 'node_done')   { fadeOutTopoNode('uninstallLiveTopology', data.node);   return; }
+      if (data.type === 'node_failed') { markTopoNodeFailed('uninstallLiveTopology', data.node); return; }
+
+      if (data.type === 'finished') {
+        es.close(); _eventSource = null;
+        document.getElementById('abortWelcomeUninstall').style.display = 'none';
+        document.getElementById('btnBackAfterUninstall').style.display = '';
+        if (data.success) {
+          document.getElementById('uninstallProgressTitle').textContent    = '✅ Cluster Uninstalled';
+          document.getElementById('uninstallProgressSubtitle').textContent = 'All nodes cleaned up successfully';
+          appendLog('', '');
+          appendLog('✓ Cluster uninstalled successfully.', 'tlog-done');
+          showToast('Cluster uninstalled successfully.', 4000);
+        } else if (data.aborted) {
+          document.getElementById('uninstallProgressTitle').textContent    = '⛔ Uninstall Aborted';
+          document.getElementById('uninstallProgressSubtitle').textContent = 'Cancelled by user';
+          appendLog('⛔ Aborted by user.', 'tlog-warn');
+        } else {
+          document.getElementById('uninstallProgressTitle').textContent    = '❌ Uninstall Failed';
+          document.getElementById('uninstallProgressSubtitle').textContent = 'Check the output below for details';
+          appendLog('✕ Uninstall failed — see output above.', 'tlog-error');
+        }
+        return;
+      }
+
+      if (data.type === 'error') {
+        es.close(); _eventSource = null;
+        showToast('❌ ' + (data.msg || 'Unknown error'), 5000);
+        appendLog('✕ Error: ' + (data.msg || 'Unknown error'), 'tlog-error');
+        document.getElementById('abortWelcomeUninstall').style.display = 'none';
+        document.getElementById('btnBackAfterUninstall').style.display = '';
+        document.getElementById('uninstallProgressTitle').textContent    = '❌ Error';
+        document.getElementById('uninstallProgressSubtitle').textContent = data.msg || '';
+      }
+    };
+
+    es.onerror = () => {
+      es.close(); _eventSource = null;
+      const title = document.getElementById('uninstallProgressTitle')?.textContent || '';
+      if (!title.includes('✅') && !title.includes('❌') && !title.includes('⛔')) {
+        appendLog('✕ Connection to server lost.', 'tlog-error');
+        document.getElementById('abortWelcomeUninstall').style.display = 'none';
+        document.getElementById('btnBackAfterUninstall').style.display = '';
+        document.getElementById('uninstallProgressTitle').textContent    = '❌ Connection Lost';
+        document.getElementById('uninstallProgressSubtitle').textContent = 'The SSE stream was interrupted';
+      }
     };
   });
 }

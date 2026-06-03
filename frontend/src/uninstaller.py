@@ -24,21 +24,30 @@ def _gen_uninstall_node(ip: str, name: str, username: str, key_path: str,
     client = None
     try:
         client = _open_ssh_client(ip, username, key_path)
+        yield _sse({'type': 'node_start', 'step': step_id, 'node': name})
         yield _sse({'type': 'task', 'step': step_id,
                     'task': f'{name}: Running {script}…'})
 
+        # Run the uninstall script only if it still exists on the node.
+        # If it's already gone (K3s was previously removed), treat as success.
+        _cmd = (
+            f'if [ -f /usr/local/bin/{script} ]; then '
+            f'sudo /usr/local/bin/{script} 2>&1; '
+            f'else echo "[{name}] Uninstall script not found — K3s already removed, skipping."; '
+            f'fi'
+        )
         rc = None
-        for line, code in _ssh_run_live(
-                client, f'sudo /usr/local/bin/{script} 2>&1', timeout=120):
+        for line, code in _ssh_run_live(client, _cmd, timeout=120):
             if code is None:
                 yield _sse({'type': 'log', 'step': step_id, 'node': name, 'msg': line})
             else:
                 rc = code
 
-        if rc != 0:
+        if rc is not None and rc != 0:
             yield _sse({'type': 'task_warning', 'step': step_id,
                         'msg': f'[{name}] {script} exited with rc={rc}'})
         else:
+            rc = 0  # treat None (shouldn't happen) and 0 equally as success
             yield _sse({'type': 'log', 'step': step_id, 'node': name,
                         'msg': f'[{name}] Uninstalled successfully.'})
 
@@ -65,11 +74,16 @@ def _gen_uninstall_node(ip: str, name: str, username: str, key_path: str,
         yield _sse({'type': 'log', 'step': step_id, 'node': name,
                     'msg': f'[{name}] Docker containers cleaned up.'})
 
+        if rc == 0:
+            yield _sse({'type': 'node_done', 'step': step_id, 'node': name})
+        else:
+            yield _sse({'type': 'node_failed', 'step': step_id, 'node': name})
         return rc if rc is not None else -1
 
     except Exception as exc:
         yield _sse({'type': 'task_warning', 'step': step_id,
                     'msg': f'[{name}] Error: {exc}'})
+        yield _sse({'type': 'node_failed', 'step': step_id, 'node': name})
         return -1
     finally:
         if client:
@@ -106,6 +120,7 @@ def _stream_k3s_uninstall(username: str, key_path: str):
             steps.append({'id': 'primordial', 'label': 'Remove Primary Node'})
 
         yield _sse({'type': 'steps', 'steps': steps})
+        overall_ok = True
 
         # ── Phase 1: Workers ─────────────────────────────────────────────
         if workers:
@@ -128,9 +143,8 @@ def _stream_k3s_uninstall(username: str, key_path: str):
                 yield _sse({'type': 'step_done', 'step': 'workers'})
             else:
                 yield _sse({'type': 'step_failed', 'step': 'workers'})
-                deploy_state.status = 'failed'
-                yield _sse({'type': 'finished', 'success': False})
-                return
+                overall_ok = False
+                # Do NOT return — continue to next phases
 
         # ── Phase 2: Joining Masters ──────────────────────────────────────
         if joining_masters:
@@ -153,9 +167,8 @@ def _stream_k3s_uninstall(username: str, key_path: str):
                 yield _sse({'type': 'step_done', 'step': 'masters'})
             else:
                 yield _sse({'type': 'step_failed', 'step': 'masters'})
-                deploy_state.status = 'failed'
-                yield _sse({'type': 'finished', 'success': False})
-                return
+                overall_ok = False
+                # Do NOT return — continue to next phases
 
         # ── Phase 3: Primordial Master ────────────────────────────────────
         if primordial:
@@ -170,21 +183,19 @@ def _stream_k3s_uninstall(username: str, key_path: str):
 
             if rc != 0:
                 yield _sse({'type': 'step_failed', 'step': 'primordial'})
-                deploy_state.status = 'failed'
-                yield _sse({'type': 'finished', 'success': False})
-                return
+                overall_ok = False
+            else:
+                # Clean local kubeconfig only when primordial cleaned successfully
+                kube_path = os.path.expanduser('~/.kube/k3s.yaml')
+                try:
+                    if os.path.exists(kube_path):
+                        os.remove(kube_path)
+                except OSError:
+                    pass  # Non-fatal
+                yield _sse({'type': 'step_done', 'step': 'primordial'})
 
-            # ── Clean local kubeconfig (silently, as part of primordial phase) ──
-            kube_path = os.path.expanduser('~/.kube/k3s.yaml')
-            try:
-                if os.path.exists(kube_path):
-                    os.remove(kube_path)
-            except OSError:
-                pass  # Non-fatal
-            yield _sse({'type': 'step_done', 'step': 'primordial'})
-
-        deploy_state.status = 'success'
-        yield _sse({'type': 'finished', 'success': True})
+        deploy_state.status = 'success' if overall_ok else 'failed'
+        yield _sse({'type': 'finished', 'success': overall_ok})
 
     except Exception as exc:
         deploy_state.status = 'failed'

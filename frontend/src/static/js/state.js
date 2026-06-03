@@ -16,3 +16,4 @@ let _activeClusterSection = 'overview';
 
 // Welcome-screen uninstall flow
 let _uninstallNodes = [];
+let _uninstallConnPass = false;

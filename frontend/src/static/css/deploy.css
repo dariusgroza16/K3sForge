@@ -112,7 +112,13 @@
 .uninstall-btn:hover { background: rgba(245,158,11,0.15) !important; border-color: #fbbf24 !important; }
 
 /* ── Timeline ─────────────────────────────────────────────────────── */
-.deploy-steps { display: block; }
+.deploy-steps {
+  display: block;
+  background: rgba(26,26,26,0.55);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 16px;
+}
 
 .tl {
   display: flex;

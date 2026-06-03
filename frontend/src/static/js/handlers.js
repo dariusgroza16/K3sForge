@@ -130,21 +130,8 @@ function setupHandlers() {
   const abortDeployBtn = document.getElementById('abortDeploy');
   if (abortDeployBtn) abortDeployBtn.addEventListener('click', () => abortDeploy());
 
-  const uninstallBtn = document.getElementById('uninstallCluster');
-  if (uninstallBtn) uninstallBtn.addEventListener('click', () => {
-    if (!allConnectionsPass) { showToast('⚠️ All node connections must pass before you can uninstall.', 4000); return; }
-    startUninstall();
-  });
-
   const redeployBtn = document.getElementById('redeployCluster');
   if (redeployBtn) redeployBtn.addEventListener('click', () => { clusterDeployed = false; _showDeployIdle(); });
-
-  const abortUninstallBtn = document.getElementById('abortUninstall');
-  if (abortUninstallBtn) abortUninstallBtn.addEventListener('click', () => {
-    showConfirmToast('Abort the running uninstall?', async () => {
-      try { await fetch('/deploy-abort', { method: 'POST' }); } catch(e) { showToast('Failed to abort'); }
-    });
-  });
 
   // ── Secret visibility toggles ──────────────────────────────────────
   wireSecretToggle('toggleSshKey', 'sshKey');

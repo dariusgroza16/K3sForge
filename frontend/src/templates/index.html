@@ -250,7 +250,7 @@
         </section>
 
         <div class="deploy-actions-top">
-          <button id="startDeploy" class="primary deploy-btn">🚀 Deploy Cluster</button>
+          <button id="startDeploy" class="primary deploy-btn">Deploy Cluster</button>
         </div>
       </div>
 
@@ -267,7 +267,6 @@
 
         <div class="deploy-actions-bottom">
           <button id="abortDeploy" class="secondary abort-btn">✕ Abort</button>
-          <button id="uninstallCluster" class="secondary uninstall-btn" style="display:none;">Uninstall Cluster</button>
           <button id="redeployCluster" class="primary" style="display:none;">Redeploy</button>
         </div>
 
@@ -290,21 +289,7 @@
         </div>
       </div>
 
-      <!-- Uninstall running state -->
-      <div id="uninstallRunning" class="deploy-section" style="display:none;">
-        <div class="deploy-header">
-          <h2 class="section-title" id="uninstallTitle">Uninstalling…</h2>
-          <p class="section-subtitle" id="uninstallSubtitle">Running the k3s-uninstall playbook</p>
-        </div>
 
-        <div id="uninstallSteps" class="deploy-steps">
-          <!-- step cards injected by JS -->
-        </div>
-
-        <div class="deploy-actions-bottom">
-          <button id="abortUninstall" class="secondary abort-btn">✕ Abort</button>
-        </div>
-      </div>
     </main>
   </div>
 
@@ -445,7 +430,7 @@
           </div>
         </div>
         <div class="uninstall-test-row">
-          <button id="btnTestUninstallConn" class="secondary">🔌 Test Connections</button>
+          <button id="btnTestUninstallConn" class="secondary">Test Connections</button>
           <span id="uninstallTestStatus" class="uninstall-test-status"></span>
         </div>
         <div id="uninstallConnResults" class="connection-list" style="display:none;margin-bottom:16px;"></div>

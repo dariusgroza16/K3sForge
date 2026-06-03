@@ -268,7 +268,7 @@ function _setNodeStatus(stepId, nodeName, status) {
     ring.style.opacity = '0';
     nameT.setAttribute('fill', '#fff');
     statusT.setAttribute('fill', color);
-    statusT.textContent = '✓ DONE';
+    statusT.textContent = stepId === 'docker' ? 'READY' : '✓ DONE';
   } else if (status === 'failed') {
     el.classList.add('dhn-failed');
     hex.setAttribute('fill', 'rgba(239,68,68,0.09)');
@@ -291,20 +291,17 @@ function _setNodeStatus(stepId, nodeName, status) {
 }
 
 function _showDeployIdle() {
-  document.getElementById('deployIdle').style.display      = '';
-  document.getElementById('deployRunning').style.display   = 'none';
-  document.getElementById('uninstallRunning').style.display = 'none';
+  document.getElementById('deployIdle').style.display    = '';
+  document.getElementById('deployRunning').style.display = 'none';
   const panel = document.getElementById('kubeconfigPanel');
   if (panel) panel.style.display = 'none';
 }
 
 function _showDeployRunning() {
-  document.getElementById('deployIdle').style.display       = 'none';
-  document.getElementById('deployRunning').style.display    = '';
-  document.getElementById('uninstallRunning').style.display  = 'none';
-  document.getElementById('abortDeploy').style.display      = '';
-  document.getElementById('uninstallCluster').style.display = 'none';
-  document.getElementById('redeployCluster').style.display  = 'none';
+  document.getElementById('deployIdle').style.display      = 'none';
+  document.getElementById('deployRunning').style.display   = '';
+  document.getElementById('abortDeploy').style.display     = '';
+  document.getElementById('redeployCluster').style.display = 'none';
   const panel = document.getElementById('kubeconfigPanel');
   if (panel) panel.style.display = 'none';
   document.getElementById('deployTitle').textContent    = 'Deploying…';
@@ -313,18 +310,13 @@ function _showDeployRunning() {
   if (homeBtn) homeBtn.style.display = 'none';
 }
 
-function _showUninstallRunning() {
-  document.getElementById('deployIdle').style.display       = 'none';
-  document.getElementById('deployRunning').style.display    = 'none';
-  document.getElementById('uninstallRunning').style.display = '';
-  document.getElementById('abortUninstall').style.display   = '';
-  document.getElementById('uninstallTitle').textContent    = 'Uninstalling…';
-  document.getElementById('uninstallSubtitle').textContent = 'Running the k3s-uninstall playbook';
-  const homeBtn = document.getElementById('btnHomeFixed');
-  if (homeBtn) homeBtn.style.display = 'none';
-}
-
 function startDeploy() {
+  const masters = vms.filter(v => v.role === 'master');
+  const workers = vms.filter(v => v.role === 'worker');
+  if (masters.length < 1 || workers.length < 1) {
+    showToast('⚠️ At least 1 master and 1 worker are required to deploy a cluster.', 4000);
+    return;
+  }
   const { username, sshKey } = _getSSHCreds();
   if (!username || !sshKey) {
     showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
@@ -362,7 +354,6 @@ function startDeploy() {
         clusterDeployed = true;
         document.getElementById('deployTitle').textContent    = 'Cluster Deployed';
         document.getElementById('deploySubtitle').textContent = 'All steps completed successfully';
-        document.getElementById('uninstallCluster').style.display = '';
         showToast('K3s cluster deployed successfully!', 5000);
 
         // Show kubeconfig panel if content was returned
@@ -425,86 +416,5 @@ function abortDeploy() {
   showConfirmToast('Abort the running deployment?', async () => {
     try { await fetch('/deploy-abort', { method: 'POST' }); }
     catch(e) { showToast('Failed to send abort signal'); }
-  });
-}
-
-function startUninstall() {
-  if (!allConnectionsPass) {
-    showToast('⚠️ All node connections must pass before you can uninstall.', 4000);
-    return;
-  }
-  const { username, sshKey } = _getSSHCreds();
-  if (!username || !sshKey) {
-    showToast('⚠️ SSH credentials from the connection tab are required.', 4000);
-    return;
-  }
-  showConfirmToast('Uninstall the K3s cluster from all nodes?', () => {
-    _showUninstallRunning();
-    const container = document.getElementById('uninstallSteps');
-    container.innerHTML = '<div style="color:rgba(255,255,255,0.5);text-align:center;">Connecting…</div>';
-
-    const params = new URLSearchParams({ username, ssh_key: sshKey });
-    const es = new EventSource(`/uninstall?${params.toString()}`);
-    _eventSource = es;
-
-    es.onmessage = (ev) => {
-      let data; try { data = JSON.parse(ev.data); } catch { return; }
-      if (data.type === 'steps')      { _renderDeployCanvas(container, data.steps, true); return; }
-      if (data.type === 'step_start')  { _setPhaseState(data.step, 'active'); return; }
-      if (data.type === 'step_done')   { _setPhaseState(data.step, 'done'); return; }
-      if (data.type === 'step_failed') { _setPhaseState(data.step, 'failed'); return; }
-      if (data.type === 'node_start')  { _setNodeStatus(data.step, data.node, 'active'); return; }
-      if (data.type === 'node_done')   { _setNodeStatus(data.step, data.node, 'done');   return; }
-      if (data.type === 'node_failed') { _setNodeStatus(data.step, data.node, 'failed'); return; }
-
-      if (data.type === 'finished') {
-        es.close(); _eventSource = null;
-        document.getElementById('abortUninstall').style.display = 'none';
-        const homeBtn = document.getElementById('btnHomeFixed');
-        if (homeBtn) homeBtn.style.display = '';
-        if (data.success) {
-          clusterDeployed = false;
-          document.getElementById('uninstallTitle').textContent    = '✅ Cluster Uninstalled';
-          document.getElementById('uninstallSubtitle').textContent = 'All nodes cleaned up successfully';
-          showToast('Cluster uninstalled.', 4000);
-          setTimeout(() => { _showDeployIdle(); }, 2500);
-        } else if (data.aborted) {
-          document.getElementById('uninstallTitle').textContent    = '⛔ Uninstall Aborted';
-          document.getElementById('uninstallSubtitle').textContent = 'Cancelled by user';
-          _phaseSteps.forEach(s => { const el = document.getElementById(`dps-${s.id}`); if (el && !el.classList.contains('dps-step--done') && !el.classList.contains('dps-step--failed')) _setPhaseState(s.id, 'aborted'); });
-          setTimeout(() => {
-            document.getElementById('deployRunning').style.display    = '';
-            document.getElementById('uninstallRunning').style.display = 'none';
-          }, 2500);
-        } else {
-          document.getElementById('uninstallTitle').textContent    = '❌ Uninstall Failed';
-          document.getElementById('uninstallSubtitle').textContent = 'Check the step that failed';
-          _phaseSteps.forEach(s => { const el = document.getElementById(`dps-${s.id}`); if (el && el.classList.contains('dps-step--pending')) _setPhaseState(s.id, 'aborted'); });
-        }
-        return;
-      }
-
-      if (data.type === 'error') {
-        es.close(); _eventSource = null;
-        showToast('❌ ' + (data.msg || 'Unknown error'), 5000);
-        document.getElementById('abortUninstall').style.display  = 'none';
-        document.getElementById('uninstallTitle').textContent    = '❌ Error';
-        document.getElementById('uninstallSubtitle').textContent = data.msg || '';
-        const homeBtn = document.getElementById('btnHomeFixed');
-        if (homeBtn) homeBtn.style.display = '';
-      }
-    };
-
-    es.onerror = () => {
-      es.close(); _eventSource = null;
-      const title = document.getElementById('uninstallTitle')?.textContent || '';
-      if (!title.includes('✅') && !title.includes('❌') && !title.includes('⛔')) {
-        document.getElementById('abortUninstall').style.display  = 'none';
-        document.getElementById('uninstallTitle').textContent    = '❌ Connection Lost';
-        document.getElementById('uninstallSubtitle').textContent = 'The SSE stream was interrupted';
-        const homeBtn = document.getElementById('btnHomeFixed');
-        if (homeBtn) homeBtn.style.display = '';
-      }
-    };
   });
 }

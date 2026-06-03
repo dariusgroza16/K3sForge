@@ -597,6 +597,7 @@ async function showUninstallContainer() {
   document.getElementById('uninstallProgressView').style.display = 'none';
 
   // Reset test state
+  _uninstallConnPass = false;
   const resultsEl = document.getElementById('uninstallConnResults');
   const statusEl  = document.getElementById('uninstallTestStatus');
   if (resultsEl) { resultsEl.innerHTML = ''; resultsEl.style.display = 'none'; }
@@ -660,6 +661,7 @@ async function testUninstallConnections() {
     }
   }
 
+  _uninstallConnPass = allPassed;
   if (statusEl) {
     statusEl.textContent = allPassed ? '✓ All connections OK' : '✕ Some connections failed';
     statusEl.style.color = allPassed ? '#86efac' : '#f87171';
@@ -667,6 +669,10 @@ async function testUninstallConnections() {
 }
 
 function startWelcomeUninstall() {
+  if (!_uninstallConnPass) {
+    showToast('⚠️ All node connections must pass before you can uninstall.', 4000);
+    return;
+  }
   const username = document.getElementById('uninstallSSHUser')?.value.trim();
   const sshKey   = document.getElementById('uninstallSSHKey')?.value.trim();
   if (!username || !sshKey) {
